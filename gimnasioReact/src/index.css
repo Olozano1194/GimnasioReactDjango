@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Style Person */
+.formRegister {
+    @media (min-width: 600px) {
+        width: 70%;
+    }
+    @media (min-width: 700px) {
+        width: 65%;
+    }
+    
+}

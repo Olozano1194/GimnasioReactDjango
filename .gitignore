@@ -1,0 +1,29 @@
+# Archivos y directorios del sistema operativo
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Archivos de configuración del entorno
+.env
+*.env
+
+# Directorios de dependencias
+venv/
+env/
+*.egg-info/
+
+# Archivos de bases de datos
+db.sqlite3
+
+# Archivos de migraciones
+/migrations/
+
+# Archivos de cobertura de pruebas
+.coverage
+
+# Archivos de configuración de IDEs
+.vscode/
+.idea/
