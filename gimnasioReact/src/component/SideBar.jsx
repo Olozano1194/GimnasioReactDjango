@@ -26,7 +26,6 @@ function SideBar() {
             [submenu]: !prevState[submenu],
         }));                
     };
-
        
     return (
         <>
