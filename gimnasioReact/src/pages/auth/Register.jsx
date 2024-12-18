@@ -2,7 +2,7 @@ import {useForm} from 'react-hook-form';
 import { Link } from 'react-router-dom';
 //Icons
 import { CiUser } from 'react-icons/ci';
-import { RiLockPasswordLine, RiLoginBoxLine, RiMailFill, RiLockFill,  RiUserLine } from "react-icons/ri";
+import { RiLoginBoxLine, RiMailFill, RiLockFill,  RiUserLine } from "react-icons/ri";
 
 const Register = () => {
     const { register, handleSubmit, formState: {errors}, watch } = useForm();
