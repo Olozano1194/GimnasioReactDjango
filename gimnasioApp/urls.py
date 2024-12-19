@@ -1,9 +1,14 @@
+from django.urls import path, include
 from rest_framework import routers
-from .api import RegistrarUsuarioViewSet
+from .views import UserViewSet, CustomAuthTokenViewSet, userProfileView
 
-router =routers.DefaultRouter()
+#api versioning
+router = routers.DefaultRouter()
+router.register(r'User', UserViewSet, basename='User')
 
-router.register('api/gimnasio', RegistrarUsuarioViewSet, 'registrarUsuario')
+urlpatterns = [
+    path('api/v1/', include(router.urls)),
 
-urlpatterns = router.urls
-
+    path('api/v1/login/', CustomAuthTokenViewSet.as_view(), name='login'),
+    path('api/v1/me/', userProfileView.as_view(), name='user-profile'),
+]
