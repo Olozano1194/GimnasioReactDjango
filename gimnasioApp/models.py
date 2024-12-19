@@ -1,33 +1,51 @@
 from django.db import models
 from django.utils import timezone
+from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
+
 
 # Create your models here.
-class RegistrarUsuario(models.Model):
+class UserManager(BaseUserManager): # Clase para la creación de usuarios
+    def create_user(self, email, password, **extra_fields): #extra_fields es un diccionario que puede contener cualquier campo adicional que se desee agregar al modelo de usuario
+        if not email:
+            raise ValueError('Los usuarios deben tener un correo electrónico')
+        user = self.model(email=self.normalize_email(email), **extra_fields) # Normaliza la dirección de correo electrónico convirtiendo todos los caracteres en minúsculas y eliminando cualquier espacio en blanco al principio o al final        
+        user.set_password(password) # Establece la contraseña del usuario encriptada 
+        user.save()
+        return user
 
-    name = models.CharField(max_length=100)
-    lastname = models.CharField(max_length=100)
-    user = models.CharField(max_length=30, unique=True)
-    # user = models.OneToOneField(User, on_delete=models.CASCADE)
+class RegistrarUsuario(AbstractBaseUser):
+
+    name = models.CharField(max_length=45)
+    lastname = models.CharField(max_length=50)
+    #user = models.CharField(max_length=30, unique=True)
     email = models.EmailField(unique=True)
-    
-
+        
     OPCIONES_ROL = [
-        ('usuario', 'Usuario Normal'),
+        ('recepcion', 'Recepcionista'),
         ('admin', 'Administrador')
     ]
-
-    roles = models.CharField(max_length=7, choices=OPCIONES_ROL, default='usuario')
-
-    password = models.CharField(max_length=300)
+    roles = models.CharField(max_length=10, choices=OPCIONES_ROL, default='recepcion')
+    #password = models.CharField(max_length=300)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    #Usamos el UserManager personalizado
+    objects = UserManager()
+
+    #Se define el campo de autenticación sea el email
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['name', 'lastname']
+
+    def full_name(self):
+        return '{} {}'.format(self.name, self.lastname)
+
     def __str__(self):
-        return self.name
+        return self.full_name()
     
     class Meta:
-        verbose_name = 'RegistrarUsuario'
-        verbose_name_plural = 'RegistrarUsuarios'
-        db_table = 'RegistrarUsuario'
+        verbose_name = 'User'
+        verbose_name_plural = 'Users'
+        db_table = 'user'
 
 class RegistrarUsuarioGym(models.Model):
     name = models.CharField(max_length=100)

@@ -1,6 +1,6 @@
 from .models import RegistrarUsuario
 from rest_framework import viewsets, permissions
-from .serializer import RegistrarUsuarioSerializer
+from .serializers import RegistrarUsuarioSerializer
 
 class RegistrarUsuarioViewSet(viewsets.ModelViewSet):
     queryset = RegistrarUsuario.objects.all()

@@ -1,5 +1,5 @@
 from django import forms
-from . models import RegistrarUsuario, RegistrarUsuarioGym, RegistrarUsuarioGymDay, Renovacion
+from .models import RegistrarUsuario, RegistrarUsuarioGym, RegistrarUsuarioGymDay, Renovacion
 
 
 class UsuarioForm(forms.ModelForm):

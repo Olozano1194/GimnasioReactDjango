@@ -4,9 +4,6 @@ from .models import RegistrarUsuario, RegistrarUsuarioGym, RegistrarUsuarioGymDa
 #token
 from rest_framework.authtoken.models import Token
 
-#encriptación
-from django.contrib.auth.hashers import make_password
-
 # class StudentSerializer(serializers.ModelSerializer):
 #     class Meta:
 #         model = Student
@@ -31,12 +28,15 @@ class RegistrarUsuarioSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         #ciframos la contraseña antes de crear el usuario
-        validated_data['password'] = make_password(validated_data['password'])
+        password = validated_data.pop('password')
+        user = RegistrarUsuario(**validated_data) #creamos el usuario
+        #ciframos la contraseña
+        user.set_password(password)
 
-        #Creamos el usuario
-        user = super().create(validated_data)
+        #guardamos el usuario
+        user.save()
 
-        #Generamos el codigo para poder loguearse
+        #Generamos el token para poder loguearse
         token = Token.objects.create(user=user)
 
         return user
