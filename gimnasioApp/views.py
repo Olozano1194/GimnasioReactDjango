@@ -49,62 +49,66 @@ class CustomAuthTokenViewSet(APIView):
     def post(self, request, *args, **kwargs):
         email = request.data.get('email')
         password = request.data.get('password')
-        
-        user = authenticate(email=email, password=password)
+
+        if not email or not password:
+            return Response({'error': 'Correo y contraseña son requeridos'}, status=status.HTTP_400_BAD_REQUEST)
+        #autenticamos el usuario
+        user = authenticate(request, email=email, password=password)
+        #si el usuario es correcto generamos el token
         if user:
             token, created = Token.objects.get_or_create(user=user)
             return Response({'token': token.key}, status=status.HTTP_200_OK)
-        return Response({'error': 'Invalid credentials'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'error': 'Credenciales invalidas'}, status=status.HTTP_400_BAD_REQUEST)
 
 #esta clase nos sirve para mostrar los datos del usuario y poder hacer el login respectivo
 class userProfileView(APIView):
     permission_classes = [IsAuthenticated]
-    parser_classes = (MultiPartParser, FormParser)
+    #parser_classes = (MultiPartParser, FormParser) #para poder subir archivos
 
     def get(self, request):
          
-        user_serializer = UserSerializer(request.user)
+        user_serializer = RegistrarUsuarioSerializer(request.user)
         # print('User data:', user_serializer.data)
         try:
-            student = Student.objects.get(user=request.user)
-            student_serializer = StudentSerializer(student)
-            student_data = student_serializer.data
-        except Student.DoesNotExist:
-             student_data = {}
+            user = RegistrarUsuario.objects.get(user=request.user)
+            user_serializer = RegistrarUsuarioSerializer(user)
+            user_data = user_serializer.data
+        except RegistrarUsuario.DoesNotExist:
+             user_data = {}
 
         return Response({
              "user": user_serializer.data,
-             "student": student_data
+             "student": user_data
         })
     
-    def put(self, request):
-        user_data = request.data.get('user', {})
-        student_data = request.data.get('student', {})
+    # def put(self, request):
+    #     user_data = request.data.get('user', {})
+    #     #student_data = request.data.get('student', {})
 
-        #Manejo de la imagen
-        if 'avatar' in request.FILES:
-            student_data['avatar'] = request.FILES['avatar']
+    #     #Manejo de la imagen
+    #     #if 'avatar' in request.FILES:
+    #         #student_data['avatar'] = request.FILES['avatar']
 
 
 
-        user_serializer = UserSerializer(request.user, data=user_data, partial=True)
+    #     user_serializer = RegistrarUsuarioSerializer(request.user, data=user_data, partial=True)
 
-        student, created = Student.objects.get_or_create(user=request.user)
-        student_serializer = StudentSerializer(student, data=student_data, partial=True)
+    #     student, created = Student.objects.get_or_create(user=request.user)
+    #     student_serializer = StudentSerializer(student, data=student_data, partial=True)
         
-        if user_serializer.is_valid() and student_serializer.is_valid():
-            user_serializer.save()
-            student_serializer.save()
-            return Response({
-                "user": user_serializer.data,
-                "student": student_serializer.data
-            })
+    #     if user_serializer.is_valid() and student_serializer.is_valid():
+    #         user_serializer.save()
+    #         student_serializer.save()
+    #         return Response({
+    #             "user": user_serializer.data,
+    #             "student": student_serializer.data
+    #         })
         
-        errors = {}
-        if user_serializer.errors:
-            errors['user'] = user_serializer.errors
-        if student_serializer.errors:
-            errors['student'] = student_serializer.errors
+    #     errors = {}
+    #     if user_serializer.errors:
+    #         errors['user'] = user_serializer.errors
+    #     if student_serializer.errors:
+    #         errors['student'] = student_serializer.errors
         
-        return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+    #     return Response(errors, status=status.HTTP_400_BAD_REQUEST)
         

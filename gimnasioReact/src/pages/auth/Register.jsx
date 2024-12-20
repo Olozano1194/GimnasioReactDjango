@@ -4,15 +4,22 @@ import { Link } from 'react-router-dom';
 import { CiUser } from 'react-icons/ci';
 import { RiLoginBoxLine, RiMailFill, RiLockFill,  RiUserLine } from "react-icons/ri";
 
-const Register = () => {
-    const { register, handleSubmit, formState: {errors}, watch } = useForm();
+//api
+import { CreateUsers } from "../../api/users.api";
 
-    const onSubmit = handleSubmit((data) => {
-        console.log(data);
+const Register = () => {
+    const { register, handleSubmit, formState: {errors}, watch, reset } = useForm();
+
+    const onSubmit = handleSubmit(async (data) => {
+        //console.log(data);
+        const rest = await CreateUsers(data);
+        console.log(rest);
         
-    })
+        reset();
+    });
     return (
         <main className="w-full min-h-screen flex flex-col justify-center items-center">
+            {/* formulario */}
             <form onSubmit={onSubmit} className="formRegister w-[85%] bg-slate-300 flex flex-col justify-center items-center text-slate-600 gap-6 p-3 rounded-md m-7 md:w-[55%] md:gap-8 lg:w-[47%] lg:px-8 xl:max-w-[30%]">
                 <h1 className="text-2xl font-bold pb-2 md:pt-3">Registrarse</h1>
 
@@ -58,27 +65,6 @@ const Register = () => {
                 {
                     errors.lastname && <span className='text-red-500 text-sm'>{errors.lastname.message}</span>
                 }
-                {/* User */}
-                <label htmlFor="user" className="w-full flex flex-col justify-center items-center gap-3 font-semibold text-xl md:gap-5 lg:flex-row lg:justify-between"><span className='flex gap-2 items-center'><RiUserLine className='lg:text-2xl' />Usuario</span><input type="text" className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500' placeholder='Escribe el usuario'
-                {...register('user',{
-                    required: {
-                        value: true,
-                        message: 'Usuario requerido'
-                    },
-                    minLength: {
-                        value: 4,
-                        message: 'El usuario debe tener como minimo 4 letras'
-                    },
-                    maxLength: {
-                        value: 20,
-                        message: 'El usuario debe tener como maximo 20 letras'
-                    },
-                })} 
-                />
-                </label>
-                {
-                    errors.user && <span className='text-red-500 text-sm'>{errors.user.message}</span>
-                }
                 {/* Roles */}
                 <label htmlFor="roles" className="w-full flex flex-col justify-center items-center gap-3 font-semibold text-xl md:gap-5 lg:flex-row lg:justify-between"><span className='flex gap-2 items-center'><RiUserLine className='lg:text-2xl' />Roles</span><select className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500'
                 {...register('roles',{
@@ -89,7 +75,7 @@ const Register = () => {
                 })}>
                         <option value="">Escoge un rol</option>
                         <option value="admin">Administrador</option>
-                        <option value="recep">Recepcionista</option>
+                        <option value="recepcion">Recepcionista</option>
 
                     </select>
                 </label>
@@ -104,7 +90,7 @@ const Register = () => {
                         message: 'Correo requerido'
                         },
                         pattern: {
-                            value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]{1,}\.[A-Z]{2,}$/i,
+                            value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
                             message: 'Correo invalido'
                         },
                 })}
