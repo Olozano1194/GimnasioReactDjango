@@ -1,31 +1,56 @@
 import {useForm} from 'react-hook-form';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 //Icons
 import { CiUser } from 'react-icons/ci';
 import { RiLockPasswordLine, RiLoginBoxLine } from "react-icons/ri";
+//Apis
+import { login } from "../../api/users.api";
 
 const Login = () => {
+    const navigate = useNavigate();
     const { register, handleSubmit, formState: {errors} } = useForm();
 
-    const onSubmit = handleSubmit((data) => {
-        console.log(data);
-        
-    })
+    const onSubmit = async data => {
+        try {
+            const { email, password } = data;
+            const response = await login(email, password);
+            console.log('Login successful, result:', response);
+
+            if (response && response.token) {                
+                console.log('Login successful, token:', response.token);
+
+                localStorage.setItem('token', response.token);
+
+                // Redirect to the dashboard
+                navigate('/dashboard');
+                                
+            }else {
+                console.error('Token not found in response');
+                
+            }           
+                      
+            } catch (error) {
+                console.error('Error logging in:', error);
+            }
+     
+    };
+
     return (
         <main className="w-full h-screen flex flex-col justify-center items-center lg:justify-between lg:flex-row lg:pr-48">
             <div className="hidden w-full lg:block lg:w-1/2 h-full relative">
                 <img src="https://cdn.pixabay.com/photo/2020/08/05/15/25/gym-5465776_1280.png" alt="" className="w-full h-full object-fill rounded-md" />
             </div>
 
-            <form onSubmit={onSubmit} className="w-[75%] bg-slate-300 flex flex-col justify-center items-center text-slate-600 gap-6 p-3 rounded-md md:w-[60%] md:gap-8 lg:w-[45%] xl:max-w-[30%]">
+            <form onSubmit={handleSubmit(onSubmit)} className="w-[75%] bg-slate-300 flex flex-col justify-center items-center text-slate-600 gap-6 p-3 rounded-md md:w-[60%] md:gap-8 lg:w-[45%] xl:max-w-[30%]">
                 <h1 className="text-2xl font-bold pb-2 md:pt-3">Inicio de sesión</h1>
-                {/* Name */}
-                <label className="flex gap-3 font-semibold md:gap-5" htmlFor="name">
+                {/* email */}
+                <label className="flex gap-3 font-semibold md:gap-5" htmlFor="email">
                     <CiUser className='text-2xl text-gray-950' />
                     <input 
                         className='bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-gray-500 text-lg placeholder:text-gray-500' 
-                        type="text"
-                        {...register('name',{
+                        type="email"
+                        name="email"
+                        {...register('email',{
                             required: {
                                 value: true,
                                 message: 'Nombre requerido'
@@ -39,11 +64,11 @@ const Login = () => {
                                 message: 'El nombre debe tener como maximo 20 letras'
                             },
                         })} 
-                        placeholder='Nombre del Usuario' 
+                        placeholder='Email del Usuario' 
                     />                    
                 </label>
                 {
-                    errors.name && <span className='text-red-500 text-sm'>{errors.name.message}</span>
+                    errors.email && <span className='text-red-500 text-sm'>{errors.email.message}</span>
                 }
                 
                   

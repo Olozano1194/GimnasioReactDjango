@@ -6,6 +6,7 @@ from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
 from .serializers import RegistrarUsuarioSerializer
+from .models import RegistrarUsuario
 
 # Create your views here.
 #esto nos sirve para que podamos crear de una vez el crud completo
@@ -84,7 +85,7 @@ class userProfileView(APIView):
 
         return Response({
              "user": user_serializer.data,
-             "student": user_data
+             "userGym": user_data
         })
     
     # def put(self, request):
