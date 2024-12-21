@@ -14,11 +14,11 @@ class UserManager(BaseUserManager): # Clase para la creación de usuarios
         return user
 
 class RegistrarUsuario(AbstractBaseUser):
-
+    email = models.EmailField(unique=True)
     name = models.CharField(max_length=45)
     lastname = models.CharField(max_length=50)
     #user = models.CharField(max_length=30, unique=True)
-    email = models.EmailField(unique=True)
+    
         
     OPCIONES_ROL = [
         ('recepcion', 'Recepcionista'),
@@ -95,5 +95,4 @@ class Renovacion(models.Model):
         verbose_name = 'Renovacion'
         verbose_name_plural = 'Renovaciones'
         db_table = 'Renovacion'
-
 

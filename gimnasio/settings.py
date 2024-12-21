@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-g6rm*m1n#pi+0h%^351!v_ln8@5s%z9=xqy1n$f#py1@1g_ih9'
+SECRET_KEY = 'django-insecure-xc99(n405dvfa#kff$a$25i)da7s@q*j6ac*w+i7*z1b8yapb3'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -132,7 +132,11 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 CORS_ALLOWED_ORIGINS = ["http://localhost:5173"]
+
+AUTH_USER_MODEL = 'gimnasioApp.RegistrarUsuario'
 
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',

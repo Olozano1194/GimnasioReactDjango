@@ -1,7 +1,6 @@
 import {useForm} from 'react-hook-form';
 import { Link } from 'react-router-dom';
 //Icons
-import { CiUser } from 'react-icons/ci';
 import { RiLoginBoxLine, RiMailFill, RiLockFill,  RiUserLine } from "react-icons/ri";
 
 //api
@@ -11,12 +10,18 @@ const Register = () => {
     const { register, handleSubmit, formState: {errors}, watch, reset } = useForm();
 
     const onSubmit = handleSubmit(async (data) => {
-        //console.log(data);
-        const rest = await CreateUsers(data);
-        console.log(rest);
+        //console.log('Form data:', data);
+        try {
+            const rest = await CreateUsers(data);
+            //console.log('Respuesta del servidor:',rest.data);            
+            reset();
+            
+        } catch (error) {
+            console.error("Error al registrar el usuario:", error.response ? error.response.data : error.message);            
+        }
         
-        reset();
     });
+
     return (
         <main className="w-full min-h-screen flex flex-col justify-center items-center">
             {/* formulario */}
@@ -24,7 +29,7 @@ const Register = () => {
                 <h1 className="text-2xl font-bold pb-2 md:pt-3">Registrarse</h1>
 
                 {/* Name */}
-                <label htmlFor="name" className="w-full flex flex-col justify-center items-center gap-3 font-semibold text-xl md:gap-5 lg:flex-row lg:justify-between"><span className='flex gap-2 items-center'><RiUserLine className='lg:text-2xl' />Nombre</span><input type="text" className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500' placeholder='Escribe el nombre'
+                <label htmlFor="name" className="w-full flex flex-col justify-center items-center gap-3 font-semibold text-xl md:gap-5 lg:flex-row lg:justify-between"><span className='flex gap-2 items-center'><RiUserLine className='lg:text-2xl' />Nombre</span><input type="text" name='name' className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500' placeholder='Escribe el nombre'
                 {...register('name',{
                     required: {
                         value: true,
@@ -45,7 +50,7 @@ const Register = () => {
                     errors.name && <span className='text-red-500 text-sm'>{errors.name.message}</span>
                 }
                 {/* LastName */}
-                <label htmlFor="lastname" className="w-full flex flex-col justify-center items-center gap-3 font-semibold text-xl md:gap-5 lg:flex-row lg:justify-between"><span className='flex gap-2 items-center'><RiUserLine className='lg:text-2xl' />Apellido</span><input type="text" className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500' placeholder='Escribe el apellido'
+                <label htmlFor="lastname" className="w-full flex flex-col justify-center items-center gap-3 font-semibold text-xl md:gap-5 lg:flex-row lg:justify-between"><span className='flex gap-2 items-center'><RiUserLine className='lg:text-2xl' />Apellido</span><input type="text" name='lastname' className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500' placeholder='Escribe el apellido'
                 {...register('lastname',{
                     required: {
                         value: true,
@@ -66,7 +71,7 @@ const Register = () => {
                     errors.lastname && <span className='text-red-500 text-sm'>{errors.lastname.message}</span>
                 }
                 {/* Roles */}
-                <label htmlFor="roles" className="w-full flex flex-col justify-center items-center gap-3 font-semibold text-xl md:gap-5 lg:flex-row lg:justify-between"><span className='flex gap-2 items-center'><RiUserLine className='lg:text-2xl' />Roles</span><select className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500'
+                <label htmlFor="roles" className="w-full flex flex-col justify-center items-center gap-3 font-semibold text-xl md:gap-5 lg:flex-row lg:justify-between"><span className='flex gap-2 items-center'><RiUserLine className='lg:text-2xl' />Roles</span><select name='roles' className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500'
                 {...register('roles',{
                     required: {
                         value: true,
@@ -83,7 +88,7 @@ const Register = () => {
                     errors.roles && <span className='text-red-500 text-sm'>{errors.roles.message}</span>
                 }
                 {/* Email */}
-                <label htmlFor="email" className="w-full flex flex-col justify-center items-center gap-3 font-semibold text-xl md:gap-5 lg:flex-row lg:justify-between"><span className='flex gap-2 items-center'><RiMailFill className='lg:text-2xl' />Correo</span><input type="email" className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500' placeholder='Escribe el correo'
+                <label htmlFor="email" className="w-full flex flex-col justify-center items-center gap-3 font-semibold text-xl md:gap-5 lg:flex-row lg:justify-between"><span className='flex gap-2 items-center'><RiMailFill className='lg:text-2xl' />Correo</span><input type="email" name='email' className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500' placeholder='Escribe el correo'
                 {...register('email',{
                     required: {
                         value: true,
@@ -100,7 +105,7 @@ const Register = () => {
                     errors.email && <span className='text-red-500 text-sm'>{errors.email.message}</span>
                 }
                 {/* Password */}
-                <label htmlFor="password" className="w-full flex flex-col justify-center items-center gap-3 font-semibold text-xl md:gap-5 lg:flex-row lg:justify-between"><span className='flex gap-2 items-center'><RiLockFill className='lg:text-2xl' />Contraseña</span><input type="password" className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500' placeholder='Escribe la contraseña'
+                <label htmlFor="password" className="w-full flex flex-col justify-center items-center gap-3 font-semibold text-xl md:gap-5 lg:flex-row lg:justify-between"><span className='flex gap-2 items-center'><RiLockFill className='lg:text-2xl' />Contraseña</span><input type="password" name='password' className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500' placeholder='Escribe la contraseña'
                 {...register('password',{
                     required: {
                         value: true,

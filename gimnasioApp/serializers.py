@@ -4,14 +4,6 @@ from .models import RegistrarUsuario, RegistrarUsuarioGym, RegistrarUsuarioGymDa
 #token
 from rest_framework.authtoken.models import Token
 
-# class StudentSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Student
-#         #fields = ('id', 'name', 'lastName', 'email', 'password', 'phone', 'address', 'created_at')
-#         fields = '__all__'
-#         read_only_fields = ('id', 'created_at',) #aca podemos colocar todas las tablas que solo van a ser de lectura
-
-
 class RegistrarUsuarioSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True)
 
