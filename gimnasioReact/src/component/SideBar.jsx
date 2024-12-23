@@ -1,10 +1,13 @@
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 // icons
 import { RiMenu3Line, RiCloseLine, RiMessage3Fill, RiCalendarTodoLine, RiLogoutCircleLine, RiHome8Line, RiUserLine, RiArrowRightSLine } from "react-icons/ri";
 import { MdOutlineSupportAgent } from "react-icons/md";
 import { FaIdCard } from "react-icons/fa";
+
+//API
+import { getUserProfile } from '../api/users.api';
 
 
 function SideBar() {
@@ -14,6 +17,24 @@ function SideBar() {
         menu2: false,
         menu3: false,
     });
+
+    const [userRole, setUserRole] = useState('');
+
+    useEffect(() => {
+        const obtenerRol = async () => {
+            try {
+                const data = await getUserProfile();
+                console.log('User data received:', data);
+                
+                setUserRole({
+                    roles: data.user.roles
+                });
+            }catch (error) {
+                console.error('No se pudo obtener el rol', error);
+            }
+        };
+        obtenerRol();
+    }, []);
 
     const handleToggleSubMenu = (submenu) => {
         setShowSubMenu(prevState => ({
@@ -32,7 +53,8 @@ function SideBar() {
             <div className={`xl:h-[100vh] bg-secondary overflow-y-scroll fixed xl:static w-[60%] md:w-[40%] lg:w-[35%] xl:w-auto h-full top-0 p-3 flex flex-col justify-between z-50 ${toggleMenu ? "left-0" : "-left-full"} transition-all`}>
                 <div>
                     <h1 className="text-center text-2xl font-black text-dark mb-10">
-                        Admin<span className="text-primary">.</span>
+                    {userRole.roles ? userRole.roles.charAt(0).toUpperCase() + userRole.roles.slice(1) : ''}
+                    <span className="text-primary">.</span>
                     </h1>
                     <nav>
                         {/* Home */}

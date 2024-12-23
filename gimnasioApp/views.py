@@ -73,20 +73,14 @@ class userProfileView(APIView):
     #parser_classes = (MultiPartParser, FormParser) #para poder subir archivos
 
     def get(self, request):
-         
-        user_serializer = RegistrarUsuarioSerializer(request.user)
-        # print('User data:', user_serializer.data)
         try:
-            user = RegistrarUsuario.objects.get(user=request.user)
-            user_serializer = RegistrarUsuarioSerializer(user)
-            user_data = user_serializer.data
-        except RegistrarUsuario.DoesNotExist:
-             user_data = {}
-
-        return Response({
-             "user": user_serializer.data,
-             "userGym": user_data
-        })
+            user_serializer = RegistrarUsuarioSerializer(request.user)
+            user_data = user_serializer.data            
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'user': user_data}, status=status.HTTP_200_OK)
+         
+       
     
     # def put(self, request):
     #     user_data = request.data.get('user', {})

@@ -1,3 +1,6 @@
+import { useEffect, useState } from "react";
+
+// icons
 import { RiNotification3Line, RiArrowDownSLine, RiSettings3Line, RiLogoutCircleRLine, RiThumbUpLine, RiChat3Line } from "react-icons/ri";
 
 //Enlaces
@@ -6,8 +9,41 @@ import { Link, useNavigate } from "react-router-dom";
 //react-menu
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 
+//API
+import { getUserProfile } from '../../api/users.api';
+
 
 function NavHeader() {
+    const navigate = useNavigate();
+    const [user, setUser] = useState({ name: '', lastName: '', email: ''});
+
+    useEffect(() => {
+        const axiosUserData = async () => {
+            try {
+                const data = await getUserProfile();
+                console.log('User data received:', data);
+                
+                setUser({
+                    name: data.user.name,
+                    lastName: data.user.lastname,
+                    email: data.user.email
+                });
+            }catch (error) {
+                console.error(error);
+            }
+        };
+        axiosUserData();
+    }, []);
+
+    // Esta función nos sirve para cerrar la sesión
+    const setLoggedOut= false;
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        setLoggedOut(true)
+        console.log('Token removed:', localStorage.getItem('token'));
+        navigate('/', { replace: true});
+        
+    }
     
     return (
         <nav className="flex items-center gap-x-2">
@@ -77,7 +113,7 @@ function NavHeader() {
                             src="https://img.freepik.com/foto-gratis/feliz-optimista-guapo-gerente-ventas-latina-apuntando-lado-mirando-camara_1262-12679.jpg" alt="img-user"
                             className="w-10 h-10 object-cover rounded-full"
                         />
-                        <span className="text-gray-100 font-semibold">Anacleto Rupertino</span>
+                        <span className="text-gray-100 font-semibold">{user.name} {user.lastName}</span>
                         <RiArrowDownSLine className="text-2xl" />
                     </MenuButton>
                     <MenuItems anchor='bottom' className='bg-secondary mt-1 p-4 rounded-lg'>
@@ -88,8 +124,8 @@ function NavHeader() {
                                     className="w-10 h-10 object-cover rounded-full"
                                 />
                                 <div className="flex flex-col gap-1 text-sm">
-                                    <span className="text-dark text-sm">Anacleto Rupertino</span>
-                                    <span className="text-dark text-xm">anacleto.roupertino@correo.com</span>
+                                    <span className="text-dark text-sm">{user.name} {user.lastName}</span>
+                                    <span className="text-dark text-xm">{user.email}</span>
                                 </div>
                             </Link>
                             
@@ -108,7 +144,7 @@ function NavHeader() {
 
                         <MenuItem className='p-0 hover:bg-gray-500'>
                             <Link 
-                                
+                                onClick={handleLogout}
                                 className="rounded-lg transition-colors text-dark hover:bg-gray-200 flex items-centerr gap-x-4 py-2 px-4 flex-1">
                             <RiLogoutCircleRLine />
                             Cerrar Sesión

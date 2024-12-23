@@ -47,3 +47,25 @@ export const login = async (email, password) => {
   }
   
 }
+
+//function profile
+export const getUserProfile = async () => {
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await gymApi.get(`/me/`, {
+            headers: {
+                'Authorization': `Token ${token}`
+                },
+            }
+        );
+        console.log('User profile response:', response.data);
+        
+        return response.data;
+        
+    } catch (error) {
+        console.error('Error fetching profile:',error);
+        throw error;
+        
+    }
+};
