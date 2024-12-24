@@ -114,13 +114,13 @@ function SideBar() {
                                 {/* Users */}                        
                                 <ul className="flex flex-col gap-4">
                                     <li>
-                                        <button onClick={() => handleToggleSubMenu('menu3')} to='/' 
-                                                className="w-full flex items-center justify-between py-2 px-4 rounded-lg hover:bg-slate-200 text-dark transition-colors">      <span className="flex items-center gap-2"><RiUserLine className="text-primary" />Usuario</span>
+                                        <button onClick={() => handleToggleSubMenu('menu3')}  
+                                                className="w-full flex items-center justify-between py-2 px-4 rounded-lg hover:bg-slate-200 text-dark transition-colors"><span className="flex items-center gap-2"><RiUserLine className="text-primary" />Usuario</span>
                                                 <RiArrowRightSLine className={`mt-1 ${showSubMenu.menu3 ? 'rotate-90' : ''} transition-all`} />
                                         </button>
                                         <ul className={`mt-2 ${!showSubMenu.menu3 ? 'hidden' : ''} transition-all`} >
                                             <li>
-                                                <Link to='register' className="py-2 px-4 border-l border-slate-400 block ml-6 text-dark relative before:w-3 before:h-3 before:absolute before:bg-primary before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-secondary hover:text-white transition-colors">Registrar Usuario</Link>
+                                                <Link to='/register' className="py-2 px-4 border-l border-slate-400 block ml-6 text-dark relative before:w-3 before:h-3 before:absolute before:bg-primary before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-secondary hover:text-white transition-colors">Registrar Usuario</Link>
                                             </li>
                                             <li>
                                                 <Link to='listUser' className="py-2 px-4 border-l border-slate-400 block ml-6 text-dark relative before:w-3 before:h-3 before:absolute before:bg-primary before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-secondary hover:text-white transition-colors">Ver Usuarios</Link>

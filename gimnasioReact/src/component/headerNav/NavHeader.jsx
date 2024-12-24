@@ -12,7 +12,6 @@ import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 //API
 import { getUserProfile } from '../../api/users.api';
 
-
 function NavHeader() {
     const navigate = useNavigate();
     const [user, setUser] = useState({ name: '', lastName: '', email: ''});

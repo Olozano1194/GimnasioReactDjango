@@ -7,6 +7,7 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
 from .serializers import RegistrarUsuarioSerializer
 from .models import RegistrarUsuario
+from django.shortcuts import render
 
 # Create your views here.
 #esto nos sirve para que podamos crear de una vez el crud completo
@@ -80,7 +81,14 @@ class userProfileView(APIView):
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response({'user': user_data}, status=status.HTTP_200_OK)
          
-       
+    #esta clase nos sirve para listar los usuarios
+    def list(self,request):
+        try:
+           users = RegistrarUsuario.objects.all().order_by('-id')
+           serializer = RegistrarUsuarioSerializer(users, many=True)
+           return Response({'users': serializer.data}, status=status.HTTP_200_OK)
+        except Exception as e:
+           return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)  
     
     # def put(self, request):
     #     user_data = request.data.get('user', {})

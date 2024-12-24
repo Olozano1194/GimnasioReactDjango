@@ -69,3 +69,25 @@ export const getUserProfile = async () => {
         
     }
 };
+
+//Lista de usuarios
+export const getUsers = async () => {
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await gymApi.get('/User/', {
+            headers: {
+                'Authorization': `Token ${token}`
+                },
+            }
+        );
+        console.log('Users response:', response.data);
+        
+        return response.data;
+        
+    } catch (error) {
+        console.error('Error fetching users:',error);
+        throw error;
+        
+    }
+};

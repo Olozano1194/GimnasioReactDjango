@@ -32,3 +32,5 @@ class RegistrarUsuarioSerializer(serializers.ModelSerializer):
         token = Token.objects.create(user=user)
 
         return user
+    
+    
