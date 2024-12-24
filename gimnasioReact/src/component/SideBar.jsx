@@ -20,6 +20,7 @@ function SideBar() {
 
     const [userRole, setUserRole] = useState('');
 
+    //este useEfect es para obtener el rol del usuario
     useEffect(() => {
         const obtenerRol = async () => {
             try {
@@ -36,6 +37,7 @@ function SideBar() {
         obtenerRol();
     }, []);
 
+    //Funcion para mostrar y ocultar los submenus
     const handleToggleSubMenu = (submenu) => {
         setShowSubMenu(prevState => ({
             //se cierran los demás submenus
@@ -47,6 +49,16 @@ function SideBar() {
             [submenu]: !prevState[submenu],
         }));                
     };
+
+    // Esta función nos sirve para cerrar la sesión
+    const setLoggedOut= false;
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        setLoggedOut(true)
+        console.log('Token removed:', localStorage.getItem('token'));
+        navigate('/', { replace: true});
+        
+    }
        
     return (
         <>
@@ -241,10 +253,11 @@ function SideBar() {
                 <nav>
                     <ul className="flex flex-col gap-4">
                         <li>
-                            <Link to='/'
-                                  className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-slate-900 text-dark transition-colors">
-                                  <RiLogoutCircleLine className="text-primary" />
-                                        Cerrar Sesión
+                            <Link 
+                                onClick={handleLogout}
+                                className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-slate-900 text-dark transition-colors">
+                                <RiLogoutCircleLine className="text-primary" />
+                                    Cerrar Sesión
                             </Link>
                         </li>
                     </ul>
