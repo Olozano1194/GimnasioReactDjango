@@ -4,9 +4,7 @@ import { Link } from 'react-router-dom';
 import { RiLoginBoxLine, RiMailFill, RiLockFill,  RiUserLine } from "react-icons/ri";
 
 //ui
-import Input from '../../component/ui/Input';
-import Label from '../../component/ui/Label';
-import Button from '../../component/ui/Button';
+import { Input, Label, Button } from '../../component/ui/index';
 
 //api
 import { CreateUsers } from "../../api/users.api";
@@ -147,14 +145,14 @@ const Register = () => {
                 {/* btn Register */}
                 <Button type='submit'><RiLoginBoxLine className='text-purple-800' />Registrarse</Button>
                 {/* Regresar al login*/}
-                <div className='flex flex-col gap-2 text-center pb-3 md:flex-row md:gap-4'>
+                {/* <div className='flex flex-col gap-2 text-center pb-3 md:flex-row md:gap-4'>
                     <p className='text-dark text-base'>¿No tienes cuenta? 
                         <Link
                             to='/login'
                             className='text-primary hover:text-sky-400 lg:text-base'> Iniciar Sesión
                         </Link>
                     </p>
-                </div>
+                </div> */}
             </form>
         </main>
 

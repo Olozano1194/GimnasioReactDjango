@@ -7,7 +7,7 @@ import { RiLockPasswordLine, RiLoginBoxLine } from "react-icons/ri";
 import { login } from "../../api/users.api";
 
 //ui
-import Input from '../../component/ui/Input';
+import { Input } from '../../component/ui/index';
 
 const Login = () => {
     const navigate = useNavigate();
