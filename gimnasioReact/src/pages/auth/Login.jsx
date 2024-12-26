@@ -6,6 +6,9 @@ import { RiLockPasswordLine, RiLoginBoxLine } from "react-icons/ri";
 //Apis
 import { login } from "../../api/users.api";
 
+//ui
+import Input from '../../component/ui/Input';
+
 const Login = () => {
     const navigate = useNavigate();
     const { register, handleSubmit, formState: {errors} } = useForm();
@@ -46,26 +49,20 @@ const Login = () => {
                 {/* email */}
                 <label className="flex gap-3 font-semibold md:gap-5" htmlFor="email">
                     <CiUser className='text-2xl text-gray-950' />
-                    <input 
-                        className='bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-gray-500 text-lg placeholder:text-gray-500' 
-                        type="email"
-                        name="email"
+                    <Input
+                        type='email'
+                        name='email'                        
+                        placeholder='Escribe el email'
                         {...register('email',{
                             required: {
                                 value: true,
-                                message: 'Nombre requerido'
+                                message: 'Email requerido'
                             },
-                            minLength: {
-                                value: 4,
-                                message: 'El nombre debe tener como minimo 4 letras'
-                            },
-                            maxLength: {
-                                value: 20,
-                                message: 'El nombre debe tener como maximo 20 letras'
-                            },
-                        })} 
-                        placeholder='Email del Usuario' 
-                    />                    
+                           
+                    })} 
+
+                    />
+                    
                 </label>
                 {
                     errors.email && <span className='text-red-500 text-sm'>{errors.email.message}</span>
@@ -75,8 +72,7 @@ const Login = () => {
                 {/* Password */}
                 <label className="flex gap-3 font-semibold md:gap-5" htmlFor="password">
                     <RiLockPasswordLine className='text-2xl text-gray-950' />
-                    <input 
-                        className="bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-gray-500 text-lg placeholder:text-gray-500" 
+                    <Input 
                         type="password" 
                         name="password" 
                         id="password"
