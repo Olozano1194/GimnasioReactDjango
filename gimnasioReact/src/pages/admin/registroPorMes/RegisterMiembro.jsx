@@ -6,6 +6,9 @@ import { MdOutlinePhoneAndroid, MdOutlinePriceChange } from "react-icons/md";
 import { BsCalendar2Date } from "react-icons/bs";
 import { LiaAddressCardSolid } from "react-icons/lia";
 
+//ui
+import { Input, Label, Button } from '../../../component/ui/index';
+
 const RegisterMiembro = () => {
     const { register, handleSubmit, formState: {errors}, watch } = useForm();
 
@@ -19,7 +22,7 @@ const RegisterMiembro = () => {
                 <h1 className="text-xl font-bold pt-3 pb-2 md:pt-3">Registrar Miembro</h1>
 
                 {/* Name */}
-                <label htmlFor="name" className="w-full flex flex-col justify-center items-center gap-3 font-semibold text-xl md:gap-5 lg:flex-row lg:justify-between"><span className='flex gap-2 items-center'><CiUser className='lg:text-2xl' />Nombre</span><input type="text" className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500' placeholder='Escribe el nombre'
+                <Label htmlFor="name"><span className='flex gap-2 items-center'><CiUser className='lg:text-2xl' />Nombre</span><Input type="text" placeholder='Escribe el nombre'
                 {...register('name',{
                     required: {
                         value: true,
@@ -35,12 +38,12 @@ const RegisterMiembro = () => {
                     },
                 })}
                 />
-                </label>
+                </Label>
                 {
                     errors.name && <span className='text-red-500 text-sm'>{errors.name.message}</span>
                 }
                 {/* LastName */}
-                <label htmlFor="lastname" className="w-full flex flex-col justify-center items-center gap-3 font-semibold text-xl md:gap-5 lg:flex-row lg:justify-between"><span className='flex gap-2 items-center'><CiUser className='lg:text-2xl' />Apellido</span><input type="text" className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500' placeholder='Escribe el apellido'
+                <Label htmlFor="lastname"><span className='flex gap-2 items-center'><CiUser className='lg:text-2xl' />Apellido</span><Input type="text" placeholder='Escribe el apellido'
                 {...register('lastname',{
                     required: {
                         value: true,
@@ -56,12 +59,12 @@ const RegisterMiembro = () => {
                     },
                 })}
                 />
-                </label>
+                </Label>
                 {
                     errors.lastname && <span className='text-red-500 text-sm'>{errors.lastname.message}</span>
                 }
                 {/* Phone */}
-                <label htmlFor="phone" className="w-full flex flex-col justify-center items-center gap-3 font-semibold text-xl md:gap-5 lg:flex-row lg:justify-between"><span className='flex gap-2 items-center'><MdOutlinePhoneAndroid className='lg:text-2xl' />Telefono</span><input type="number" className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500' placeholder='Escribe el telefono'
+                <Label htmlFor="phone"><span className='flex gap-2 items-center'><MdOutlinePhoneAndroid className='lg:text-2xl' />Telefono</span><Input type="number" placeholder='Escribe el telefono'
                 {...register('phone',{
                     required: {
                         value: true,
@@ -77,12 +80,12 @@ const RegisterMiembro = () => {
                     },
                 })} 
                 />
-                </label>
+                </Label>
                 {
                     errors.phone && <span className='text-red-500 text-sm'>{errors.phone.message}</span>
                 }
                 {/* Address */}
-                <label htmlFor="address" className="w-full flex flex-col justify-center items-center gap-3 font-semibold text-xl md:gap-5 lg:flex-row lg:justify-between"><span className='flex gap-2 items-center'><LiaAddressCardSolid className='lg:text-4xl' />Dirección</span><input type="number" className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500 lg:w-96' placeholder='Colocar la direccion'
+                <Label htmlFor="address"><span className='flex gap-2 items-center'><LiaAddressCardSolid className='lg:text-4xl' />Dirección</span><Input type="number" placeholder='Colocar la direccion'
                 {...register('address',{
                     required: {
                         value: true,
@@ -90,12 +93,12 @@ const RegisterMiembro = () => {
                     },                    
                 })} 
                 />
-                </label>
+                </Label>
                 {
                     errors.address && <span className='text-red-500 text-sm'>{errors.address.message}</span>
                 }               
                 {/* Date Initial */}
-                <label htmlFor="DateInitial" className="w-full flex flex-col justify-center items-center gap-3 font-semibold text-xl md:gap-5 lg:flex-row lg:justify-between"><span className='flex gap-2 items-center'><BsCalendar2Date className='lg:text-2xl' />Fecha Inicial</span><input type="date" className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg'
+                <Label htmlFor="DateInitial"><span className='flex gap-2 items-center'><BsCalendar2Date className='lg:text-2xl' />Fecha Inicial</span><Input type="date"
                 {...register('dateInitial',{
                     required: {
                         value: true,
@@ -103,12 +106,12 @@ const RegisterMiembro = () => {
                     },                    
                 })} 
                 />
-                </label>
+                </Label>
                 {
                     errors.dateInitial && <span className='text-red-500 text-center text-sm'>{errors.dateInitial.message}</span>
                 }
                 {/* Date final */}
-                <label htmlFor="DateFinal" className="w-full flex flex-col justify-center items-center gap-3 font-semibold text-xl md:gap-5 lg:flex-row lg:justify-between"><span className='flex gap-2 items-center'><BsCalendar2Date className='lg:text-2xl' />Fecha Final</span><input type="date" className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg'
+                <Label htmlFor="DateFinal"><span className='flex gap-2 items-center'><BsCalendar2Date className='lg:text-2xl' />Fecha Final</span><Input type="date"
                 {...register('dateFinal',{
                     required: {
                         value: true,
@@ -116,12 +119,12 @@ const RegisterMiembro = () => {
                     },                    
                 })} 
                 />
-                </label>
+                </Label>
                 {
                     errors.dateFinal && <span className='text-red-500 text-center text-sm'>{errors.dateFinal.message}</span>
                 }
                 {/* Price */}
-                <label htmlFor="price" className="w-full flex flex-col justify-center items-center gap-3 font-semibold text-xl md:gap-5 lg:flex-row lg:justify-between"><span className='flex gap-2 items-center'><MdOutlinePriceChange className='lg:text-4xl' />Precio</span><input type="number" className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500 lg:w-96' placeholder='Colocar precio'
+                <Label htmlFor="price"><span className='flex gap-2 items-center'><MdOutlinePriceChange className='lg:text-4xl' />Precio</span><Input type="number" placeholder='Colocar precio'
                 {...register('price',{
                     required: {
                         value: true,
@@ -129,15 +132,15 @@ const RegisterMiembro = () => {
                     },                    
                 })} 
                 />
-                </label>
+                </Label>
                 {
                     errors.price && <span className='text-red-500 text-sm'>{errors.price.message}</span>
                 }
                 {/* btn Register */}
-                <button type="submit" className="bg-sky-600 cursor-pointer flex gap-2 items-center rounded-lg p-4 text-slate-100 text-lg font-bold mb-2 hover:scale-105 hover:bg-sky-400 hover:text-slate-800">
+                <Button type="submit">
                     <RiLoginBoxLine className='text-purple-800' />
                     Registrar
-                </button>                
+                </Button>                
             </form>
         </main>
     );
