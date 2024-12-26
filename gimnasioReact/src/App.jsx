@@ -29,12 +29,12 @@ function App() {
         <Routes>        
           <Route path="/" element={<Navigate to='/login' />} />
           <Route path="login" element={<Login />} />
-          <Route path="register" element={<Register />} />
           <Route path="forget-password" element={<ForgetPassword />} />
           {/* Rutas protegidas */}
           <Route element={<ProtectRoute />} >
             <Route path="dashboard" element={<LayoutAdmin />} >
               <Route index element={<Home />} />
+              <Route path="register" element={<Register />} />
               <Route path="listUser" element={<ListUser />} />
               <Route path="registrar-miembro" element={<RegisterMiembro />} />
               <Route path="miembros" element={<ListMiembro />} />
