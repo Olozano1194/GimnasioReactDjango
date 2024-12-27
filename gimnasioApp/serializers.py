@@ -34,3 +34,8 @@ class RegistrarUsuarioSerializer(serializers.ModelSerializer):
         return user
     
     
+class RegistrarUsuarioGymSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = RegistrarUsuarioGym
+        fields = '__all__'
+        read_only_fields = ('id',)

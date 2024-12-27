@@ -5,9 +5,9 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
-from .serializers import RegistrarUsuarioSerializer
-from .models import RegistrarUsuario
-from django.shortcuts import render
+from .serializers import RegistrarUsuarioSerializer, RegistrarUsuarioGymSerializer
+from .models import RegistrarUsuario, RegistrarUsuarioGym
+
 
 # Create your views here.
 #esto nos sirve para que podamos crear de una vez el crud completo
@@ -121,3 +121,8 @@ class userProfileView(APIView):
         
     #     return Response(errors, status=status.HTTP_400_BAD_REQUEST)
         
+#clase para la creación de  miembros del gimnasio
+class RegistrarUsuarioGymViewSet(viewsets.ModelViewSet):
+    serializer_class = RegistrarUsuarioGymSerializer
+    queryset = RegistrarUsuarioGym.objects.all()
+
