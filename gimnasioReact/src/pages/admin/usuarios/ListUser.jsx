@@ -1,83 +1,67 @@
 import { useEffect, useState } from "react";
+//API
+import { getUsers } from '../../../api/users.api';
 
+import { createColumnHelper } from '@tanstack/react-table';
 //Enlaces
 import { Link } from "react-router-dom";
-// Table
-import { useReactTable, createColumnHelper, flexRender, getCoreRowModel, getPaginationRowModel, getSortedRowModel } from '@tanstack/react-table';
+
+//Componente principal para la listas
+import Table from '../../../component/Table';
 
 
-const ListUser = ({data, columns}) => {
-    const [users, setUser] = useState([]);    
-    const [sorting, setSorting] = useState([]);
+const ListUser = () => {
+    const [users, setUser] = useState([]);
 
-    const table = useReactTable({
-        data, 
-        columns,
-        getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
-        getSortedRowModel: getSortedRowModel(),
-        state: {
-            sorting 
-        },
-        onSortingChange: setSorting,              
-    });
+    useEffect(() => {
+        const axiosUserData = async () => {
+            try {
+                const data = await getUsers();
+                console.log('User data received:', data);
+                
+                setUser(data);
+            }catch (error) {
+                console.error(error);
+            }
+        };
+        axiosUserData();
+    }, []);
+
+    const columnHelper = createColumnHelper();
+
+    const columns = [
+        columnHelper.accessor('index', {
+            header: 'N°',
+            cell: ((info) => info.row.index + 1),
+        }),
+        columnHelper.accessor('name', {
+            header: 'Nombre',
+
+        }),
+        columnHelper.accessor('lastname', {
+            header: 'Apellido',
+        }),
+        columnHelper.accessor('email', {
+            header: 'Correo',
+        }),
+        columnHelper.accessor('roles', {
+            header: 'Rol',
+        }),
+        columnHelper.accessor('actions', {
+            header: 'Acciones',
+            cell: (({ row }) => (
+                <div className="flex justify-center items-center gap-x-4">
+                    <Link to={`/edit/usuarios/${row.original.id}`} className="bg-green-500 text-white p-2 rounded-md">Editar</Link>
+                    <button className="bg-red-500 text-white p-2 rounded-md">Eliminar</button>
+                </div>
+            )),
+        }),
+    ];
 
     return (
         <main className="cards bg-secondary w-full flex flex-col justify-center items-center gap-y-4 p-4 rounded-xl">
             <h1 className='text-xl font-bold pb-4' >Listado de Usuarios</h1>
-            <table className="min-w-full border"> 
-                <thead className="bg-slate-500 text-white">
-                    {
-                        table.getHeaderGroups().map(headerGroup => (
-                            <tr key={headerGroup.id}>
-                                {
-                                    headerGroup.headers.map(header => (
-                                        <th key={header.id}
-                                            onClick={header.column.getToggleSortingHandler()}
-                                            className="p-2">
-                                                {header.isPlaceholder ? null :
-                                                flexRender(header.column.columnDef.header, header.getContext())}
-
-                                                {
-                                                    {'asc' : "⬆️", 'desc' : "⬇️", 'none' : "↕️"}[header.column.getIsSorted() ?? null]                                   
-                                                }                                            
-                                        </th>                                        
-                                    ))}                                
-                            </tr>
-                        ))
-                    }
-                </thead>
-                <tbody>
-                    {
-                        table.getRowModel().rows.map(row => (
-                            <tr key={row.id}>
-                                {
-                                    row.getVisibleCells().map(cell => (
-                                        <td key={cell.id} className="border p-2">{flexRender(cell.column.columnDef.cell, cell.getContext())
-                                        }</td>
-                                    ))
-                                }
-                            </tr>
-                        ))
-                    }
-                </tbody>
-            </table>
-            {/* contenedor de los btn de paginación */}
-            <div className="flex justify-center items-center gap-x-4">
-                <button onClick={() => table.setPageIndex(0)} >
-                    Primera Página
-                </button>
-                <button onClick={() => table.previousPage()}>
-                    Página Anterior
-                </button>
-                <button onClick={() => table.nextPage()}>
-                    Página Siguiente
-                </button>
-                <button onClick={() => table.setPageIndex(table.getPageCount() - 1)}>
-                    Última Página
-                </button>
-
-            </div>           
+            <Table data={users} columns={columns} />         
         </main>
     );
 

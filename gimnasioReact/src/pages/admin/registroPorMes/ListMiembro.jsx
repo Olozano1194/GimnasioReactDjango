@@ -5,7 +5,7 @@ import { getMembers } from '../../../api/userGym.api';
 import { useEffect, useState } from "react";
 import { createColumnHelper } from '@tanstack/react-table';
 //Componente principal para la listas
-import ListUser from '../usuarios/ListUser';
+import Table from '../../../component/Table';
 //Enlaces
 import { Link } from "react-router-dom";
 
@@ -107,7 +107,7 @@ const ListMiembro = () => {
     return (
         <main className="cards bg-secondary w-full flex flex-col justify-center items-center gap-y-4 p-4 rounded-xl">
             <h1 className='text-xl font-bold pb-4'>Listado de Miembros</h1>
-            <ListUser data={dataWithTotal} columns={columns} />
+            <Table data={dataWithTotal} columns={columns} />
         </main>
     );
 }
