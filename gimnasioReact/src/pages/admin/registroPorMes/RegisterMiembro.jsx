@@ -9,12 +9,24 @@ import { LiaAddressCardSolid } from "react-icons/lia";
 //ui
 import { Input, Label, Button } from '../../../component/ui/index';
 
-const RegisterMiembro = () => {
-    const { register, handleSubmit, formState: {errors}, watch } = useForm();
+//API
+import { createMember } from '../../../api/userGym.api';
 
-    const onSubmit = handleSubmit((data) => {
-        console.log(data);        
-    })
+const RegisterMiembro = () => {
+    const { register, handleSubmit, formState: {errors}, watch, reset } = useForm();
+
+    const onSubmit = handleSubmit(async (data) => {
+        //console.log('Form data:', data);
+        try {
+            const rest = await createMember(data);
+            //console.log('Respuesta del servidor:',rest.data);            
+            reset();
+            
+        } catch (error) {
+            console.error("Error al registrar el usuario:", error.response ? error.response.data : error.message);            
+        }
+        
+    });
 
     return (
         <main className="w-full min-h-screen flex flex-col justify-center items-center">
@@ -22,7 +34,7 @@ const RegisterMiembro = () => {
                 <h1 className="text-xl font-bold pt-3 pb-2 md:pt-3">Registrar Miembro</h1>
 
                 {/* Name */}
-                <Label htmlFor="name"><span className='flex gap-2 items-center'><CiUser className='lg:text-2xl' />Nombre</span><Input type="text" placeholder='Escribe el nombre'
+                <Label htmlFor="name"><span className='flex gap-2 items-center'><CiUser className='lg:text-2xl' />Nombre</span><Input type="text" name='name' placeholder='Escribe el nombre'
                 {...register('name',{
                     required: {
                         value: true,
@@ -43,7 +55,7 @@ const RegisterMiembro = () => {
                     errors.name && <span className='text-red-500 text-sm'>{errors.name.message}</span>
                 }
                 {/* LastName */}
-                <Label htmlFor="lastname"><span className='flex gap-2 items-center'><CiUser className='lg:text-2xl' />Apellido</span><Input type="text" placeholder='Escribe el apellido'
+                <Label htmlFor="lastname"><span className='flex gap-2 items-center'><CiUser className='lg:text-2xl' />Apellido</span><Input type="text" name='lastname' placeholder='Escribe el apellido'
                 {...register('lastname',{
                     required: {
                         value: true,
@@ -64,7 +76,7 @@ const RegisterMiembro = () => {
                     errors.lastname && <span className='text-red-500 text-sm'>{errors.lastname.message}</span>
                 }
                 {/* Phone */}
-                <Label htmlFor="phone"><span className='flex gap-2 items-center'><MdOutlinePhoneAndroid className='lg:text-2xl' />Telefono</span><Input type="number" placeholder='Escribe el telefono'
+                <Label htmlFor="phone"><span className='flex gap-2 items-center'><MdOutlinePhoneAndroid className='lg:text-2xl' />Telefono</span><Input type="number" name='phone' placeholder='Escribe el telefono'
                 {...register('phone',{
                     required: {
                         value: true,
@@ -85,11 +97,15 @@ const RegisterMiembro = () => {
                     errors.phone && <span className='text-red-500 text-sm'>{errors.phone.message}</span>
                 }
                 {/* Address */}
-                <Label htmlFor="address"><span className='flex gap-2 items-center'><LiaAddressCardSolid className='lg:text-4xl' />Dirección</span><Input type="number" placeholder='Colocar la direccion'
+                <Label htmlFor="address"><span className='flex gap-2 items-center'><LiaAddressCardSolid className='lg:text-4xl' />Dirección</span><Input type="text" name='address' placeholder='Colocar la direccion'
                 {...register('address',{
                     required: {
                         value: true,
                         message: 'Dirección requerido'
+                    },
+                    maxLength: {
+                        value: 50,
+                        message: 'La dirección debe tener como maximo 50 letras'
                     },                    
                 })} 
                 />
@@ -98,7 +114,7 @@ const RegisterMiembro = () => {
                     errors.address && <span className='text-red-500 text-sm'>{errors.address.message}</span>
                 }               
                 {/* Date Initial */}
-                <Label htmlFor="DateInitial"><span className='flex gap-2 items-center'><BsCalendar2Date className='lg:text-2xl' />Fecha Inicial</span><Input type="date"
+                <Label htmlFor="DateInitial"><span className='flex gap-2 items-center'><BsCalendar2Date className='lg:text-2xl' />Fecha Inicial</span><Input type="date" name='dateInitial'
                 {...register('dateInitial',{
                     required: {
                         value: true,
@@ -111,7 +127,7 @@ const RegisterMiembro = () => {
                     errors.dateInitial && <span className='text-red-500 text-center text-sm'>{errors.dateInitial.message}</span>
                 }
                 {/* Date final */}
-                <Label htmlFor="DateFinal"><span className='flex gap-2 items-center'><BsCalendar2Date className='lg:text-2xl' />Fecha Final</span><Input type="date"
+                <Label htmlFor="DateFinal"><span className='flex gap-2 items-center'><BsCalendar2Date className='lg:text-2xl' />Fecha Final</span><Input type="date" name='dateFinal'
                 {...register('dateFinal',{
                     required: {
                         value: true,
@@ -124,7 +140,7 @@ const RegisterMiembro = () => {
                     errors.dateFinal && <span className='text-red-500 text-center text-sm'>{errors.dateFinal.message}</span>
                 }
                 {/* Price */}
-                <Label htmlFor="price"><span className='flex gap-2 items-center'><MdOutlinePriceChange className='lg:text-4xl' />Precio</span><Input type="number" placeholder='Colocar precio'
+                <Label htmlFor="price"><span className='flex gap-2 items-center'><MdOutlinePriceChange className='lg:text-4xl' />Precio</span><Input type="number" name='price' placeholder='Colocar precio'
                 {...register('price',{
                     required: {
                         value: true,
