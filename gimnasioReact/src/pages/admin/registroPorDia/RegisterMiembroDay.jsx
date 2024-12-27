@@ -8,12 +8,24 @@ import { BsCalendar2Date } from "react-icons/bs";
 //ui
 import { Input, Label, Button } from '../../../component/ui/index';
 
-const RegisterMiembroDay = () => {
-    const { register, handleSubmit, formState: {errors}, watch } = useForm();
+//API
+import { createMemberDay } from '../../../api/userGymDay.api';
 
-    const onSubmit = handleSubmit((data) => {
-        console.log(data);        
-    })
+const RegisterMiembroDay = () => {
+    const { register, handleSubmit, formState: {errors}, watch, reset } = useForm();
+
+    const onSubmit = handleSubmit(async (data) => {
+        //console.log('Form data:', data);
+        try {
+            const rest = await createMemberDay(data);
+            //console.log('Respuesta del servidor:',rest.data);            
+            reset();
+            
+        } catch (error) {
+            console.error("Error al registrar el usuario:", error.response ? error.response.data : error.message);            
+        }
+        
+    });
 
     return (
         <main className="w-full min-h-screen flex flex-col justify-center items-center">

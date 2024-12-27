@@ -1,9 +1,11 @@
-//Ejemplo de usar una sola tabla en varios componentes
-//API
-import { getMembers } from '../../../api/userGym.api';
 //Estados
 import { useEffect, useState } from "react";
+
+//API
+import { getMembers } from '../../../api/userGym.api';
+
 import { createColumnHelper } from '@tanstack/react-table';
+
 //Componente principal para la listas
 import Table from '../../../component/Table';
 //Enlaces
