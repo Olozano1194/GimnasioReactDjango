@@ -55,3 +55,23 @@ class RegistrarUsuarioGymSerializer(serializers.ModelSerializer):
             representation['dateFinal'] = instance.dateFinal.strftime("%d-%m-%Y")
             
         return representation
+
+class RegistrarUsuarioGymDaySerializer(serializers.ModelSerializer):
+    #Formato para mostrar las fechas
+    dateInitial = serializers.DateField(format="%d-%m-%Y", input_formats=['%Y-%m-%d', '%d-%m-%Y'])
+    
+
+    class Meta:
+        model = RegistrarUsuarioGymDay
+        fields = ['id', 'name', 'lastname', 'phone', 'dateInitial','price']
+        read_only_fields = ('id',)
+
+    def to_representation(self, instance):
+        # Esto nos permite personalizar aún más la representación de los datos
+        representation = super().to_representation(instance)
+        
+        # Aseguramos que las fechas estén en el formato correcto
+        if instance.dateInitial:
+            representation['dateInitial'] = instance.dateInitial.strftime("%d-%m-%Y")        
+            
+        return representation

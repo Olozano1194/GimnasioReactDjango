@@ -5,8 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
-from .serializers import RegistrarUsuarioSerializer, RegistrarUsuarioGymSerializer
-from .models import RegistrarUsuario, RegistrarUsuarioGym
+from .serializers import RegistrarUsuarioSerializer, RegistrarUsuarioGymSerializer, RegistrarUsuarioGymDaySerializer
+from .models import RegistrarUsuario, RegistrarUsuarioGym, RegistrarUsuarioGymDay
 
 
 # Create your views here.
@@ -126,3 +126,7 @@ class RegistrarUsuarioGymViewSet(viewsets.ModelViewSet):
     serializer_class = RegistrarUsuarioGymSerializer
     queryset = RegistrarUsuarioGym.objects.all()
 
+#clase para la creación de  miembros del gimnasio
+class RegistrarUsuarioGymDayViewSet(viewsets.ModelViewSet):
+    serializer_class = RegistrarUsuarioGymDaySerializer
+    queryset = RegistrarUsuarioGymDay.objects.all()
