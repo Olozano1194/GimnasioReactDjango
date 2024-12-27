@@ -1,106 +1,83 @@
 import { useEffect, useState } from "react";
-//API
-import { getUsers } from '../../../api/users.api';
+
 //Enlaces
 import { Link } from "react-router-dom";
 // Table
-import DataTable from 'react-data-table-component';
-import 'styled-components';
-
-const ListUser = () => {
-    const [users, setUser] = useState([]);
-
-    useEffect(() => {
-        const axiosUserData = async () => {
-            try {
-                const data = await getUsers();
-                console.log('User data received:', data);
-                
-                setUser([
-                    ...data
-                ]);
-            }catch (error) {
-                console.error(error);
-            }
-        };
-        axiosUserData();
-    }, []);
-
-    const columns = [
-        {
-            name: '#',
-            selector: (row, index) => index + 1,
-                       
-        },
-        {
-            name: 'Nombre',
-            selector: row => row.name,
-            sortable: true,
-        },
-        {
-            name: 'Apellido',
-            selector: row => row.lastname,
-            sortable: true,
-        },
-        {
-            name: 'Correo',
-            selector: row => row.email,
-            sortable: true,
-        },
-        {
-            name: 'Roles',
-            selector: row => row.roles,
-            sortable: true,
-        },
-        {
-            name: 'Acciones',
-            selector: row => (<div className='flex gap-1'>
-                <button className='bg-green-500 hover:bg-green-700 text-xs text-white font-bold py-2 px-4 rounded'>Editar</button>
-                <button className='bg-red-500 hover:bg-red-700 text-xs text-white font-bold py-2 px-4 rounded'>Eliminar</button>
-                </div>),
-                button: true,                
-        },
-    ];
-
-    const customStyles = {
-        headCells: {
-          style: {
-            fontSize: '14px',
-            fontWeight: 'bold',
-            paddingLeft: '8px',
-            paddingRight: '8px',
-            backgroundColor: '#2b6cb0',
-            color: 'white',
-          },
-        },
-        cells: {
-          style: {
-            paddingLeft: '8px',
-            paddingRight: '8px',
-          },
-        },
-        rows: {
-          highlightOnHoverStyle: {
-            backgroundColor: 'rgb(230, 244, 244)',
-            color: 'black',
-            width: '100%',
-          },
-        },
+import { useReactTable, createColumnHelper, flexRender, getCoreRowModel, getPaginationRowModel, getSortedRowModel } from '@tanstack/react-table';
 
 
+const ListUser = ({data, columns}) => {
+    const [users, setUser] = useState([]);    
+    const [sorting, setSorting] = useState([]);
 
-    };
+    const table = useReactTable({
+        data, 
+        columns,
+        getCoreRowModel: getCoreRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+        state: {
+            sorting 
+        },
+        onSortingChange: setSorting,              
+    });
 
     return (
         <main className="cards bg-secondary w-full flex flex-col justify-center items-center gap-y-4 p-4 rounded-xl">
-            <h1 className='text-xl font-bold pb-4' >Listado de Usuarios</h1>           
-            <DataTable
-                columns={columns}
-                data={users}
-                pagination
-                highlightOnHover
-                customStyles={customStyles} 
-            />
+            <h1 className='text-xl font-bold pb-4' >Listado de Usuarios</h1>
+            <table className="min-w-full border"> 
+                <thead className="bg-slate-500 text-white">
+                    {
+                        table.getHeaderGroups().map(headerGroup => (
+                            <tr key={headerGroup.id}>
+                                {
+                                    headerGroup.headers.map(header => (
+                                        <th key={header.id}
+                                            onClick={header.column.getToggleSortingHandler()}
+                                            className="p-2">
+                                                {header.isPlaceholder ? null :
+                                                flexRender(header.column.columnDef.header, header.getContext())}
+
+                                                {
+                                                    {'asc' : "⬆️", 'desc' : "⬇️", 'none' : "↕️"}[header.column.getIsSorted() ?? null]                                   
+                                                }                                            
+                                        </th>                                        
+                                    ))}                                
+                            </tr>
+                        ))
+                    }
+                </thead>
+                <tbody>
+                    {
+                        table.getRowModel().rows.map(row => (
+                            <tr key={row.id}>
+                                {
+                                    row.getVisibleCells().map(cell => (
+                                        <td key={cell.id} className="border p-2">{flexRender(cell.column.columnDef.cell, cell.getContext())
+                                        }</td>
+                                    ))
+                                }
+                            </tr>
+                        ))
+                    }
+                </tbody>
+            </table>
+            {/* contenedor de los btn de paginación */}
+            <div className="flex justify-center items-center gap-x-4">
+                <button onClick={() => table.setPageIndex(0)} >
+                    Primera Página
+                </button>
+                <button onClick={() => table.previousPage()}>
+                    Página Anterior
+                </button>
+                <button onClick={() => table.nextPage()}>
+                    Página Siguiente
+                </button>
+                <button onClick={() => table.setPageIndex(table.getPageCount() - 1)}>
+                    Última Página
+                </button>
+
+            </div>           
         </main>
     );
 
