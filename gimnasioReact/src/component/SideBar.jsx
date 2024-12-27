@@ -25,7 +25,7 @@ function SideBar() {
         const obtenerRol = async () => {
             try {
                 const data = await getUserProfile();
-                console.log('User data received:', data);
+                //console.log('User data received:', data);
                 
                 setUserRole({
                     roles: data.user.roles

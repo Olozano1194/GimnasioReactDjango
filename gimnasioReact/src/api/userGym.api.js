@@ -38,7 +38,7 @@ export const getMembers = async () => {
                 'Authorization': `Token ${token}`
                 },
             });
-        console.log('API Response:', response.data);
+        //console.log('API Response:', response.data);
         
         return response.data;
         

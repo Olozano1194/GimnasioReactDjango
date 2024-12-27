@@ -36,7 +36,7 @@ export const login = async (email, password) => {
           password
 
       });
-      console.log('API Response:', response.data);
+      //console.log('API Response:', response.data);
       
       return response.data;
       
@@ -59,7 +59,7 @@ export const getUserProfile = async () => {
                 },
             }
         );
-        console.log('User profile response:', response.data);
+        //console.log('User profile response:', response.data);
         
         return response.data;
         
@@ -81,7 +81,7 @@ export const getUsers = async () => {
                 },
             }
         );
-        console.log('Users response:', response.data);
+        //console.log('Users response:', response.data);
         
         return response.data;
         

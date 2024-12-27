@@ -17,10 +17,10 @@ const Login = () => {
         try {
             const { email, password } = data;
             const response = await login(email, password);
-            console.log('Login successful, result:', response);
+            //console.log('Login successful, result:', response);
 
             if (response && response.token) {                
-                console.log('Login successful, token:', response.token);
+                //console.log('Login successful, token:', response.token);
 
                 localStorage.setItem('token', response.token);
 

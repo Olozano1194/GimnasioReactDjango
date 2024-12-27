@@ -20,7 +20,7 @@ function NavHeader() {
         const axiosUserData = async () => {
             try {
                 const data = await getUserProfile();
-                console.log('User data received:', data);
+                //console.log('User data received:', data);
                 
                 setUser({
                     name: data.user.name,
