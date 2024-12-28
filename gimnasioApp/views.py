@@ -7,6 +7,9 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
 from .serializers import RegistrarUsuarioSerializer, RegistrarUsuarioGymSerializer, RegistrarUsuarioGymDaySerializer
 from .models import RegistrarUsuario, RegistrarUsuarioGym, RegistrarUsuarioGymDay
+from django.utils import timezone
+from django.http import JsonResponse
+
 
 
 # Create your views here.
@@ -130,3 +133,45 @@ class RegistrarUsuarioGymViewSet(viewsets.ModelViewSet):
 class RegistrarUsuarioGymDayViewSet(viewsets.ModelViewSet):
     serializer_class = RegistrarUsuarioGymDaySerializer
     queryset = RegistrarUsuarioGymDay.objects.all()
+
+#funcion para la creación de las cards
+
+class Home(APIView):
+    def get(self, request):
+        UserGymList = RegistrarUsuarioGym.objects.all().order_by('-id')
+        UserDayList = RegistrarUsuarioGymDay.objects.all().order_by('-id')
+
+        now = timezone.now()
+        month = now.month
+        year = now.year
+
+        #Calculamos el numero de miembros 
+        num_miembros = RegistrarUsuarioGym.objects.count()
+
+        #Filtramos los miembros del gimnasio registrados en el mes
+        miembros_mes = RegistrarUsuarioGym.objects.filter(dateInitial__month=month, dateInitial__year=year)
+        #Cantidad de dinero miembros mensualidad
+        total_gym_mes = sum(user.price for user in miembros_mes)
+
+        #Filtramos los miembros del gimnasio registrados en el mes
+        miembrosDay_mes = RegistrarUsuarioGymDay.objects.filter(dateInitial__month=month, dateInitial__year=year)
+        #Cantidad de dinero del dia
+        total_day_mes = sum(user.price for user in miembrosDay_mes)
+
+        #Cantidad de dinero del mes
+        total_month = total_gym_mes + total_day_mes
+
+        #Filtramos los miembros registrados en el mes actual
+        miembros_mes = RegistrarUsuarioGym.objects.filter(dateInitial__month=month, dateInitial__year=year).count()
+
+        #Total de dinero en el gym
+        total_gym = sum(user.price for user in UserGymList)
+        total_day = sum(user.price for user in UserDayList)
+        total = total_gym + total_day                                                     
+
+        return JsonResponse({ 
+            'num_miembros': num_miembros, 
+            'total_month': total_month, 
+            'miembros_mes': miembros_mes,
+            'total': total
+            })

@@ -1,6 +1,5 @@
 import axios from 'axios';
 
-
 const gymApi = axios.create({
     baseURL: 'http://localhost:8000/gym/api/v1/',
     headers: {
@@ -49,3 +48,20 @@ export const getMembersDay = async () => {
     }
     
 }
+
+export const getHome = async () => {
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await gymApi.get(`/home/`, {
+            headers: {
+                'Authorization': `Token ${token}`}
+            });
+        return response.data;
+    } catch (error) {
+        console.error('Error al mostrar los datos en el Home:',error);
+        throw error;      
+        
+    }
+    
+};
