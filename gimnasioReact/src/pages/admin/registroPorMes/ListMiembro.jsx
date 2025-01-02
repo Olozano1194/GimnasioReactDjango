@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 
 //API
-import { getMembers } from '../../../api/userGym.api';
+import { getMembers, deleteMember } from '../../../api/userGym.api';
 
 import { createColumnHelper } from '@tanstack/react-table';
 
@@ -14,6 +14,7 @@ import { Link } from "react-router-dom";
 
 const ListMiembro = () => {
     const [users, setUser] = useState([]);
+    
 
     useEffect(() => {
         const axiosUserData = async () => {
@@ -88,10 +89,18 @@ const ListMiembro = () => {
                 
                 return (
                     <div className="flex justify-center items-center gap-x-4">
-                        <Link to={`/edit/usuarios/${row.original.id}`} className="bg-green-500 text-white p-2 rounded-md">
+                        <Link to={`/dashboard/miembro/${row.original.id}`} className="bg-green-500 text-white p-2 rounded-md">
                             Editar
                         </Link>
-                        <button className="bg-red-500 text-white p-2 rounded-md">
+                        <button 
+                            onClick={ async () => {
+                               const accepted = window.confirm('¿Estás seguro de eliminar este miembro?');
+                               if (accepted) {
+                                   await deleteMember(row.original.id);
+                                   setUser(users.filter(user => user.id !== row.original.id));
+                               }                                
+                            }}
+                            className="bg-red-500 text-white p-2 rounded-md">
                             Eliminar
                         </button>
                     </div>
@@ -108,7 +117,7 @@ const ListMiembro = () => {
 
     return (
         <main className="cards bg-secondary w-full flex flex-col justify-center items-center gap-y-4 p-4 rounded-xl">
-            <h1 className='text-xl font-bold pb-4'>Listado de Miembros</h1>
+            <h1 className='text-xl font-bold pb-4 md:text-2xl md:pt-2'>Listado de Miembros</h1>
             <Table data={dataWithTotal} columns={columns} />
         </main>
     );

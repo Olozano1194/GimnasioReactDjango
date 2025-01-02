@@ -134,8 +134,7 @@ class RegistrarUsuarioGymDayViewSet(viewsets.ModelViewSet):
     serializer_class = RegistrarUsuarioGymDaySerializer
     queryset = RegistrarUsuarioGymDay.objects.all()
 
-#funcion para la creación de las cards
-
+#funcion para mostrar los datos en las cards
 class Home(APIView):
     def get(self, request):
         UserGymList = RegistrarUsuarioGym.objects.all().order_by('-id')

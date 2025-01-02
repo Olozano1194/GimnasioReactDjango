@@ -37,8 +37,10 @@ function App() {
               <Route path="listUser" element={<ListUser />} />
               <Route path="registrar-miembro" element={<RegisterMiembro />} />
               <Route path="miembros" element={<ListMiembro />} />
+              <Route path="miembro/:id" element={<RegisterMiembro />} />
               <Route path="miembros-day" element={<ListMiembroDay />} />
-              <Route path="registrar-miembro-day" element={<RegisterMiembroDay />} />                   
+              <Route path="registrar-miembro-day" element={<RegisterMiembroDay />} />
+              <Route path="miembro-day/:id" element={<RegisterMiembroDay />} />                   
             </Route> 
           </Route>       
           <Route path="*" element={<Error404 />} />

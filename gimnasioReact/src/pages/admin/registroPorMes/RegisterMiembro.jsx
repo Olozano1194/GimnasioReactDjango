@@ -1,4 +1,7 @@
 import {useForm} from 'react-hook-form';
+import { useParams, useNavigate } from "react-router-dom";
+//Estados
+import { useEffect } from "react";
 //Icons
 import { CiUser } from 'react-icons/ci';
 import { RiLoginBoxLine } from "react-icons/ri";
@@ -10,17 +13,26 @@ import { LiaAddressCardSolid } from "react-icons/lia";
 import { Input, Label, Button } from '../../../component/ui/index';
 
 //API
-import { createMember } from '../../../api/userGym.api';
+import { createMember, updateMember, getMember } from '../../../api/userGym.api';
 
 const RegisterMiembro = () => {
-    const { register, handleSubmit, formState: {errors}, watch, reset } = useForm();
+    const params = useParams();
+    const navigate = useNavigate();
+    const { register, handleSubmit, formState: {errors}, watch, reset } = useForm();    
 
     const onSubmit = handleSubmit(async (data) => {
         //console.log('Form data:', data);
         try {
-            const rest = await createMember(data);
-            //console.log('Respuesta del servidor:',rest.data);            
-            reset();
+            if (params.id) {
+                await updateMember(params.id, data);
+                //console.log('Actualizando miembro:', params.id);                
+            }else {
+                await createMember(data);
+                //console.log('Respuesta del servidor:',rest.data);            
+                reset();
+            }
+            navigate('/dashboard/miembros');
+           
             
         } catch (error) {
             console.error("Error al registrar el usuario:", error.response ? error.response.data : error.message);            
@@ -28,10 +40,42 @@ const RegisterMiembro = () => {
         
     });
 
+    useEffect(() => {
+        const axiosUserData = async () => {
+            try {
+                if (params.id) {
+                    const response = await getMember(params.id);
+
+                    //formateamos la fecha antes de pasarla al formulario
+                    if (response.dateInitial && response.dateFinal) {
+                        response.dateInitial = formatDate(response.dateInitial);
+                        response.dateFinal = formatDate(response.dateFinal);                        
+                    }
+                    
+                    reset(response);
+                }
+            }catch (error) {
+                console.error('Error al obtener el miembro',error);
+            }
+        }
+        axiosUserData();
+    }, [params.id, reset]);
+
+    const formatDate = (date) => {
+        if (!date) return ''; // Retorna un valor vacío si la fecha es undefined o null
+        try {
+            const [day, month, year] = date.split('-');
+            return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+        } catch (error) {
+            console.error('Error al formatear la fecha:', error);
+            return '';
+        }
+    };
+
     return (
         <main className="w-full min-h-screen flex flex-col justify-center items-center">
             <form onSubmit={onSubmit} className="formRegister w-[85%] bg-slate-300 flex flex-col justify-center items-center text-slate-600 gap-6 p-3 rounded-md m-7 md:w-[55%] md:gap-8 lg:w-[47%] lg:px-8 xl:max-w-[30%]">
-                <h1 className="text-xl font-bold pt-3 pb-2 md:pt-3">Registrar Miembro</h1>
+                <h1 className="text-xl font-bold pt-3 pb-2 md:pt-3">{ params.id ? 'Actualizar Miembro' : 'Registrar Miembro' }</h1>
 
                 {/* Name */}
                 <Label htmlFor="name"><span className='flex gap-2 items-center'><CiUser className='lg:text-2xl' />Nombre</span><Input type="text" name='name' placeholder='Escribe el nombre'
@@ -154,8 +198,8 @@ const RegisterMiembro = () => {
                 }
                 {/* btn Register */}
                 <Button type="submit">
-                    <RiLoginBoxLine className='text-purple-800' />
-                    Registrar
+                    <RiLoginBoxLine className='text-purple-800' />{ params.id ? 'Actualizar' : 'Registrar' }
+                    
                 </Button>                
             </form>
         </main>

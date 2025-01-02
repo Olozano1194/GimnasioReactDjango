@@ -10,20 +10,20 @@ const gymApi = axios.create({
 
 //Creación de miembros del gimnasio
 export const createMemberDay = async (userGymDay) => {
-  try {
-      const response = await gymApi.post('/UserGymDay/', userGymDay);
-      const { token } = response.data;
+    const token = localStorage.getItem('token');
+    try {
+        const response = await gymApi.post('/UserGymDay/', userGymDay, {
+            headers: {
+                'Authorization': `Token ${token}`
+            },
 
-      //Almacenamos el token en el localstorage para las futuras solicitudes
-      localStorage.setItem('token', token);
-
-      return response.data;
-      
-  } catch (error) {
-      console.error('Error fetching users:', error.response ? error.response.data : error.message);
-      throw error;
-          
-  }
+        });
+        return response.data;
+        
+    } catch (error) {
+        console.error('Error fetching users:', error.response ? error.response.data : error.message);
+        throw error;            
+    }
   
 };
 
@@ -39,6 +39,68 @@ export const getMembersDay = async () => {
             });
         //console.log('API Response:', response.data);
         
+        return response.data;
+        
+    } catch (error) {
+        console.error('Error logging in:',error);
+        throw error;      
+        
+    }
+    
+}
+
+//Eliminar miembro del gimnasio
+export const deleteMember = async (id) => {
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await gymApi.delete(`/UserGymDay/${id}/`, {
+            headers: {
+                'Authorization': `Token ${token}`
+                },
+            });
+        //console.log('API Response:', response.data);
+        
+        return response.data;
+        
+    } catch (error) {
+        console.error('Error logging in:',error);
+        throw error;      
+        
+    }
+    
+}
+
+//Obtener miembro del gimnasio
+export const getMember = async (id) => {
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await gymApi.get(`/UserGymDay/${id}/`, {
+            headers: {
+                'Authorization': `Token ${token}`
+                },
+            });
+        return response.data;
+        
+    } catch (error) {
+        console.error('Error logging in:',error);
+        throw error;      
+        
+    }
+    
+}
+
+//Actualizar miembro del gimnasio
+export const updateMember = async (id, userGym) => {
+    const token = localStorage.getItem('token');
+
+    try {
+        const response = await gymApi.put(`/UserGymDay/${id}/`, userGym, {
+            headers: {
+                'Authorization': `Token ${token}`
+                },
+            });
         return response.data;
         
     } catch (error) {

@@ -1,6 +1,5 @@
 import axios from 'axios';
 
-
 const gymApi = axios.create({
     baseURL: 'http://localhost:8000/gym/api/v1/',
     headers: {
@@ -34,16 +33,12 @@ export const login = async (email, password) => {
       const response = await gymApi.post('/login/', {
           email,
           password
-
-      });
-      //console.log('API Response:', response.data);
-      
+      });            
       return response.data;
       
   } catch (error) {
       console.error('Error logging in:',error);
       throw error;      
-      
   }
   
 }

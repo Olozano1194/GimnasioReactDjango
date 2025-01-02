@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 
 //API
-import { getMembersDay } from '../../../api/userGymDay.api';
+import { getMembersDay, deleteMember } from '../../../api/userGymDay.api';
 
 import { createColumnHelper } from '@tanstack/react-table';
 
@@ -80,11 +80,19 @@ const ListMiembroDay = () => {
                 
                 return (
                     <div className="flex justify-center items-center gap-x-4">
-                        <Link to={`/edit/usuarios/${row.original.id}`} className="bg-green-500 text-white p-2 rounded-md">
+                        <Link to={`/dashboard/miembro-day/${row.original.id}`} className="bg-green-500 text-white p-2 rounded-md">
                             Editar
                         </Link>
-                        <button className="bg-red-500 text-white p-2 rounded-md">
-                            Eliminar
+                        <button
+                            onClick={ async () => {
+                                const accepted = window.confirm('¿Estás seguro de eliminar este miembro?');
+                                if (accepted) {
+                                    await deleteMember(row.original.id);
+                                    setUser(users.filter(user => user.id !== row.original.id));
+                                }                                
+                             }} 
+                            className="bg-red-500 text-white p-2 rounded-md">
+                                Eliminar
                         </button>
                     </div>
                 );
