@@ -17,7 +17,7 @@ const ListUser = () => {
         const axiosUserData = async () => {
             try {
                 const data = await getUsers();
-                console.log('User data received:', data);
+                //console.log('User data received:', data);
                 
                 setUser(data);
             }catch (error) {
@@ -47,15 +47,15 @@ const ListUser = () => {
         columnHelper.accessor('roles', {
             header: 'Rol',
         }),
-        columnHelper.accessor('actions', {
-            header: 'Acciones',
-            cell: (({ row }) => (
-                <div className="flex justify-center items-center gap-x-4">
-                    <Link to={`/edit/usuarios/${row.original.id}`} className="bg-green-500 text-white p-2 rounded-md">Editar</Link>
-                    <button className="bg-red-500 text-white p-2 rounded-md">Eliminar</button>
-                </div>
-            )),
-        }),
+        // columnHelper.accessor('actions', {
+        //     header: 'Acciones',
+        //     cell: (({ row }) => (
+        //         <div className="flex justify-center items-center gap-x-4">
+        //             <Link to={`/edit/usuarios/${row.original.id}`} className="bg-green-500 text-white p-2 rounded-md">Editar</Link>
+        //             <button className="bg-red-500 text-white p-2 rounded-md">Eliminar</button>
+        //         </div>
+        //     )),
+        // }),
     ];
 
     return (
