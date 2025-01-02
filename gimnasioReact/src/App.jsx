@@ -10,11 +10,11 @@ import ForgetPassword from './pages/auth/ForgetPassword';
 import Home from './pages/admin/Home';
 import ListUser from './pages/admin/usuarios/ListUser';
 // Miembros mensuales
-import RegisterMiembro from './pages/admin/registroPorMes/RegisterMiembro';
+import MemberForm from './pages/admin/registroPorMes/MemberForm';
 import ListMiembro from './pages/admin/registroPorMes/ListMiembro';
 // Miembros por dia
 import ListMiembroDay from './pages/admin/registroPorDia/ListMiembroDay';
-import RegisterMiembroDay from './pages/admin/registroPorDia/RegisterMiembroDay';
+import MemberFormDay from './pages/admin/registroPorDia/MemberFormDay';
 
 //Ruta protegida
 import ProtectRoute from './pages/admin/protectedRoute/ProtectRoute';
@@ -35,12 +35,12 @@ function App() {
               <Route index element={<Home />} />
               <Route path="register" element={<Register />} />
               <Route path="listUser" element={<ListUser />} />
-              <Route path="registrar-miembro" element={<RegisterMiembro />} />
+              <Route path="registrar-miembro" element={<MemberForm />} />
               <Route path="miembros" element={<ListMiembro />} />
-              <Route path="miembro/:id" element={<RegisterMiembro />} />
+              <Route path="miembro/:id" element={<MemberForm />} />
               <Route path="miembros-day" element={<ListMiembroDay />} />
-              <Route path="registrar-miembro-day" element={<RegisterMiembroDay />} />
-              <Route path="miembro-day/:id" element={<RegisterMiembroDay />} />                   
+              <Route path="registrar-miembro-day" element={<MemberFormDay />} />
+              <Route path="miembro-day/:id" element={<MemberFormDay />} />                   
             </Route> 
           </Route>       
           <Route path="*" element={<Error404 />} />
