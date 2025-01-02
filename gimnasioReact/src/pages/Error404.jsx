@@ -7,7 +7,16 @@ const Error404 = () => {
     const navigate = useNavigate();
 
     const handleRedirect = () => {
-        navigate('/');
+        //si esta autenticado redirige a la pagina de inicio
+        const authenticated = localStorage.getItem('token');
+        if (authenticated) {
+            navigate('/dashboard');
+            
+        }
+        //si no esta autenticado redirige a la pagina de login
+        else {
+            navigate('/');
+        }
 
     };
     return (
