@@ -15,7 +15,7 @@ const Home = () => {
     const loadStats = async () => {
       try {
         const data = await getHome();
-        console.log("Datos recibidos:", data);
+        //console.log("Datos recibidos:", data);
         setStats(data);
       } catch (error) {
         console.error("Error al cargar estadísticas:", error);
