@@ -6,8 +6,8 @@ import { Link } from "react-router-dom";
 import { useReactTable, createColumnHelper, flexRender, getCoreRowModel, getPaginationRowModel, getSortedRowModel } from '@tanstack/react-table';
 
 
-const Table = ({data, columns}) => {
-    const [users, setUser] = useState([]);    
+const Table = ({ data, columns, totalRow }) => {
+    //const [users, setUser] = useState([]);    
     const [sorting, setSorting] = useState([]);
 
     const table = useReactTable({
@@ -60,6 +60,16 @@ const Table = ({data, columns}) => {
                                 </tr>
                             ))
                         }
+                        {/* Fila del total que estará siempre al final */}
+                        { totalRow && (
+                            <tr className="bg-slate-500 text-white">
+                                {columns.map((column, index) => (
+                                <td key={index} className="border p-2">
+                                    {flexRender(column.cell, { row: { original: totalRow }, getValue: () => totalRow[column.accessorKey] })}
+                                </td>
+                                ))}
+                            </tr>
+                        )}
                     </tbody>
                 </table>
                 {/* contenedor de los btn de paginación */}
@@ -81,6 +91,5 @@ const Table = ({data, columns}) => {
             </div>                      
         </main>
     );
-
 }
 export default Table;

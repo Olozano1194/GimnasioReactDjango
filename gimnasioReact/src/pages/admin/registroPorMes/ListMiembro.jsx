@@ -113,12 +113,12 @@ const ListMiembro = () => {
     const total = users.reduce((acc, user) => acc + parseFloat(user.price), 0);
 
     // Añadir una fila extra con el total
-    const dataWithTotal = [...users, { id: 'total', name: 'Total', price: total.toFixed(2) }];
+    //const dataWithTotal = [...users, { id: 'total', name: 'Total', price: total.toFixed(2) }];
 
     return (
         <main className="cards bg-secondary w-full flex flex-col justify-center items-center gap-y-4 p-4 rounded-xl">
             <h1 className='text-xl font-bold pb-4 md:text-2xl md:pt-2'>Listado de Miembros</h1>
-            <Table data={dataWithTotal} columns={columns} />
+            <Table data={users} columns={columns} totalRow={{ id: 'total', name: 'Total', price: total.toFixed(2) }} />
         </main>
     );
 }
