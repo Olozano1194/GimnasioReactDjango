@@ -9,6 +9,8 @@ import ForgetPassword from './pages/auth/ForgetPassword';
 //Pages admin
 import Home from './pages/admin/Home';
 import ListUser from './pages/admin/usuarios/ListUser';
+import Profile from './pages/admin/usuarios/ProfileAdmin';
+
 // Miembros mensuales
 import MemberForm from './pages/admin/registroPorMes/MemberForm';
 import ListMiembro from './pages/admin/registroPorMes/ListMiembro';
@@ -35,6 +37,7 @@ function App() {
               <Route index element={<Home />} />
               <Route path="register" element={<Register />} />
               <Route path="listUser" element={<ListUser />} />
+              <Route path="profile" element={<Profile />} />
               <Route path="registrar-miembro" element={<MemberForm />} />
               <Route path="miembros" element={<ListMiembro />} />
               <Route path="miembro/:id" element={<MemberForm />} />
