@@ -1,12 +1,45 @@
+//hooks
+import { useState, useEffect } from "react";
+//Api
+import { getUserProfile } from "../../../../api/users.api";
 //icons
 import { RiEdit2Line } from "react-icons/ri";
+//form
+import {useForm} from 'react-hook-form';
 
 const Profile = () => {
+    
+    const [user, setUser] = useState([]);
+    const { handleSubmit, setValue } = useForm();
+
+    //hook para vizualizar los datos de la bd
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const userData = await getUserProfile();
+                if (userData.user) {
+                    setUser(userData.user);
+                    console.log('Datos de usuario:', userData.user);
+                    setValue('name', userData.user.name);
+                    setValue('lastName', userData.user.lastName);
+                    setValue('roles', userData.user.roles);
+                                
+                }else {
+                    console.log('Datos de usuario o estudiante faltantes:', userData);
+                }         
+                
+            }catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+        fetchData();
+    }, [setValue]);
+
     return (
         <section className="bg-secondary p-8 rounded-xl">
             <h1 className="text-xl text-gray-100">Profile</h1>
             <hr className="my-8 border-gray-500" />
-            <form>
+            <form onSubmit={handleSubmit(onSubmit)}>
                 {/* Avatar */}
                 <div className="flex items-center">
                     <div className="w-1/4">
@@ -60,9 +93,9 @@ const Profile = () => {
                     <div className="w-full flex-1 flex items-center gap-4">
                         <div className="w-full md:w-1/2">
                             <select 
-                                name="IdType" 
+                                name="roles" 
                                 id="" 
-                                className="w-full py-2 px-4 outline-none rounded-lg bg-slate-900 appearance-none"                                   
+                                className="w-full py-2 px-4 outline-none rounded-lg bg-slate-900 appearance-none text-slate-500"                                   
                             >
                                 <option value="">Selecione el Rol</option>
                                 <option value='admin'>Administrador</option>

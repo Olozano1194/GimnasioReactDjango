@@ -2,34 +2,33 @@
 import { RiShieldCheckLine } from "react-icons/ri";
 
 //Api
-//import { getUserProfile } from "../../../api/users.api";
+import { getUserProfile } from "../../../../api/users.api";
 
 //hooks
 import { useState, useEffect } from "react";
 
 
 function UserPass() {
-    const [user, setUser] = useState({ email: '', password: ''});
+    const [user, setUser] = useState({ email: ''});
 
-    // useEffect(() => {
-    //     const axiosUserData = async () => {
-    //         try {
-    //             const data = await getUserProfile();
-    //             setUser({
-    //                 email: data.user.email,
-    //                 //password: data.user.password
-    //             });
-    //         }catch (error) {
-    //             console.error(error);
-    //         }
-    //     };
-    //     axiosUserData();
-    // }, []);
+    useEffect(() => {
+        const axiosUserData = async () => {
+            try {
+                const data = await getUserProfile();
+                setUser({
+                    email: data.user.email,                    
+                });
+            }catch (error) {
+                console.error(error);
+            }
+        };
+        axiosUserData();
+    }, []);
 
     return (
         <>
              {/* Usuario y contraseña */}
-        <div className="bg-slate-700 p-8 rounded-xl mt-10">
+        <div className="bg-secondary p-8 rounded-xl mt-10">
             <h1 className="text-xl text-gray-100">Usuario y Contraseña</h1>
             <hr className="my-8 border-gray-500/30" />
 
@@ -47,7 +46,7 @@ function UserPass() {
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
                     <div className="mb-3">
                         <h5 className="text-gray-100 text-xl">Contraseña</h5>
-                        <p className="text-gray-400 text-sm">****************</p>
+                        <p className="text-gray-400 text-sm">***************</p>
                     </div>
                         <button className="py-2 px-4 rounded-lg bg-slate-900 hover:bg-slate-950 hover:text-gray-200 transition-colors" >Cambiar Contraseña</button>
                 </div>
