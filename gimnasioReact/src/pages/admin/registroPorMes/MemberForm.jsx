@@ -8,7 +8,7 @@ import { RiLoginBoxLine } from "react-icons/ri";
 import { MdOutlinePhoneAndroid, MdOutlinePriceChange } from "react-icons/md";
 import { BsCalendar2Date } from "react-icons/bs";
 import { LiaAddressCardSolid } from "react-icons/lia";
-//notidicaciones
+//Mensajes
 import { toast } from "react-hot-toast";
 
 //ui

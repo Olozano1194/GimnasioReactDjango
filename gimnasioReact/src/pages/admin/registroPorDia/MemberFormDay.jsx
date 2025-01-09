@@ -7,6 +7,8 @@ import { CiUser } from 'react-icons/ci';
 import { RiLockPasswordLine, RiLoginBoxLine } from "react-icons/ri";
 import { MdOutlinePhoneAndroid, MdOutlinePriceChange } from "react-icons/md";
 import { BsCalendar2Date } from "react-icons/bs";
+//Mensajes
+import { toast } from "react-hot-toast";
 
 //ui
 import { Input, Label, Button } from '../../../component/ui/index';

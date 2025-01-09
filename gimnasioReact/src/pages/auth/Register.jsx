@@ -2,6 +2,8 @@ import {useForm} from 'react-hook-form';
 import { Link } from 'react-router-dom';
 //Icons
 import { RiLoginBoxLine, RiMailFill, RiLockFill,  RiUserLine } from "react-icons/ri";
+//Mensajes
+import { toast } from 'react-hot-toast';
 
 //ui
 import { Input, Label, Button } from '../../component/ui/index';
@@ -18,6 +20,17 @@ const Register = () => {
             const rest = await CreateUsers(data);
             //console.log('Respuesta del servidor:',rest.data);            
             reset();
+            toast.success('Usuario Creado', {
+                duration: 3000,
+                position: 'bottom-right',
+                style: {
+                    background: '#4b5563',   // Fondo negro
+                    color: '#fff',           // Texto blanco
+                    padding: '16px',
+                    borderRadios: '8px',
+                },
+
+            });     
             
         } catch (error) {
             console.error("Error al registrar el usuario:", error.response ? error.response.data : error.message);            

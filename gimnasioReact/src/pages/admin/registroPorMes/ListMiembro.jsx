@@ -10,7 +10,8 @@ import { createColumnHelper } from '@tanstack/react-table';
 import Table from '../../../component/Table';
 //Enlaces
 import { Link } from "react-router-dom";
-
+//Mensajes
+import { toast } from 'react-hot-toast';
 
 const ListMiembro = () => {
     const [users, setUser] = useState([]);
@@ -98,6 +99,17 @@ const ListMiembro = () => {
                                if (accepted) {
                                    await deleteMember(row.original.id);
                                    setUser(users.filter(user => user.id !== row.original.id));
+                                   toast.success('Miembro Eliminado', {
+                                        duration: 3000,
+                                        position: 'bottom-right',
+                                        style: {
+                                            background: '#4b5563',   // Fondo negro
+                                            color: '#fff',           // Texto blanco
+                                            padding: '16px',
+                                            borderRadios: '8px',
+                                        },
+                
+                                    });   
                                }                                
                             }}
                             className="bg-red-500 text-white p-2 rounded-md">
