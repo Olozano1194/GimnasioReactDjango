@@ -24,10 +24,32 @@ const RegisterMiembroDay = () => {
         try {
             if (params.id) {
                 await updateMember(params.id, data);
-                //console.log('Actualizando miembro:', params.id);                
+                //console.log('Actualizando miembro:', params.id);
+                toast.success('Miembro Actualizado', {
+                    duration: 3000,
+                    position: 'bottom-right',
+                    style: {
+                        background: '#4b5563',   // Fondo negro
+                        color: '#fff',           // Texto blanco
+                        padding: '16px',
+                        borderRadios: '8px',
+                    },
+
+                });                   
             }else {
                 await createMemberDay(data);//console.log('Respuesta del servidor:',rest.data);            
                 reset();
+                toast.success('Miembro Creado', {
+                    duration: 3000,
+                    position: 'bottom-right',
+                    style: {
+                        background: '#4b5563',   // Fondo negro
+                        color: '#fff',           // Texto blanco
+                        padding: '16px',
+                        borderRadios: '8px',
+                    },
+
+                });   
             }
             navigate('/dashboard/miembros-day');
             

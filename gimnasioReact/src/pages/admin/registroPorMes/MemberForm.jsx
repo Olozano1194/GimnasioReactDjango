@@ -8,6 +8,8 @@ import { RiLoginBoxLine } from "react-icons/ri";
 import { MdOutlinePhoneAndroid, MdOutlinePriceChange } from "react-icons/md";
 import { BsCalendar2Date } from "react-icons/bs";
 import { LiaAddressCardSolid } from "react-icons/lia";
+//notidicaciones
+import { toast } from "react-hot-toast";
 
 //ui
 import { Input, Label, Button } from '../../../component/ui/index';
@@ -25,13 +27,38 @@ const RegisterMiembro = () => {
         try {
             if (params.id) {
                 await updateMember(params.id, data);
-                //console.log('Actualizando miembro:', params.id);                
+                //console.log('Actualizando miembro:', params.id);
+                toast.success('Miembro Actualizado', {
+                    duration: 3000,
+                    position: 'bottom-right',
+                    style: {
+                        background: '#4b5563',   // Fondo negro
+                        color: '#fff',           // Texto blanco
+                        padding: '16px',
+                        borderRadios: '8px',
+                    },
+
+                });                 
             }else {
                 await createMember(data);
                 //console.log('Respuesta del servidor:',rest.data);            
                 reset();
+                toast.success('Miembro Creado', {
+                    duration: 3000,
+                    position: 'bottom-right',
+                    style: {
+                        background: '#4b5563',   // Fondo negro
+                        color: '#fff',           // Texto blanco
+                        padding: '16px',
+                        borderRadios: '8px',
+                    },
+
+                });                
             }
-            navigate('/dashboard/miembros');
+            //Se retrasa la navegación para que se muestre la notificación
+            //setTimeout(() => {
+                navigate('/dashboard/miembros');
+            //}, 1000);
            
             
         } catch (error) {

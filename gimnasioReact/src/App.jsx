@@ -22,6 +22,8 @@ import MemberFormDay from './pages/admin/registroPorDia/MemberFormDay';
 import ProtectRoute from './pages/admin/protectedRoute/ProtectRoute';
 
 import Error404 from './pages/Error404';
+//Notificaciones
+import { Toaster } from 'react-hot-toast'
 
 function App() {
 
@@ -48,7 +50,7 @@ function App() {
           </Route>       
           <Route path="*" element={<Error404 />} />
         </Routes>
-      
+        <Toaster />      
       </BrowserRouter>    
   );
 }
