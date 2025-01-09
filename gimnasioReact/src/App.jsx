@@ -32,7 +32,7 @@ function App() {
         <Routes>        
           <Route path="/" element={<Navigate to='/login' />} />
           <Route path="login" element={<Login />} />
-          <Route path="forget-password" element={<ForgetPassword />} /><Route path="register" element={<Register />} />
+          <Route path="forget-password" element={<ForgetPassword />} />
           {/* Rutas protegidas */}
           <Route element={<ProtectRoute />} >
             <Route path="dashboard" element={<LayoutAdmin />} >
