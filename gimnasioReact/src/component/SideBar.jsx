@@ -74,22 +74,22 @@ function SideBar() {
                                 {/* Home */}
                                 <ul className="flex flex-col gap-4">
                                     <li>
-                                        <Link to='/dashboard' className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-slate-200 text-dark transition-colors"><RiHome8Line className="text-primary" /> Inicio</Link>
+                                        <Link to='/dashboard' className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-slate-200 text-dark font-semibold transition-colors"><RiHome8Line className="text-primary" /> Inicio</Link>
                                     </li>                            
                                 </ul>
                                 {/* Member */}
                                 <ul className="flex flex-col gap-4">
                                     <li>
                                         <button onClick={() => handleToggleSubMenu('menu1')} 
-                                                    className="w-full flex items-center justify-between py-2 px-4 rounded-lg hover:bg-slate-200 text-dark transition-colors">      <span className="flex items-center gap-2"><RiUserLine className="text-primary" />Miembro</span>
+                                                    className="w-full flex items-center justify-between py-2 px-4 rounded-lg hover:bg-slate-200 text-dark font-semibold transition-colors">      <span className="flex items-center gap-2"><RiUserLine className="text-primary" />Miembro</span>
                                                     <RiArrowRightSLine className={`mt-1 ${showSubMenu.menu1 ? 'rotate-90': ''} transition-all`} />
                                         </button>
                                         <ul className={`mt-2 ${!showSubMenu.menu1 ? 'hidden' : ''}`}>
                                             <li>
-                                                <Link to='registrar-miembro/' className="py-2 px-4 border-l border-slate-400 block ml-6 text-dark relative before:w-3 before:h-3 before:absolute before:bg-primary before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-secondary hover:text-white transition-colors">Registrar miembro</Link>
+                                                <Link to='registrar-miembro/' className="py-2 px-4 border-l border-slate-400 block ml-6 text-dark font-semibold relative before:w-3 before:h-3 before:absolute before:bg-primary before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-secondary hover:text-white transition-colors">Registrar miembro</Link>
                                             </li>
                                             <li>
-                                                <Link to='miembros' className="py-2 px-4 border-l border-slate-400 block ml-6 text-dark relative before:w-3 before:h-3 before:absolute before:bg-primary before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-secondary hover:text-white transition-colors">Ver  miembros</Link>
+                                                <Link to='miembros' className="py-2 px-4 border-l border-slate-400 block ml-6 text-dark font-semibold relative before:w-3 before:h-3 before:absolute before:bg-primary before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-secondary hover:text-white transition-colors">Ver  miembros</Link>
                                             </li>
                                         </ul>
                                     </li>                            
@@ -98,15 +98,15 @@ function SideBar() {
                                 <ul className="flex flex-col gap-4">
                                     <li>
                                         <button onClick={() => handleToggleSubMenu('menu2')} to='/' 
-                                                className="w-full flex items-center justify-between py-2 px-4 rounded-lg hover:bg-slate-200 text-dark transition-colors">      <span className="flex items-center gap-2"><RiUserLine className="text-primary" />Miembro Diario</span>
+                                                className="w-full flex items-center justify-between py-2 px-4 rounded-lg hover:bg-slate-200 text-dark font-semibold transition-colors">      <span className="flex items-center gap-2"><RiUserLine className="text-primary" />Miembro Diario</span>
                                                 <RiArrowRightSLine className={`mt-1 ${showSubMenu.menu2 ? 'rotate-90' : ''} transition-all`} />
                                         </button>
                                         <ul className={`mt-2 ${!showSubMenu.menu2 ? 'hidden' : ''}`}>
                                             <li>
-                                                <Link to='registrar-miembro-day' className="py-2 px-4 border-l border-slate-400 block ml-6 text-dark relative before:w-3 before:h-3 before:absolute before:bg-primary before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-secondary hover:text-white transition-colors">Registrar miembro</Link>
+                                                <Link to='registrar-miembro-day' className="py-2 px-4 border-l border-slate-400 block ml-6 text-dark font-semibold relative before:w-3 before:h-3 before:absolute before:bg-primary before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-secondary hover:text-white transition-colors">Registrar miembro</Link>
                                             </li>
                                             <li>
-                                                <Link to='miembros-day' className="py-2 px-4 border-l border-slate-400 block ml-6 text-dark relative before:w-3 before:h-3 before:absolute before:bg-primary before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-secondary hover:text-white transition-colors">Ver  miembros</Link>
+                                                <Link to='miembros-day' className="py-2 px-4 border-l border-slate-400 block ml-6 text-dark font-semibold relative before:w-3 before:h-3 before:absolute before:bg-primary before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-secondary hover:text-white transition-colors">Ver  miembros</Link>
                                             </li>
                                         </ul>
                                     </li>                           
@@ -115,15 +115,15 @@ function SideBar() {
                                 <ul className="flex flex-col gap-4">
                                     <li>
                                         <button onClick={() => handleToggleSubMenu('menu3')}  
-                                                className="w-full flex items-center justify-between py-2 px-4 rounded-lg hover:bg-slate-200 text-dark transition-colors"><span className="flex items-center gap-2"><RiUserLine className="text-primary" />Usuario</span>
+                                                className="w-full flex items-center justify-between py-2 px-4 rounded-lg hover:bg-slate-200 text-dark font-semibold transition-colors"><span className="flex items-center gap-2"><RiUserLine className="text-primary" />Usuario</span>
                                                 <RiArrowRightSLine className={`mt-1 ${showSubMenu.menu3 ? 'rotate-90' : ''} transition-all`} />
                                         </button>
                                         <ul className={`mt-2 ${!showSubMenu.menu3 ? 'hidden' : ''} transition-all`} >
                                             <li>
-                                                <Link to='register' className="py-2 px-4 border-l border-slate-400 block ml-6 text-dark relative before:w-3 before:h-3 before:absolute before:bg-primary before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-secondary hover:text-white transition-colors">Registrar Usuario</Link>
+                                                <Link to='register' className="py-2 px-4 border-l border-slate-400 block ml-6 text-dark font-semibold relative before:w-3 before:h-3 before:absolute before:bg-primary before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-secondary hover:text-white transition-colors">Registrar Usuario</Link>
                                             </li>
                                             <li>
-                                                <Link to='listUser' className="py-2 px-4 border-l border-slate-400 block ml-6 text-dark relative before:w-3 before:h-3 before:absolute before:bg-primary before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-secondary hover:text-white transition-colors">Ver Usuarios</Link>
+                                                <Link to='listUser' className="py-2 px-4 border-l border-slate-400 block ml-6 text-dark font-semibold relative before:w-3 before:h-3 before:absolute before:bg-primary before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-secondary hover:text-white transition-colors">Ver Usuarios</Link>
                                             </li>
                                         </ul>
                                     </li>                           
@@ -132,7 +132,7 @@ function SideBar() {
                                 <ul className="flex flex-col gap-4">
                                     <li>
                                         <Link to='/' 
-                                            className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-slate-200 text-dark transition-colors">
+                                            className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-slate-200 text-dark font-semibold transition-colors">
                                             <FaIdCard className="text-primary" />
                                             Membresias
                                         </Link>
@@ -142,7 +142,7 @@ function SideBar() {
                                 <ul className="flex flex-col gap-4">
                                     <li>
                                         <Link to='/' 
-                                            className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-slate-200 text-dark transition-colors">
+                                            className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-slate-200 text-dark font-semibold transition-colors">
                                             <RiMessage3Fill className="text-primary" />
                                             Mensajes
                                         </Link>
@@ -152,7 +152,7 @@ function SideBar() {
                                 <ul className="flex flex-col gap-4">
                                     <li>
                                         <Link to='/dashboard/tickets'
-                                            className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-slate-200 text-dark transition-colors">
+                                            className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-slate-200 text-dark font-semibold transition-colors">
                                             <MdOutlineSupportAgent className="text-primary" />
                                             Soporte técnico
                                         </Link>
@@ -163,7 +163,7 @@ function SideBar() {
                                 <ul className="flex flex-col gap-4">
                                     <li>
                                         <Link to='/'
-                                            className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-slate-200 text-dark transition-colors">
+                                            className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-slate-200 text-dark font-semibold transition-colors">
                                             <RiCalendarTodoLine className="text-primary" />
                                             Calendario
                                         </Link>
@@ -176,7 +176,7 @@ function SideBar() {
                                 {/* Home */}
                                 <ul className="flex flex-col gap-4">
                                     <li>
-                                        <Link to='/dashboard' className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-slate-200 text-dark transition-colors"><RiHome8Line className="text-primary" /> Inicio
+                                        <Link to='/dashboard' className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-slate-200 text-dark font-semibold transition-colors"><RiHome8Line className="text-primary" /> Inicio
                                         </Link>
                                     </li>                            
                                 </ul>
@@ -184,15 +184,15 @@ function SideBar() {
                                 <ul className="flex flex-col gap-4">
                                     <li>
                                         <button onClick={() => handleToggleSubMenu('menu1')} 
-                                                    className="w-full flex items-center justify-between py-2 px-4 rounded-lg hover:bg-slate-200 text-dark transition-colors">      <span className="flex items-center gap-2"><RiUserLine className="text-primary" />Miembro</span>
+                                                    className="w-full flex items-center justify-between py-2 px-4 rounded-lg hover:bg-slate-200 text-dark font-semibold transition-colors">      <span className="flex items-center gap-2"><RiUserLine className="text-primary" />Miembro</span>
                                                     <RiArrowRightSLine className={`mt-1 ${showSubMenu.menu1 ? 'rotate-90': ''} transition-all`} />
                                         </button>
                                         <ul className={`mt-2 ${!showSubMenu.menu1 ? 'hidden' : ''}`}>
                                             <li>
-                                                <Link to='registrar-miembro/' className="py-2 px-4 border-l border-slate-400 block ml-6 text-dark relative before:w-3 before:h-3 before:absolute before:bg-primary before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-secondary hover:text-white transition-colors">Registrar miembro</Link>
+                                                <Link to='registrar-miembro/' className="py-2 px-4 border-l border-slate-400 block ml-6 text-dark font-semibold relative before:w-3 before:h-3 before:absolute before:bg-primary before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-secondary hover:text-white transition-colors">Registrar miembro</Link>
                                             </li>
                                             <li>
-                                                <Link to='miembros' className="py-2 px-4 border-l border-slate-400 block ml-6 text-dark relative before:w-3 before:h-3 before:absolute before:bg-primary before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-secondary hover:text-white transition-colors">Ver  miembros</Link>
+                                                <Link to='miembros' className="py-2 px-4 border-l border-slate-400 block ml-6 text-dark font-semibold relative before:w-3 before:h-3 before:absolute before:bg-primary before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-secondary hover:text-white transition-colors">Ver  miembros</Link>
                                             </li>
                                         </ul>
                                     </li>                            
@@ -201,15 +201,15 @@ function SideBar() {
                                 <ul className="flex flex-col gap-4">
                                     <li>
                                         <button onClick={() => handleToggleSubMenu('menu2')} to='/' 
-                                                className="w-full flex items-center justify-between py-2 px-4 rounded-lg hover:bg-slate-200 text-dark transition-colors">      <span className="flex items-center gap-2"><RiUserLine className="text-primary" />Miembro Diario</span>
+                                                className="w-full flex items-center justify-between py-2 px-4 rounded-lg hover:bg-slate-200 text-dark font-semibold transition-colors">      <span className="flex items-center gap-2"><RiUserLine className="text-primary" />Miembro Diario</span>
                                                 <RiArrowRightSLine className={`mt-1 ${showSubMenu.menu2 ? 'rotate-90' : ''} transition-all`} />
                                         </button>
                                         <ul className={`mt-2 ${!showSubMenu.menu2 ? 'hidden' : ''}`}>
                                             <li>
-                                                <Link to='registrar-miembro-day' className="py-2 px-4 border-l border-slate-400 block ml-6 text-dark relative before:w-3 before:h-3 before:absolute before:bg-primary before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-secondary hover:text-white transition-colors">Registrar miembro</Link>
+                                                <Link to='registrar-miembro-day' className="py-2 px-4 border-l border-slate-400 block ml-6 text-dark font-semibold relative before:w-3 before:h-3 before:absolute before:bg-primary before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-secondary hover:text-white transition-colors">Registrar miembro</Link>
                                             </li>
                                             <li>
-                                                <Link to='miembros-day' className="py-2 px-4 border-l border-slate-400 block ml-6 text-dark relative before:w-3 before:h-3 before:absolute before:bg-primary before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-secondary hover:text-white transition-colors">Ver  miembros</Link>
+                                                <Link to='miembros-day' className="py-2 px-4 border-l border-slate-400 block ml-6 text-dark font-semibold relative before:w-3 before:h-3 before:absolute before:bg-primary before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-secondary hover:text-white transition-colors">Ver  miembros</Link>
                                             </li>
                                         </ul>
                                     </li>                           
@@ -218,7 +218,7 @@ function SideBar() {
                                 <ul className="flex flex-col gap-4">
                                     <li>
                                         <Link to='/' 
-                                            className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-slate-200 text-dark transition-colors">
+                                            className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-slate-200 text-dark font-semibold transition-colors">
                                             <FaIdCard className="text-primary" />
                                             Membresias
                                         </Link>
@@ -228,7 +228,7 @@ function SideBar() {
                                 <ul className="flex flex-col gap-4">
                                     <li>
                                         <Link to='/' 
-                                            className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-slate-200 text-dark transition-colors">
+                                            className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-slate-200 text-dark font-semibold transition-colors">
                                             <RiMessage3Fill className="text-primary" />
                                             Mensajes
                                         </Link>
@@ -238,7 +238,7 @@ function SideBar() {
                                 <ul className="flex flex-col gap-4">
                                     <li>
                                         <Link to='/'
-                                            className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-slate-200 text-dark transition-colors">
+                                            className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-slate-200 text-dark font-semibold transition-colors">
                                             <RiCalendarTodoLine className="text-primary" />
                                             Calendario
                                         </Link>
@@ -255,7 +255,7 @@ function SideBar() {
                         <li>
                             <Link 
                                 onClick={handleLogout}
-                                className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-slate-900 text-dark transition-colors">
+                                className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-slate-200 text-dark font-semibold transition-colors">
                                 <RiLogoutCircleLine className="text-primary" />
                                     Cerrar Sesión
                             </Link>

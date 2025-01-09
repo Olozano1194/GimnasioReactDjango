@@ -92,7 +92,7 @@ const Login = () => {
                 <button htmlFor="" 
                     className="bg-sky-600 cursor-pointer flex gap-2 items-center rounded-lg p-2 text-slate-100 font-bold mb-2 hover:scale-105 hover:bg-sky-400 hover:text-slate-800"
                     type='submit'
-                    >
+                >
                     <RiLoginBoxLine className='text-2xl text-purple-800' />Iniciar Sesión 
                 </button>
                 {/* Contenedor de registrar usuario o recuperar contraseña */}
