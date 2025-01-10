@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 import os
 import dj_database_url
+from dotenv import load_dotenv
 
 from pathlib import Path
 
@@ -88,6 +89,8 @@ WSGI_APPLICATION = 'gimnasio.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+load_dotenv() # cargamos las variables de entorno desde .env
+
 DATABASES = {
     # 'default': {
     #     'ENGINE': 'django.db.backends.mysql',
@@ -101,7 +104,7 @@ DATABASES = {
     # Replace the SQLite DATABASES configuration with PostgreSQL:
     'default': dj_database_url.config(
         # Replace this value with your local database's connection string.
-        default='postgresql://ym_h1on_user:fxiMtqp5KkO4yGY3dCGGK4w0DvqtF4tg@dpg-csq7umaj1k6c738ee6e0-a.oregon-postgres.render.com/gym_h1on',
+        default=os.getenv('DATABASE_URL', 'postgresql://ym_h1on_user:fxiMtqp5KkO4yGY3dCGGK4w0DvqtF4tg@dpg-csq7umaj1k6c738ee6e0-a.oregon-postgres.render.com/gym_h1on'),
         conn_max_age=600        
     )
 }
@@ -150,8 +153,6 @@ if not DEBUG:
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
-
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 

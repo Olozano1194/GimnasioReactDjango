@@ -95,7 +95,7 @@ const RegisterMiembroDay = () => {
 
     return (
         <main className="w-full min-h-screen flex flex-col justify-center items-center">
-            <form onSubmit={onSubmit} className="formRegister w-[85%] bg-slate-300 flex flex-col justify-center items-center text-slate-600 gap-6 p-3 rounded-md m-7 md:w-[55%] md:gap-8 lg:w-[47%] lg:px-8 xl:max-w-[30%]">
+            <form onSubmit={onSubmit} className="formRegister w-[85%] bg-slate-300 flex flex-col justify-center items-center text-slate-600 gap-6 p-3 rounded-md m-7 md:w-[55%] md:gap-8 lg:w-[47%] lg:px-8 xl:max-w-[43%]">
                 <h1 className="text-xl font-bold pt-3 pb-2 md:pt-3">{params.id ? 'Actualizar Miembro Diario' : 'Registrar Miembro Diario'}</h1>
 
                 {/* Name */}
@@ -175,7 +175,7 @@ const RegisterMiembroDay = () => {
                     errors.dateInitial && <span className='text-red-500 text-center text-sm'>{errors.dateInitial.message}</span>
                 }
                 {/* Price */}
-                <Label htmlFor="price"><span className='flex gap-2 items-center'><MdOutlinePriceChange className='lg:text-4xl' />Precio</span><Input type="number" name="price" placeholder='Colocar precio'
+                <Label htmlFor="price"><span className='flex gap-2 items-center'><MdOutlinePriceChange className='lg:text-2xl' />Precio</span><Input type="number" name="price" placeholder='Colocar precio'
                 {...register('price',{
                     required: {
                         value: true,

@@ -1,8 +1,10 @@
 import axios from 'axios';
 
 const gymApi = axios.create({
-    // baseURL: 'http://localhost:8000/gym/api/v1/',
-    baseURL: 'https://gimnasioreactdjango.onrender.com/gym/api/v1',
+    //baseURL: 'http://localhost:8000/gym/api/v1/',
+    baseURL: import.meta.env.MODE === 'development' 
+        ? import.meta.env.VITE_API_URL_DEV 
+        : import.meta.env.VITE_API_URL_PROD,
     headers: {
         'Content-Type': 'application/json',
       },

@@ -41,7 +41,7 @@ const Register = () => {
     return (
         <main className="w-full min-h-screen flex flex-col justify-center items-center">
             {/* formulario */}
-            <form onSubmit={onSubmit} className="formRegister w-[85%] bg-slate-300 flex flex-col justify-center items-center text-slate-600 gap-8 p-3 rounded-md m-7 md:w-[55%] md:gap-6 lg:w-[47%] lg:px-8 xl:max-w-[30%]">
+            <form onSubmit={onSubmit} className="formRegister w-[85%] bg-slate-300 flex flex-col justify-center items-center text-slate-600 gap-8 p-3 rounded-md m-7 md:w-[55%] md:gap-6 lg:w-[47%] lg:px-8 xl:max-w-[43%]">
                 <h1 className="text-2xl font-bold pb-4 md:pt-3">Registrarse</h1>
 
                 {/* Name */}
