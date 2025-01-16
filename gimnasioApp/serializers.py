@@ -12,7 +12,6 @@ class RegistrarUsuarioSerializer(serializers.ModelSerializer):
         model = RegistrarUsuario
         fields = '__all__'
         read_only_fields = ('id','created_at', 'email', 'is_active')
-
     
     def validate_password(self, value):
         if len(value) < 6:
@@ -35,28 +34,22 @@ class RegistrarUsuarioSerializer(serializers.ModelSerializer):
         return user
     
     def update(self, instance, validated_data):
-        # evitamos modificar el campo is_active eliminandolo de la actualización
-        validated_data.pop('is_active', None)
-        validated_data.pop('email', None)
+        try:
+            # Manejo de la contraseña
+            if 'password' in validated_data:
+                password = validated_data.pop('password')
+                instance.set_password(password)
 
-        # Si existe una nueva contraseña se actualiza
-        if 'password' in validated_data:
-            password = validated_data.pop('password')
-            instance.set_password(password)
-        
-        # Manejo del avatar
-        if 'avatar' in validated_data:
-            # Si hay un avatar anterior y estamos subiendo uno nuevo, eliminar el anterior
-            if instance.avatar and instance.avatar != validated_data['avatar']:
-                instance.avatar.delete(save=False)
-            instance.avatar = validated_data['avatar']
+            # Actualizar los demás campos
+            for attr, value in validated_data.items():
+                setattr(instance, attr, value)
 
-        # Actualizamos el resto de los campos
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        
-        # Guardamos los cambios
-        instance.save()
+            instance.save()
+            return instance
+            
+        except Exception as e:
+            print("Error en el serializer update:", str(e))
+            raise
 
 class RegistrarUsuarioGymSerializer(serializers.ModelSerializer):
     #Formato para mostrar las fechas

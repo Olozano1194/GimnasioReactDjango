@@ -43,70 +43,52 @@ class UserViewSet(viewsets.ModelViewSet):
         }, status=status.HTTP_201_CREATED)
     
     def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
-        instance = self.get_object()
-
-        # Manejamos los datos y el archivo por separado
-        data = request.data.copy()
-
-        # Si hay avatar en los archivos, lo agregamos a los datos
-        if 'avatar' in request.FILES:
-            data['avatar'] = request.FILES['avatar']
-        
-        # Si hay un avatar anterior, lo eliminamos
-            if instance.avatar:
-                instance.avatar.delete(save=False)
-
-        print("Datos antes de la validación:", data)
-        serializer = self.get_serializer(instance, data, partial=partial)
-
         try:
-            serializer.is_valid(raise_exception=True)
-            print("Datos válidos, procediendo con la actualización.")
-            updated_user = serializer.save()
-            
-            # Si se actualizó la contraseña, regeneramos el token
-            if 'password' in request.data:
-                Token.objects.filter(user=updated_user).delete()
-                token, _ = Token.objects.get_or_create(user=updated_user)
-                return Response({
-                    "user": serializer.data,
-                    "token": token.key
-                })
-                
-            return Response({
-                "user": serializer.data
-            })
-            
-        except ValidationError as e:
-            return Response({
-                "error": "Error de validación",
-                "details": e.detail
-            }, status=status.HTTP_400_BAD_REQUEST)
+            partial = kwargs.pop('partial', False)
+            instance = self.get_object()
+
+            print("Datos antes de la validación:", request.data)
+
+            serializer = self.get_serializer(
+                instance, 
+                data=request.data, 
+                partial=partial
+            )
+
+            if serializer.is_valid():
+                print("Datos válidos, procediendo con la actualización.")
+
+                # Si hay avatar en los archivos, lo agregamos a los datos
+                if 'avatar' in request.FILES:
+                    if instance.avatar.delete(save=False):
+
+                        instance.avatar = request.FILES['avatar']
+
+                updated_instance = serializer.save()
+
+                 # Verificar que la actualización fue exitosa
+                if updated_instance:
+                    print("Actualización exitosa")
+                    return Response(
+                        serializer.data,
+                        status=status.HTTP_200_OK
+                    )
+                else:
+                    print("Error: La actualización no devolvió una instancia")
+                    return Response(
+                        {"error": "Error al actualizar el usuario"},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                    )
+            else:
+                print("Errores de validación:", serializer.errors)
+                return Response(
+                    serializer.errors,
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
         except Exception as e:
-            return Response({
-                "error": "Error al actualizar usuario",
-                "details": str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-
-    # def update(self, request, *args, **kwargs):
-    #      partial = kwargs.pop('partial', False)
-    #      instance = self.get_object()
-    #      serializer = self.get_serializer(instance, data=request.data, partial=partial)
-    #      serializer.is_valid(raise_exception=True)
-    #      user_data = serializer.save()
-    #      #si se actualiza la contraseña el token se actualiza
-    #      if 'password' in request.data:
-    #          Token.objects.filter(user=user_data).delete()
-    #          token, create = Token.objects.get_or_create(user=user_data)
-    #      else:
-    #          token = Token.objects.get(user=user_data)
-
-    #      return Response({
-    #          "user": UserSerializer(user_data).data,
-    #          "token": token.key
-    #      }, status=status.HTTP_200_OK)
+            print("Error inesperado:", str(e))
+            return Response({"error": "Error inesperado"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 #esta es la autenticación del usuario osea me guarda el token donde debe ser
 class CustomAuthTokenViewSet(APIView):
