@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import RegistrarUsuario, RegistrarUsuarioGym, RegistrarUsuarioGymDay
-from rest_framework.exceptions import ValidationError
+from rest_framework.reverse import reverse
 
 #token
 from rest_framework.authtoken.models import Token
@@ -33,8 +33,16 @@ class RegistrarUsuarioSerializer(serializers.ModelSerializer):
 
         return user
     
+    def get_avatar(self, obj):
+        request = self.context.get('request')
+        if obj.avatar:
+            return request.build_absolute_uri(obj.avatar.url)
+        return None
+
     def update(self, instance, validated_data):
         try:
+            avatar = validated_data.get('avatar')
+            print(f"Avatar recibido: {avatar}")
             # Manejo de la contraseña
             if 'password' in validated_data:
                 password = validated_data.pop('password')

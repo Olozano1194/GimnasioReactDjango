@@ -11,10 +11,7 @@ from django.utils import timezone
 from django.http import JsonResponse
 #para la imagen
 from rest_framework.parsers import MultiPartParser, FormParser
-from rest_framework.exceptions import ValidationError
-
-
-
+# from rest_framework.exceptions import ValidationError
 
 
 # Create your views here.

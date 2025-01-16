@@ -190,7 +190,7 @@ const Profile = () => {
                     {editingUser ? (
                     <button
                         type="button"
-                        className="mt-4 py-2 px-4 bg-blue-500 text-white rounded"
+                        className="mt-4 py-2 px-4 bg-orange-500 text-white rounded"
                         onClick={handleSave}
                     >
                         Guardar Cambios
@@ -198,7 +198,7 @@ const Profile = () => {
                     ) : (
                     <button
                         type="button"
-                        className="mt-4 py-2 px-4 bg-orange-500 text-white rounded"
+                        className="mt-4 py-2 px-4 bg-primary text-white rounded"
                         onClick={() => seteditingUser(true)}
                     >
                         Editar Perfil
