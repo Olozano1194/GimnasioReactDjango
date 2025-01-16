@@ -18,6 +18,7 @@ class RegistrarUsuario(AbstractBaseUser):
     name = models.CharField(max_length=45)
     lastname = models.CharField(max_length=50)
     #user = models.CharField(max_length=30, unique=True)
+    avatar = models.ImageField(upload_to='fotos/', null=True, blank=True, default='')
     
         
     OPCIONES_ROL = [

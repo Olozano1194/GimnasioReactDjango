@@ -9,6 +9,11 @@ from .serializers import RegistrarUsuarioSerializer, RegistrarUsuarioGymSerializ
 from .models import RegistrarUsuario, RegistrarUsuarioGym, RegistrarUsuarioGymDay
 from django.utils import timezone
 from django.http import JsonResponse
+#para la imagen
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.exceptions import ValidationError
+
+
 
 
 
@@ -16,7 +21,8 @@ from django.http import JsonResponse
 #esto nos sirve para que podamos crear de una vez el crud completo
 class UserViewSet(viewsets.ModelViewSet): 
     serializer_class = RegistrarUsuarioSerializer
-    queryset = get_user_model().objects.all()    
+    queryset = get_user_model().objects.all()
+    parser_classes = (MultiPartParser, FormParser)   
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -35,6 +41,53 @@ class UserViewSet(viewsets.ModelViewSet):
             "user": RegistrarUsuarioSerializer(user_data).data,
             "token": token.key
         }, status=status.HTTP_201_CREATED)
+    
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+
+        # Manejamos los datos y el archivo por separado
+        data = request.data.copy()
+
+        # Si hay avatar en los archivos, lo agregamos a los datos
+        if 'avatar' in request.FILES:
+            data['avatar'] = request.FILES['avatar']
+        
+        # Si hay un avatar anterior, lo eliminamos
+            if instance.avatar:
+                instance.avatar.delete(save=False)
+
+        print("Datos antes de la validación:", data)
+        serializer = self.get_serializer(instance, data, partial=partial)
+
+        try:
+            serializer.is_valid(raise_exception=True)
+            print("Datos válidos, procediendo con la actualización.")
+            updated_user = serializer.save()
+            
+            # Si se actualizó la contraseña, regeneramos el token
+            if 'password' in request.data:
+                Token.objects.filter(user=updated_user).delete()
+                token, _ = Token.objects.get_or_create(user=updated_user)
+                return Response({
+                    "user": serializer.data,
+                    "token": token.key
+                })
+                
+            return Response({
+                "user": serializer.data
+            })
+            
+        except ValidationError as e:
+            return Response({
+                "error": "Error de validación",
+                "details": e.detail
+            }, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({
+                "error": "Error al actualizar usuario",
+                "details": str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
 
     # def update(self, request, *args, **kwargs):

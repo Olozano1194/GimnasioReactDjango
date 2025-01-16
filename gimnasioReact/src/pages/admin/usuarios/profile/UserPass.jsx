@@ -39,7 +39,7 @@ function UserPass() {
                         <h5 className="text-dark font-semibold text-xl">Corre Electrónico</h5>
                         <p className="text-gray-500 text-sm">{user.email}</p>
                     </div>
-                        <button className="py-2 px-4 rounded-lg bg-primary font-semibold hover:bg-slate-950 hover:text-gray-200 transition-colors" >Cambiar Correo</button>
+                        <button className="py-2 px-4 rounded-lg bg-primary font-semibold text-white hover:bg-slate-950 hover:text-gray-50 transition-colors" >Cambiar Correo</button>
                 </div>
 
                 {/* Contraseña */}
@@ -48,11 +48,11 @@ function UserPass() {
                         <h5 className="text-dark font-semibold text-xl">Contraseña</h5>
                         <p className="text-gray-500 text-sm">***************</p>
                     </div>
-                        <button className="py-2 px-4 rounded-lg bg-primary font-semibold hover:bg-slate-950 hover:text-gray-200 transition-colors" >Cambiar Contraseña</button>
+                        <button className="py-2 px-4 rounded-lg bg-primary font-semibold text-white hover:bg-slate-950 hover:text-gray-50 transition-colors" >Cambiar Contraseña</button>
                 </div>
             </form>
 
-            <div className="grid grid-cols-1 items-center gap-y-4 md:grid-cols-8 bg-blue-300/10 p-4 rounded-lg border border-dashed border-sky-300 ">
+            <div className="grid grid-cols-1 items-center gap-y-4 md:grid-cols-8 bg-blue-400/10 p-4 rounded-lg border border-dashed border-sky-400 ">
                 <div className="flex justify-center">
                     <RiShieldCheckLine className="text-4xl text-primary" />
                 </div>

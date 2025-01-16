@@ -117,7 +117,7 @@ function NavHeader() {
                     </MenuButton>
                     <MenuItems anchor='bottom' className='bg-secondary mt-1 p-4 rounded-lg'>
                         <MenuItem className='p-0 hover:bg-gray-500'>
-                            <Link to='/dashboard/profile' className="rounded-lg transition-colors text-dark hover:bg-gray-200 flex items-center gap-x-4 py-2 px-4">
+                            <Link to='#' className="rounded-lg transition-colors text-dark hover:bg-gray-200 flex items-center gap-x-4 py-2 px-4">
                                 <img 
                                     src="https://img.freepik.com/foto-gratis/feliz-optimista-guapo-gerente-ventas-latina-apuntando-lado-mirando-camara_1262-12679.jpg" alt="img-user"
                                     className="w-10 h-10 object-cover rounded-full"
@@ -129,25 +129,23 @@ function NavHeader() {
                             </Link>
                             
                         </MenuItem>
-                        <hr className="my-4 border-gray-500" />
+                        <hr className="my-4 border-gray-900/10" />
 
                         <MenuItem className='p-0 hover:bg-gray-500'>
-                            <Link to='/configuration' className="rounded-lg transition-colors text-dark hover:bg-gray-200 flex items-center gap-x-4 py-2 px-4 flex-1">
-                            <RiSettings3Line className="text-2xl" />
-                            Configuración
-                                                
+                            <Link to='/dashboard/profile' className="rounded-lg transition-colors text-dark hover:bg-gray-200 flex items-center gap-x-4 py-2 px-4 flex-1">
+                                <RiSettings3Line className="text-2xl" />
+                                Configuración                                                
                             </Link>
                             
                         </MenuItem>
-                        <hr className="my-4 border-gray-500" />
+                        <hr className="my-4 border-gray-900/10" />
 
                         <MenuItem className='p-0 hover:bg-gray-500'>
                             <Link 
                                 onClick={handleLogout}
                                 className="rounded-lg transition-colors text-dark hover:bg-gray-200 flex items-centerr gap-x-4 py-2 px-4 flex-1">
-                            <RiLogoutCircleRLine />
-                            Cerrar Sesión
-                                                
+                                <RiLogoutCircleRLine />
+                                Cerrar Sesión                                                
                             </Link>
                             
                         </MenuItem>

@@ -1,7 +1,7 @@
 //hooks
 import { useState, useEffect } from "react";
 //Api
-import { getUserProfile } from "../../../../api/users.api";
+import { getUserProfile, getUsers, updateUser } from "../../../../api/users.api";
 //icons
 import { RiEdit2Line } from "react-icons/ri";
 //form
@@ -10,14 +10,15 @@ import {useForm} from 'react-hook-form';
 const Profile = () => {
     
     const [user, setUser] = useState([]);
-    const { editingUser, seteditingUser } = useState(false);
-    const [loading, setLoading] = useState(true);
+    const [ editingUser, seteditingUser ] = useState(false);
+    //const [loading, setLoading] = useState(true);
     const { handleSubmit, setValue } = useForm();
     const [formData, setFormData] = useState({
         name: '',
         lastname: '',
         roles: '',
-        avatar: '',
+        avatar: null,
+        id: ''
     });
 
     //hook para vizualizar los datos de la bd
@@ -25,16 +26,19 @@ const Profile = () => {
         const fetchData = async () => {
             try {
                 const userData = await getUserProfile();
-                if (userData.user) {
+                console.log('Respuesta del servidor:', userData);
+                
+                if (userData && userData.user) {
                     setUser(userData.user);
                     //console.log('Datos de usuario:', userData.user);
                     setFormData({
                         name: userData.user.name,
                         lastname: userData.user.lastname,
                         roles: userData.user.roles,
-                        //avatar: userData.user.avatar,
+                        avatar: userData.user.avatar,
+                        id: userData.user.id,
                     });
-                    setLoading(false);
+                    //setLoading(false);
                                 
                 }else {
                     console.log('Datos de usuario o estudiante faltantes:', userData);
@@ -42,7 +46,7 @@ const Profile = () => {
                 
             }catch (error) {
                 console.error('Error fetching data:', error);
-                setLoading(false);
+                //setLoading(false);
             }
         };
         fetchData();
@@ -57,17 +61,42 @@ const Profile = () => {
         }));
     };
 
+    //Función para las imagenes
+    const handleFileChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            setFormData(prev => ({
+                ...prev,
+                avatar: file  // Guardamos el archivo directamente
+            }));
+        }
+    };
+
     //Función para guardar los cambios en el formulario
     const handleSave = async () => {
         try {
-            const updateUser = await updateProfile(formData);
-            if (updateUser) {
-                setUser(false);
-                console.log('Perfil actualizado: ', updateUser);
-                
+            // Enviamos solo los campos necesarios
+            const dataToUpdate = {
+                name: formData.name,
+                lastname: formData.lastname,
+                roles: formData.roles,
+                avatar: formData.avatar instanceof File ? formData.avatar : undefined
+            };
+
+            const updatedProfile = await updateUser(formData.id, dataToUpdate);
+            
+            if (updatedProfile) {
+                setUser(updatedProfile);
+                seteditingUser(false); // Desactivar modo edición
+                // Actualizar el formData con los nuevos datos
+                setFormData(prev => ({
+                    ...prev,
+                    ...updatedProfile,
+                }));
             }
-        }catch (err) {
-            console.error('Error al actualizar perfil:', err);
+        } catch (error) {
+            console.error('Error al actualizar perfil:', error);
+            // Aquí podrías mostrar un mensaje de error al usuario
         }
     };
 
@@ -83,12 +112,19 @@ const Profile = () => {
                     </div>                    
                     <div className="flex-1">
                         <div className="relative mb-2">
-                            <img src={formData.avatar || 'https://img.freepik.com/foto-gratis/negocios-finanzas-empleo-concepto-mujeres-emprendedoras-exitosas-joven-empresaria-segura-anteojos-mostrando-gesto-pulga-arriba-sostenga-computadora-portatil-garantice-mejor-calidad-servicio_1258-59118.jpg'} alt="Avatar" className="w-28 h-28 object-cover rounded-lg" />
-                            <label htmlFor="avatar" className="absolute bg-secondary p-2 rounded-full hover:cursor-pointer -top-2 left-24"><RiEdit2Line className='text-primary' /></label>
-                            <input type="file" name="avatar" id="avatar" className="hidden" 
-                                // {...register("avatar")} 
-                                accept='image/*' 
-                            />
+                            <img src={formData.avatar instanceof File
+                                ? URL.createObjectURL(formData.avatar)
+                                : formData.avatar || 'https://img.freepik.com/foto-gratis/negocios-finanzas-empleo-concepto-mujeres-emprendedoras-exitosas-joven-empresaria-segura-anteojos-mostrando-gesto-pulga-arriba-sostenga-computadora-portatil-garantice-mejor-calidad-servicio_1258-59118.jpg'} alt="Avatar" className="w-28 h-28 object-cover rounded-lg" />
+                                {editingUser && (
+                                    <>
+                                        <label htmlFor="avatar" className="absolute bg-secondary p-2 rounded-full hover:cursor-pointer -top-2 left-24"><RiEdit2Line className='text-primary' /></label>
+                                        <input type="file" name="avatar" id="avatar"        className="hidden" 
+                                            // {...register("avatar")} 
+                                            accept='image/*' 
+                                            onChange={handleFileChange}
+                                        />
+                                    </>
+                                )}                            
                         </div>
                         <p className="text-gray-500 text-sm mb-5">Allowed file types: png, jpg, jpeg.</p>
                     </div>                       
@@ -119,7 +155,7 @@ const Profile = () => {
                                 className="w-full py-2 px-4 outline-none rounded-lg bg-dark text-white"
                                 placeholder='Apellido(s)'
                                 id="lastName"
-                                name='lastName'
+                                name='lastname'
                                 value={formData.lastname}
                                 onChange={handleChanges}
                                 disabled={!editingUser}                                   
