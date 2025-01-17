@@ -100,6 +100,14 @@ const Profile = () => {
         }
     };
 
+    const avatarSrc = formData.avatar 
+        ? (formData.avatar instanceof File
+            ? URL.createObjectURL(formData.avatar)
+            : formData.avatar.startsWith('http') 
+                ? formData.avatar
+                :  `http://localhost:8000${formData.avatar}`)
+        : 'https://img.freepik.com/foto-gratis/negocios-finanzas-empleo-concepto-mujeres-emprendedoras-exitosas-joven-empresaria-segura-anteojos-mostrando-gesto-pulga-arriba-sostenga-computadora-portatil-garantice-mejor-calidad-servicio_1258-59118.jpg';
+
     return (
         <section className="bg-secondary p-8 rounded-xl">
             <h1 className="text-xl text-dark font-bold md:text-2xl">Profile</h1>
@@ -112,19 +120,20 @@ const Profile = () => {
                     </div>                    
                     <div className="flex-1">
                         <div className="relative mb-2">
-                            <img src={formData.avatar instanceof File
-                                ? URL.createObjectURL(formData.avatar)
-                                : formData.avatar || 'https://img.freepik.com/foto-gratis/negocios-finanzas-empleo-concepto-mujeres-emprendedoras-exitosas-joven-empresaria-segura-anteojos-mostrando-gesto-pulga-arriba-sostenga-computadora-portatil-garantice-mejor-calidad-servicio_1258-59118.jpg'} alt="Avatar" className="w-28 h-28 object-cover rounded-lg" />
-                                {editingUser && (
-                                    <>
+                            <img src={avatarSrc} 
+                                alt="Avatar" 
+                                className="w-28 h-28 object-cover rounded-lg" 
+                            />
+                            {editingUser && (
+                                <>
                                         <label htmlFor="avatar" className="absolute bg-secondary p-2 rounded-full hover:cursor-pointer -top-2 left-24"><RiEdit2Line className='text-primary' /></label>
                                         <input type="file" name="avatar" id="avatar"        className="hidden" 
                                             // {...register("avatar")} 
                                             accept='image/*' 
                                             onChange={handleFileChange}
                                         />
-                                    </>
-                                )}                            
+                                </>
+                            )}                            
                         </div>
                         <p className="text-gray-500 text-sm mb-5">Allowed file types: png, jpg, jpeg.</p>
                     </div>                       
