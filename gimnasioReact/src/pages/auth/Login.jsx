@@ -8,6 +8,8 @@ import { login } from "../../api/users.api";
 
 //ui
 import { Input } from '../../component/ui/index';
+//Mensajes
+import { toast } from 'react-hot-toast';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -28,12 +30,32 @@ const Login = () => {
                 navigate('/dashboard');
                                 
             }else {
-                console.error('Token not found in response');
+                //console.error('Token not found in response');
+                toast.success('Token no encontrado', {
+                    duration: 3000,
+                    position: 'bottom-right',
+                    style: {
+                        background: '#4b5563',   // Fondo negro
+                        color: '#fff',           // Texto blanco
+                        padding: '16px',
+                        borderRadios: '8px',
+                    },
+                });
                 
             }           
                       
             } catch (error) {
                 console.error('Error logging in:', error);
+                toast.success('Error al iniciar sesión', {
+                    duration: 3000,
+                    position: 'bottom-right',
+                    style: {
+                        background: '#4b5563',   // Fondo negro
+                        color: '#fff',           // Texto blanco
+                        padding: '16px',
+                        borderRadios: '8px',
+                    },
+                });
             }
      
     };

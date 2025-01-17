@@ -57,7 +57,7 @@ const RegisterMiembro = () => {
             }
             //Se retrasa la navegación para que se muestre la notificación
             //setTimeout(() => {
-                navigate('/dashboard/miembros');
+            navigate('/dashboard/miembros');
             //}, 1000);
            
             

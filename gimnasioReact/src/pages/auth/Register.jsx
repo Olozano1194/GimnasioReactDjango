@@ -1,5 +1,5 @@
 import {useForm} from 'react-hook-form';
-import { Link } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
 //Icons
 import { RiLoginBoxLine, RiMailFill, RiLockFill,  RiUserLine } from "react-icons/ri";
 //Mensajes
@@ -13,6 +13,7 @@ import { CreateUsers } from "../../api/users.api";
 
 const Register = () => {
     const { register, handleSubmit, formState: {errors}, watch, reset } = useForm();
+    const navigate = useNavigate();
 
     const onSubmit = handleSubmit(async (data) => {
         //console.log('Form data:', data);
@@ -30,7 +31,8 @@ const Register = () => {
                     borderRadios: '8px',
                 },
 
-            });     
+            });
+            navigate('/dashboard/listUser');
             
         } catch (error) {
             console.error("Error al registrar el usuario:", error.response ? error.response.data : error.message);            
