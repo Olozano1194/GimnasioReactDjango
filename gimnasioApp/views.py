@@ -110,7 +110,7 @@ class userProfileView(APIView):
 
     def get(self, request):
         try:
-            user_serializer = RegistrarUsuarioSerializer(request.user)
+            user_serializer = RegistrarUsuarioSerializer(request.user, context={'request': request})
             user_data = user_serializer.data            
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -120,41 +120,10 @@ class userProfileView(APIView):
     def list(self,request):
         try:
            users = RegistrarUsuario.objects.all().order_by('-id')
-           serializer = RegistrarUsuarioSerializer(users, many=True)
+           serializer = RegistrarUsuarioSerializer(users, many=True, context={'request': request})
            return Response({'users': serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
-           return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)  
-    
-    # def put(self, request):
-    #     user_data = request.data.get('user', {})
-    #     #student_data = request.data.get('student', {})
-
-    #     #Manejo de la imagen
-    #     #if 'avatar' in request.FILES:
-    #         #student_data['avatar'] = request.FILES['avatar']
-
-
-
-    #     user_serializer = RegistrarUsuarioSerializer(request.user, data=user_data, partial=True)
-
-    #     student, created = Student.objects.get_or_create(user=request.user)
-    #     student_serializer = StudentSerializer(student, data=student_data, partial=True)
-        
-    #     if user_serializer.is_valid() and student_serializer.is_valid():
-    #         user_serializer.save()
-    #         student_serializer.save()
-    #         return Response({
-    #             "user": user_serializer.data,
-    #             "student": student_serializer.data
-    #         })
-        
-    #     errors = {}
-    #     if user_serializer.errors:
-    #         errors['user'] = user_serializer.errors
-    #     if student_serializer.errors:
-    #         errors['student'] = student_serializer.errors
-        
-    #     return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+           return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)    
         
 #clase para la creación de  miembros del gimnasio
 class RegistrarUsuarioGymViewSet(viewsets.ModelViewSet):

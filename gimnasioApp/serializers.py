@@ -7,6 +7,7 @@ from rest_framework.authtoken.models import Token
 
 class RegistrarUsuarioSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=False)
+    avatar = serializers.SerializerMethodField()
 
     class Meta:
         model = RegistrarUsuario
