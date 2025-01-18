@@ -46,10 +46,14 @@ class UserViewSet(viewsets.ModelViewSet):
 
             print("Datos antes de la validación:", request.data)
 
+            # Se guarda la imagen anterior por si acaso
+            old_avatar = instance.avatar if instance.avatar else None
+
             serializer = self.get_serializer(
                 instance, 
                 data=request.data, 
-                partial=partial
+                partial=partial,
+                context={'request': request}
             )
 
             if serializer.is_valid():
@@ -57,9 +61,9 @@ class UserViewSet(viewsets.ModelViewSet):
 
                 # Si hay avatar en los archivos, lo agregamos a los datos
                 if 'avatar' in request.FILES:
-                    if instance.avatar.delete(save=False):
-
-                        instance.avatar = request.FILES['avatar']
+                    if old_avatar:
+                        instance.avatar.delete(save=False)
+                    instance.avatar = request.FILES['avatar']
 
                 updated_instance = serializer.save()
 
@@ -72,6 +76,10 @@ class UserViewSet(viewsets.ModelViewSet):
                     )
                 else:
                     print("Error: La actualización no devolvió una instancia")
+                    # Si algo salió mal, devolvemos la imagen anterior
+                    if old_avatar:
+                        instance.avatar = old_avatar
+                        instance.save()
                     return Response(
                         {"error": "Error al actualizar el usuario"},
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR
