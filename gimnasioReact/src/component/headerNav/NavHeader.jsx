@@ -14,7 +14,7 @@ import { getUserProfile } from '../../api/users.api';
 
 function NavHeader() {
     const navigate = useNavigate();
-    const [user, setUser] = useState({ name: '', lastName: '', email: ''});
+    const [user, setUser] = useState({ name: '', lastName: '', email: '', avatar: null});
 
     useEffect(() => {
         const axiosUserData = async () => {
@@ -25,7 +25,8 @@ function NavHeader() {
                 setUser({
                     name: data.user.name,
                     lastName: data.user.lastname,
-                    email: data.user.email
+                    email: data.user.email,
+                    avatar: data.user.avatar
                 });
             }catch (error) {
                 console.error(error);
@@ -109,7 +110,7 @@ function NavHeader() {
                 <Menu>
                     <MenuButton className="flex items-center gap-x-2 hover:bg-slate-600 p-2 rounded-lg transition-colors">
                         <img 
-                            src="https://img.freepik.com/foto-gratis/feliz-optimista-guapo-gerente-ventas-latina-apuntando-lado-mirando-camara_1262-12679.jpg" alt="img-user"
+                            src={user.avatar || "https://img.freepik.com/foto-gratis/feliz-optimista-guapo-gerente-ventas-latina-apuntando-lado-mirando-camara_1262-12679.jpg"} alt="img-user"
                             className="w-10 h-10 object-cover rounded-full"
                         />
                         <span className="text-gray-100 font-semibold">{user.name} {user.lastName}</span>
@@ -119,7 +120,7 @@ function NavHeader() {
                         <MenuItem className='p-0 hover:bg-gray-500'>
                             <Link to='#' className="rounded-lg transition-colors text-dark hover:bg-gray-200 flex items-center gap-x-4 py-2 px-4">
                                 <img 
-                                    src="https://img.freepik.com/foto-gratis/feliz-optimista-guapo-gerente-ventas-latina-apuntando-lado-mirando-camara_1262-12679.jpg" alt="img-user"
+                                    src={user.avatar || "https://img.freepik.com/foto-gratis/feliz-optimista-guapo-gerente-ventas-latina-apuntando-lado-mirando-camara_1262-12679.jpg"} alt="img-user"
                                     className="w-10 h-10 object-cover rounded-full"
                                 />
                                 <div className="flex flex-col gap-1 text-sm">
