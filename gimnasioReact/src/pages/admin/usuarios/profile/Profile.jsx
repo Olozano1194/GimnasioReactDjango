@@ -105,7 +105,7 @@ const Profile = () => {
             ? URL.createObjectURL(formData.avatar)
             : formData.avatar.startsWith('http') 
                 ? formData.avatar
-                :  `http://localhost:8000${formData.avatar}`)
+                :  `${import.meta.env.MODE === 'development' ? import.meta.env.VITE_API_URL_DEV : import.meta.env.VITE_API_URL_PROD}${formData.avatar}`)
         : 'https://img.freepik.com/foto-gratis/negocios-finanzas-empleo-concepto-mujeres-emprendedoras-exitosas-joven-empresaria-segura-anteojos-mostrando-gesto-pulga-arriba-sostenga-computadora-portatil-garantice-mejor-calidad-servicio_1258-59118.jpg';
 
     return (
