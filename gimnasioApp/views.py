@@ -5,8 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
-from .serializers import RegistrarUsuarioSerializer, RegistrarUsuarioGymSerializer, RegistrarUsuarioGymDaySerializer
-from .models import RegistrarUsuario, RegistrarUsuarioGym, RegistrarUsuarioGymDay
+from .serializers import RegistrarUsuarioSerializer, RegistrarUsuarioGymSerializer, RegistrarUsuarioGymDaySerializer, RegistrarMembresiasSerializer
+from .models import RegistrarUsuario, RegistrarUsuarioGym, RegistrarUsuarioGymDay, RegistrarMembresias
 from django.utils import timezone
 from django.http import JsonResponse
 #para la imagen
@@ -44,7 +44,7 @@ class UserViewSet(viewsets.ModelViewSet):
             partial = kwargs.pop('partial', False)
             instance = self.get_object()
 
-            print("Datos antes de la validación:", request.data)
+            # print("Datos antes de la validación:", request.data)
 
             # Se guarda la imagen anterior por si acaso
             old_avatar = instance.avatar if instance.avatar else None
@@ -57,7 +57,7 @@ class UserViewSet(viewsets.ModelViewSet):
             )
 
             if serializer.is_valid():
-                print("Datos válidos, procediendo con la actualización.")
+                # print("Datos válidos, procediendo con la actualización.")
 
                 # Si hay avatar en los archivos, lo agregamos a los datos
                 if 'avatar' in request.FILES:
@@ -69,13 +69,13 @@ class UserViewSet(viewsets.ModelViewSet):
 
                  # Verificar que la actualización fue exitosa
                 if updated_instance:
-                    print("Actualización exitosa")
+                    # print("Actualización exitosa")
                     return Response(
                         serializer.data,
                         status=status.HTTP_200_OK
                     )
                 else:
-                    print("Error: La actualización no devolvió una instancia")
+                    # print("Error: La actualización no devolvió una instancia")
                     # Si algo salió mal, devolvemos la imagen anterior
                     if old_avatar:
                         instance.avatar = old_avatar
@@ -85,7 +85,7 @@ class UserViewSet(viewsets.ModelViewSet):
                         status=status.HTTP_500_INTERNAL_SERVER_ERROR
                     )
             else:
-                print("Errores de validación:", serializer.errors)
+                # print("Errores de validación:", serializer.errors)
                 return Response(
                     serializer.errors,
                     status=status.HTTP_400_BAD_REQUEST
@@ -133,12 +133,12 @@ class userProfileView(APIView):
         except Exception as e:
            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)    
         
-#clase para la creación de  miembros del gimnasio
+#clase para la crud de  miembros del gimnasio
 class RegistrarUsuarioGymViewSet(viewsets.ModelViewSet):
     serializer_class = RegistrarUsuarioGymSerializer
     queryset = RegistrarUsuarioGym.objects.all()
 
-#clase para la creación de  miembros del gimnasio
+#clase para la crud de  miembros del gimnasio por día
 class RegistrarUsuarioGymDayViewSet(viewsets.ModelViewSet):
     serializer_class = RegistrarUsuarioGymDaySerializer
     queryset = RegistrarUsuarioGymDay.objects.all()
@@ -183,3 +183,8 @@ class Home(APIView):
             'miembros_mes': miembros_mes,
             'total': total
             })
+
+# clase para el crud de los miembros del gimnasio
+class RegistrarMembresiaViewSet(viewsets.ModelViewSet):
+    serializer_class = RegistrarMembresiasSerializer
+    queryset = RegistrarMembresias.objects.all()

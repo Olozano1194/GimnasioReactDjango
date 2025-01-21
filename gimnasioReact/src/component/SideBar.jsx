@@ -16,6 +16,7 @@ function SideBar() {
         menu1: false,
         menu2: false,
         menu3: false,
+        menu4: false,
     });
 
     const [userRole, setUserRole] = useState('');
@@ -130,18 +131,23 @@ function SideBar() {
                                 </ul> 
                                 {/* MemberShips */}
                                 <ul className="flex flex-col gap-4">
-                                    <li>
-                                        <Link to='/' 
-                                            className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-slate-200 text-dark font-semibold transition-colors">
-                                            <FaIdCard className="text-primary" />
-                                            Membresias
-                                        </Link>
-                                    </li>
+                                    <button onClick={() => handleToggleSubMenu('menu4')}  
+                                                className="w-full flex items-center justify-between py-2 px-4 rounded-lg hover:bg-slate-200 text-dark font-semibold transition-colors"><span className="flex items-center gap-2"><RiUserLine className="text-primary" />MemberShips</span>
+                                                <RiArrowRightSLine className={`mt-1 ${showSubMenu.menu4 ? 'rotate-90' : ''} transition-all`} />
+                                    </button>
+                                    <ul className={`mt-2 ${!showSubMenu.menu4 ? 'hidden' : ''} transition-all`} >
+                                            <li>
+                                                <Link to='register' className="py-2 px-4 border-l border-slate-400 block ml-6 text-dark font-semibold relative before:w-3 before:h-3 before:absolute before:bg-primary before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-secondary hover:text-white transition-colors">Registrar Membresía</Link>
+                                            </li>
+                                            <li>
+                                                <Link to='listUser' className="py-2 px-4 border-l border-slate-400 block ml-6 text-dark font-semibold relative before:w-3 before:h-3 before:absolute before:bg-primary before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-secondary hover:text-white transition-colors">Ver Membresías</Link>
+                                            </li>
+                                    </ul>
                                 </ul>
                                 {/* Message */}
                                 <ul className="flex flex-col gap-4">
                                     <li>
-                                        <Link to='/' 
+                                        <Link to='#' 
                                             className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-slate-200 text-dark font-semibold transition-colors">
                                             <RiMessage3Fill className="text-primary" />
                                             Mensajes
@@ -151,7 +157,7 @@ function SideBar() {
                                 {/* Support */}
                                 <ul className="flex flex-col gap-4">
                                     <li>
-                                        <Link to='/dashboard/tickets'
+                                        <Link to='#'
                                             className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-slate-200 text-dark font-semibold transition-colors">
                                             <MdOutlineSupportAgent className="text-primary" />
                                             Soporte técnico
@@ -162,7 +168,7 @@ function SideBar() {
                                 {/* Calendar */}
                                 <ul className="flex flex-col gap-4">
                                     <li>
-                                        <Link to='/'
+                                        <Link to='#'
                                             className="flex items-center gap-3 py-2 px-4 rounded-lg hover:bg-slate-200 text-dark font-semibold transition-colors">
                                             <RiCalendarTodoLine className="text-primary" />
                                             Calendario

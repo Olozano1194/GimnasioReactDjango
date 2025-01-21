@@ -162,7 +162,7 @@ const RegisterMiembroDay = () => {
                     errors.phone && <span className='text-red-500 text-sm'>{errors.phone.message}</span>
                 }               
                 {/* Date Initial */}
-                <Label htmlFor="DateInitial"><span className='flex gap-2 items-center'><BsCalendar2Date className='lg:text-2xl' />Fecha Inicial</span><Input type="date" name="dateInitial" 
+                <Label htmlFor="DateInitial"><span className='flex gap-2 items-center'><BsCalendar2Date className='lg:text-xl' />Fecha Inicial</span><Input type="date" name="dateInitial" 
                 {...register('dateInitial',{
                     required: {
                         value: true,

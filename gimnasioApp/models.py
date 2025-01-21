@@ -81,7 +81,21 @@ class RegistrarUsuarioGymDay(models.Model):
         verbose_name = 'RegistrarUsuarioGymDay'
         verbose_name_plural = 'RegistrarUsuarioGymDays'
         db_table = 'RegistrarUsuarioGymDay'
+
+class RegistrarMembresias(models.Model):
+    name = models.CharField(max_length=100)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    duration = models.CharField(max_length=100)
+    state = models.BooleanField()
+
+    def __str__(self):
+        return self.name
     
+    class Meta:
+        verbose_name = 'RegistrarMembresia'
+        verbose_name_plural = 'RegistrarMembresias'
+        db_table = 'RegistrarMembresia'
+
 #Clase para la renovación de los usuarios del gimnasio
 class Renovacion(models.Model):
     usuarioGym = models.ForeignKey(RegistrarUsuarioGym, on_delete=models.CASCADE, related_name="renovaciones")

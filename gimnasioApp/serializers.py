@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import RegistrarUsuario, RegistrarUsuarioGym, RegistrarUsuarioGymDay
+from .models import RegistrarUsuario, RegistrarUsuarioGym, RegistrarUsuarioGymDay, RegistrarMembresias
 from rest_framework.reverse import reverse
 
 #token
@@ -12,7 +12,7 @@ class RegistrarUsuarioSerializer(serializers.ModelSerializer):
     class Meta:
         model = RegistrarUsuario
         fields = '__all__'
-        read_only_fields = ('id','created_at', 'email', 'is_active')
+        read_only_fields = ('id','created_at', 'email', 'is_active',)
     
     def validate_password(self, value):
         if len(value) < 6:
@@ -101,3 +101,10 @@ class RegistrarUsuarioGymDaySerializer(serializers.ModelSerializer):
             representation['dateInitial'] = instance.dateInitial.strftime("%d-%m-%Y")        
             
         return representation
+
+class RegistrarMembresiasSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = RegistrarMembresias
+        fields = '__all__'
+        read_only_fields = ('id',)
