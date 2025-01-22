@@ -83,10 +83,19 @@ class RegistrarUsuarioGymDay(models.Model):
         db_table = 'RegistrarUsuarioGymDay'
 
 class RegistrarMembresias(models.Model):
-    name = models.CharField(max_length=100)
+    OPCIONES_NAME = [
+        ('basico', 'Básico'),
+        ('premium', 'Premium'),
+        ('VIP', 'VIP'),
+    ]    
+    name = models.CharField(max_length=10, choices=OPCIONES_NAME, default='basico')
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    duration = models.CharField(max_length=100)
-    state = models.BooleanField()
+    duration = models.PositiveIntegerField()
+    is_active = models.BooleanField(default=True)
+
+    
+
+    
 
     def __str__(self):
         return self.name
@@ -94,7 +103,7 @@ class RegistrarMembresias(models.Model):
     class Meta:
         verbose_name = 'RegistrarMembresia'
         verbose_name_plural = 'RegistrarMembresias'
-        db_table = 'RegistrarMembresia'
+        db_table = 'membresia'
 
 #Clase para la renovación de los usuarios del gimnasio
 class Renovacion(models.Model):
