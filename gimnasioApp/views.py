@@ -5,8 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
-from .serializers import RegistrarUsuarioSerializer, RegistrarUsuarioGymSerializer, RegistrarUsuarioGymDaySerializer, RegistrarMembresiasSerializer
-from .models import RegistrarUsuario, RegistrarUsuarioGym, RegistrarUsuarioGymDay, RegistrarMembresias
+from .serializers import UsuarioSerializer, UsuarioGymSerializer, UsuarioGymDaySerializer, MembresiasSerializer
+from .models import Usuario, UsuarioGym, UsuarioGymDay, Membresia
 from django.utils import timezone
 from django.http import JsonResponse
 #para la imagen
@@ -17,7 +17,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 # Create your views here.
 #esto nos sirve para que podamos crear de una vez el crud completo
 class UserViewSet(viewsets.ModelViewSet): 
-    serializer_class = RegistrarUsuarioSerializer
+    serializer_class = UsuarioSerializer
     queryset = get_user_model().objects.all()
     parser_classes = (MultiPartParser, FormParser)   
 
@@ -35,7 +35,7 @@ class UserViewSet(viewsets.ModelViewSet):
         token, created = Token.objects.get_or_create(user=user_data)
 
         return Response({
-            "user": RegistrarUsuarioSerializer(user_data).data,
+            "user": UsuarioSerializer(user_data).data,
             "token": token.key
         }, status=status.HTTP_201_CREATED)
     
@@ -118,7 +118,7 @@ class userProfileView(APIView):
 
     def get(self, request):
         try:
-            user_serializer = RegistrarUsuarioSerializer(request.user, context={'request': request})
+            user_serializer = UsuarioSerializer(request.user, context={'request': request})
             user_data = user_serializer.data            
         except Exception as e:
             return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -127,42 +127,42 @@ class userProfileView(APIView):
     #esta clase nos sirve para listar los usuarios
     def list(self,request):
         try:
-           users = RegistrarUsuario.objects.all().order_by('-id')
-           serializer = RegistrarUsuarioSerializer(users, many=True, context={'request': request})
+           users = Usuario.objects.all().order_by('-id')
+           serializer = UsuarioSerializer(users, many=True, context={'request': request})
            return Response({'users': serializer.data}, status=status.HTTP_200_OK)
         except Exception as e:
            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)    
         
 #clase para la crud de  miembros del gimnasio
 class RegistrarUsuarioGymViewSet(viewsets.ModelViewSet):
-    serializer_class = RegistrarUsuarioGymSerializer
-    queryset = RegistrarUsuarioGym.objects.all()
+    serializer_class = UsuarioGymSerializer
+    queryset = UsuarioGym.objects.all()
 
 #clase para la crud de  miembros del gimnasio por día
 class RegistrarUsuarioGymDayViewSet(viewsets.ModelViewSet):
-    serializer_class = RegistrarUsuarioGymDaySerializer
-    queryset = RegistrarUsuarioGymDay.objects.all()
+    serializer_class = UsuarioGymDaySerializer
+    queryset = UsuarioGymDay.objects.all()
 
 #funcion para mostrar los datos en las cards
 class Home(APIView):
     def get(self, request):
-        UserGymList = RegistrarUsuarioGym.objects.all().order_by('-id')
-        UserDayList = RegistrarUsuarioGymDay.objects.all().order_by('-id')
+        UserGymList = UsuarioGym.objects.all().order_by('-id')
+        UserDayList = UsuarioGymDay.objects.all().order_by('-id')
 
         now = timezone.now()
         month = now.month
         year = now.year
 
         #Calculamos el numero de miembros 
-        num_miembros = RegistrarUsuarioGym.objects.count()
+        num_miembros = UsuarioGym.objects.count()
 
         #Filtramos los miembros del gimnasio registrados en el mes
-        miembros_mes = RegistrarUsuarioGym.objects.filter(dateInitial__month=month, dateInitial__year=year)
+        miembros_mes = UsuarioGym.objects.filter(dateInitial__month=month, dateInitial__year=year)
         #Cantidad de dinero miembros mensualidad
         total_gym_mes = sum(user.price for user in miembros_mes)
 
         #Filtramos los miembros del gimnasio registrados en el mes
-        miembrosDay_mes = RegistrarUsuarioGymDay.objects.filter(dateInitial__month=month, dateInitial__year=year)
+        miembrosDay_mes = UsuarioGymDay.objects.filter(dateInitial__month=month, dateInitial__year=year)
         #Cantidad de dinero del dia
         total_day_mes = sum(user.price for user in miembrosDay_mes)
 
@@ -170,7 +170,7 @@ class Home(APIView):
         total_month = total_gym_mes + total_day_mes
 
         #Filtramos los miembros registrados en el mes actual
-        miembros_mes = RegistrarUsuarioGym.objects.filter(dateInitial__month=month, dateInitial__year=year).count()
+        miembros_mes = UsuarioGym.objects.filter(dateInitial__month=month, dateInitial__year=year).count()
 
         #Total de dinero en el gym
         total_gym = sum(user.price for user in UserGymList)
@@ -186,5 +186,5 @@ class Home(APIView):
 
 # clase para el crud de los miembros del gimnasio
 class RegistrarMembresiaViewSet(viewsets.ModelViewSet):
-    serializer_class = RegistrarMembresiasSerializer
-    queryset = RegistrarMembresias.objects.all()
+    serializer_class = MembresiasSerializer
+    queryset = Membresia.objects.all()

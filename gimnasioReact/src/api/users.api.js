@@ -6,7 +6,7 @@ const gymApi = axios.create({
     ? 'http://localhost:8000/gym/api/v1'
     : 'https://gimnasioreactdjango.onrender.com/gym/api/v1',
     headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'multipart/form-data',
       },
 
 });

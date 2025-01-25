@@ -1,18 +1,18 @@
 from rest_framework import serializers
-from .models import RegistrarUsuario, RegistrarUsuarioGym, RegistrarUsuarioGymDay, RegistrarMembresias
+from .models import Usuario, UsuarioGym, UsuarioGymDay, Membresia
 from rest_framework.reverse import reverse
 
 #token
 from rest_framework.authtoken.models import Token
 
-class RegistrarUsuarioSerializer(serializers.ModelSerializer):
+class UsuarioSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=False)
     avatar = serializers.SerializerMethodField()
 
     class Meta:
-        model = RegistrarUsuario
+        model = Usuario
         fields = '__all__'
-        read_only_fields = ('id','created_at', 'email', 'is_active',)
+        read_only_fields = ('id','created_at', 'is_active',)
     
     def validate_password(self, value):
         if len(value) < 6:
@@ -22,7 +22,7 @@ class RegistrarUsuarioSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         #ciframos la contraseña antes de crear el usuario
         password = validated_data.pop('password')
-        user = RegistrarUsuario(**validated_data) #creamos el usuario
+        user = Usuario(**validated_data) #creamos el usuario
         #ciframos la contraseña
         user.set_password(password)
 
@@ -60,14 +60,14 @@ class RegistrarUsuarioSerializer(serializers.ModelSerializer):
             print("Error en el serializer update:", str(e))
             raise
 
-class RegistrarUsuarioGymSerializer(serializers.ModelSerializer):
+class UsuarioGymSerializer(serializers.ModelSerializer):
     #Formato para mostrar las fechas
     dateInitial = serializers.DateField(format="%d-%m-%Y", input_formats=['%Y-%m-%d', '%d-%m-%Y'])
     dateFinal = serializers.DateField(format="%d-%m-%Y", input_formats=['%Y-%m-%d', '%d-%m-%Y'])
 
     class Meta:
-        model = RegistrarUsuarioGym
-        fields = ['id', 'name', 'lastname', 'phone', 'address', 'dateInitial', 'dateFinal','price']
+        model = UsuarioGym
+        fields = '__all__'
         read_only_fields = ('id',)
 
     def to_representation(self, instance):
@@ -82,14 +82,14 @@ class RegistrarUsuarioGymSerializer(serializers.ModelSerializer):
             
         return representation
 
-class RegistrarUsuarioGymDaySerializer(serializers.ModelSerializer):
+class UsuarioGymDaySerializer(serializers.ModelSerializer):
     #Formato para mostrar las fechas
     dateInitial = serializers.DateField(format="%d-%m-%Y", input_formats=['%Y-%m-%d', '%d-%m-%Y'])
     
 
     class Meta:
-        model = RegistrarUsuarioGymDay
-        fields = ['id', 'name', 'lastname', 'phone', 'dateInitial','price']
+        model = UsuarioGymDay
+        fields = '__all__'
         read_only_fields = ('id',)
 
     def to_representation(self, instance):
@@ -102,9 +102,9 @@ class RegistrarUsuarioGymDaySerializer(serializers.ModelSerializer):
             
         return representation
 
-class RegistrarMembresiasSerializer(serializers.ModelSerializer):
+class MembresiasSerializer(serializers.ModelSerializer):
     
     class Meta:
-        model = RegistrarMembresias
+        model = Membresia
         fields = '__all__'
         read_only_fields = ('id',)

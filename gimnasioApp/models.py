@@ -13,7 +13,7 @@ class UserManager(BaseUserManager): # Clase para la creación de usuarios
         user.save()
         return user
 
-class RegistrarUsuario(AbstractBaseUser):
+class Usuario(AbstractBaseUser):
     email = models.EmailField(unique=True)
     name = models.CharField(max_length=45)
     lastname = models.CharField(max_length=50)
@@ -44,11 +44,11 @@ class RegistrarUsuario(AbstractBaseUser):
         return self.full_name()
     
     class Meta:
-        verbose_name = 'User'
-        verbose_name_plural = 'Users'
-        db_table = 'user'
+        verbose_name = 'Usuario'
+        verbose_name_plural = 'Usuarios'
+        db_table = 'usuario'
 
-class RegistrarUsuarioGym(models.Model):
+class UsuarioGym(models.Model):
     name = models.CharField(max_length=100)
     lastname = models.CharField(max_length=100)
     phone = models.CharField(max_length=10)
@@ -62,11 +62,11 @@ class RegistrarUsuarioGym(models.Model):
         return self.name
     
     class Meta:
-        verbose_name = 'RegistrarUsuarioGym'
-        verbose_name_plural = 'RegistrarUsuarioGyms'
-        db_table = 'RegistrarUsuarioGym'
+        verbose_name = 'UsuarioGym'
+        verbose_name_plural = 'UsuarioGyms'
+        db_table = 'usuarioGym'
     
-class RegistrarUsuarioGymDay(models.Model):
+class UsuarioGymDay(models.Model):
     name = models.CharField(max_length=100)
     lastname = models.CharField(max_length=100)
     phone = models.CharField(max_length=10)
@@ -78,11 +78,11 @@ class RegistrarUsuarioGymDay(models.Model):
         return self.name
     
     class Meta:
-        verbose_name = 'RegistrarUsuarioGymDay'
-        verbose_name_plural = 'RegistrarUsuarioGymDays'
-        db_table = 'RegistrarUsuarioGymDay'
+        verbose_name = 'UsuarioGymDay'
+        verbose_name_plural = 'UsuarioGymDays'
+        db_table = 'usuarioGymDay'
 
-class RegistrarMembresias(models.Model):
+class Membresia(models.Model):
     OPCIONES_NAME = [
         ('basico', 'Básico'),
         ('premium', 'Premium'),
@@ -101,22 +101,6 @@ class RegistrarMembresias(models.Model):
         return self.name
     
     class Meta:
-        verbose_name = 'RegistrarMembresia'
-        verbose_name_plural = 'RegistrarMembresias'
+        verbose_name = 'Membresia'
+        verbose_name_plural = 'Membresias'
         db_table = 'membresia'
-
-#Clase para la renovación de los usuarios del gimnasio
-class Renovacion(models.Model):
-    usuarioGym = models.ForeignKey(RegistrarUsuarioGym, on_delete=models.CASCADE, related_name="renovaciones")
-    fechaRenovacion = models.DateField()
-    fechaVencimiento = models.DateField()
-    es_renovado = models.BooleanField(default=False) # Marca si es una renovación o no
-
-    def __str__(self):
-         return f"Renovación de {self.usuario.name} del {self.fechaRenovacion} al {self.fechaVencimiento}"
-    
-    class Meta:
-        verbose_name = 'Renovacion'
-        verbose_name_plural = 'Renovaciones'
-        db_table = 'Renovacion'
-

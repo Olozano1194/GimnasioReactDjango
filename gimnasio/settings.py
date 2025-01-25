@@ -92,21 +92,21 @@ WSGI_APPLICATION = 'gimnasio.wsgi.application'
 load_dotenv() # cargamos las variables de entorno desde .env
 
 DATABASES = {
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'gimnasioreact',
-    #     'USER': 'root',
-    #     'PASSWORD': '123456',
-    #     'HOST': 'localhost',
-    #     'PORT': '3306'
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'gimnasioreact',
+        'USER': 'root',
+        'PASSWORD': '123456',
+        'HOST': 'localhost',
+        'PORT': '3306'
         
-    # }
+    }
     # Replace the SQLite DATABASES configuration with PostgreSQL:
-    'default': dj_database_url.config(
-        # Replace this value with your local database's connection string.
-        default=os.getenv('DATABASE_URL', 'postgresql://ym_h1on_user:fxiMtqp5KkO4yGY3dCGGK4w0DvqtF4tg@dpg-csq7umaj1k6c738ee6e0-a.oregon-postgres.render.com/gym_h1on'),
-        conn_max_age=600        
-    )
+    # 'default': dj_database_url.config(
+    #     # Replace this value with your local database's connection string.
+    #     default=os.getenv('DATABASE_URL', 'postgresql://ym_h1on_user:fxiMtqp5KkO4yGY3dCGGK4w0DvqtF4tg@dpg-csq7umaj1k6c738ee6e0-a.oregon-postgres.render.com/gym_h1on'),
+    #     conn_max_age=600        
+    # )
 }
 
 
@@ -162,7 +162,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CORS_ALLOWED_ORIGINS = ["http://localhost:5173", "https://gimnasio-react-django.vercel.app"]
 
-AUTH_USER_MODEL = 'gimnasioApp.RegistrarUsuario'
+AUTH_USER_MODEL = 'gimnasioApp.Usuario'
 
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
