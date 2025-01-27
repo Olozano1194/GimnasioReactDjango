@@ -20,6 +20,9 @@ import MemberFormDay from './pages/admin/registroPorDia/MemberFormDay';
 // Membresías
 import ListMemberShips from './pages/admin/memberShips/ListMemberShips';
 import MemberShipsForm from './pages/admin/memberShips/MemberShipsForm';
+//Asignación membresías
+import AsignarMemberShipsForm from './pages/admin/asignadaMemberShips/AsignarMemberShipsForm';
+import ListAsignarMemberShips from './pages/admin/asignadaMemberShips/ListAsignarMemberShips';
 
 //Ruta protegida
 import ProtectRoute from './pages/admin/protectedRoute/ProtectRoute';
@@ -56,6 +59,9 @@ function App() {
               <Route path="registrar-membresia" element={<MemberShipsForm />} />
               <Route path="memberships-list" element={<ListMemberShips />} />
               <Route path="membresia/:id" element={<MemberShipsForm />} />
+              {/* Asignación Membresía */}
+              <Route path="asignar-membresia" element={<AsignarMemberShipsForm /> } />
+              <Route path="asignar-membresia-list" element={<ListAsignarMemberShips /> } />
             </Route> 
           </Route>       
           <Route path="*" element={<Error404 />} />

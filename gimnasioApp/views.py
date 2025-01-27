@@ -5,8 +5,8 @@ from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
-from .serializers import UsuarioSerializer, UsuarioGymSerializer, UsuarioGymDaySerializer, MembresiasSerializer
-from .models import Usuario, UsuarioGym, UsuarioGymDay, Membresia
+from .serializers import UsuarioSerializer, UsuarioGymSerializer, UsuarioGymDaySerializer, MembresiasSerializer, MembresiaAsignadaSerializer
+from .models import Usuario, UsuarioGym, UsuarioGymDay, Membresia, MembresiaAsignada
 from django.utils import timezone
 from django.http import JsonResponse
 #para la imagen
@@ -134,12 +134,12 @@ class userProfileView(APIView):
            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)    
         
 #clase para la crud de  miembros del gimnasio
-class RegistrarUsuarioGymViewSet(viewsets.ModelViewSet):
+class UsuarioGymViewSet(viewsets.ModelViewSet):
     serializer_class = UsuarioGymSerializer
     queryset = UsuarioGym.objects.all()
 
 #clase para la crud de  miembros del gimnasio por día
-class RegistrarUsuarioGymDayViewSet(viewsets.ModelViewSet):
+class UsuarioGymDayViewSet(viewsets.ModelViewSet):
     serializer_class = UsuarioGymDaySerializer
     queryset = UsuarioGymDay.objects.all()
 
@@ -185,6 +185,16 @@ class Home(APIView):
             })
 
 # clase para el crud de los miembros del gimnasio
-class RegistrarMembresiaViewSet(viewsets.ModelViewSet):
+class MembresiaViewSet(viewsets.ModelViewSet):
     serializer_class = MembresiasSerializer
     queryset = Membresia.objects.all()
+
+class MembresiaAsignadaViewSet(viewsets.ModelViewSet):
+    serializer_class = MembresiaAsignadaSerializer
+    queryset = MembresiaAsignada.objects.all()
+
+    def get_queryset(self):
+        miembro_id = self.request.query_params.get('miembro')
+        if miembro_id:
+            return self.queryset.filter(miembro_id=miembro_id)
+        return self.queryset

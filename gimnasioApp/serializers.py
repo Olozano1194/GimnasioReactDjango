@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from .models import Usuario, UsuarioGym, UsuarioGymDay, Membresia
-from rest_framework.reverse import reverse
+from .models import Usuario, UsuarioGym, UsuarioGymDay, Membresia, MembresiaAsignada
+from datetime import timedelta
 
 #token
 from rest_framework.authtoken.models import Token
@@ -108,3 +108,17 @@ class MembresiasSerializer(serializers.ModelSerializer):
         model = Membresia
         fields = '__all__'
         read_only_fields = ('id',)
+
+class MembresiaAsignadaSerializer(serializers.ModelSerializer):
+    miembro = UsuarioGymSerializer(read_only=True)
+    membresia = MembresiasSerializer(read_only=True)
+
+    class Meta:
+        model = MembresiaAsignada
+        fields = '__all__'
+        read_only_fields = ('id',)
+
+    def create(self, validated_data):
+        membresia = validated_data['membresia']
+        validated_data['dateFinal'] = validated_data['dateInitial'] + timedelta(days=membresia.duration)
+        return super().create(validated_data)

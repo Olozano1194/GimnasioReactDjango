@@ -84,7 +84,7 @@ class UsuarioGymDay(models.Model):
 
 class Membresia(models.Model):
     OPCIONES_NAME = [
-        ('basico', 'Básico'),
+        ('básico', 'Básico'),
         ('premium', 'Premium'),
         ('VIP', 'VIP'),
     ]    
@@ -104,3 +104,17 @@ class Membresia(models.Model):
         verbose_name = 'Membresia'
         verbose_name_plural = 'Membresias'
         db_table = 'membresia'
+
+class MembresiaAsignada(models.Model):
+    miembro = models.ForeignKey(UsuarioGym, on_delete=models.CASCADE, related_name='miembros')
+    membresia = models.ForeignKey(Membresia, on_delete=models.CASCADE)
+    dateInitial = models.DateField(max_length=200)
+    dateFinal = models.DateField(max_length=200, null=True, blank=True)
+
+    def __srt__(self):
+        return f"{self.miembro.name} - {self.miembro.lastname} - {self.membresia.name}"   
+    
+    class Meta:
+        verbose_name = 'MembresiaAsignada'
+        verbose_name_plural = 'MembresiaAsignadas'
+        db_table = 'membresiaAsignada'

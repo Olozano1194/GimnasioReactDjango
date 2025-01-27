@@ -12,10 +12,10 @@ const gymApi = axios.create({
 });
 
 //Creación de miembros del gimnasio
-export const createMemberShips = async (member) => {
+export const createAsignarMemberShips = async (member) => {
     const token = localStorage.getItem('token');
     try {
-        const response = await gymApi.post('/MemberShips/', member, {
+        const response = await gymApi.post('/MemberShipsAsignada/', member, {
             headers: {
                 'Authorization': `Token ${token}`
                 },
@@ -31,11 +31,11 @@ export const createMemberShips = async (member) => {
 };
 
 //Lista de los miembros del gimnasio
-export const getMemberList = async () => {
+export const getAsignarMemberList = async () => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await gymApi.get(`/MemberShips/`, {
+        const response = await gymApi.get(`/MemberShipsAsignada/`, {
             headers: {
                 'Authorization': `Token ${token}`
                 },
@@ -53,11 +53,11 @@ export const getMemberList = async () => {
 }
 
 //Eliminar miembro del gimnasio
-export const deleteMemberShips = async (id) => {
+export const deleteAsignarMemberShips = async (id) => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await gymApi.delete(`/MemberShips/${id}/`, {
+        const response = await gymApi.delete(`/MemberShipsAsignada/${id}/`, {
             headers: {
                 'Authorization': `Token ${token}`
                 },
@@ -75,11 +75,11 @@ export const deleteMemberShips = async (id) => {
 }
 
 //Obtener miembro del gimnasio
-export const getMemberShips = async (id) => {
+export const getAsignarMemberShips = async (id) => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await gymApi.get(`/MemberShips/${id}/`, {
+        const response = await gymApi.get(`/MemberShipsAsignada/${id}/`, {
             headers: {
                 'Authorization': `Token ${token}`
                 },
@@ -95,11 +95,11 @@ export const getMemberShips = async (id) => {
 }
 
 //Actualizar miembro del gimnasio
-export const updateMemberShips = async (id, memberShips) => {
+export const updateAsignarMemberShips = async (id, memberShips) => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await gymApi.put(`/MemberShips/${id}/`, memberShips, {
+        const response = await gymApi.put(`/MemberShipsAsignada/${id}/`, memberShips, {
             headers: {
                 'Authorization': `Token ${token}`
                 },
@@ -113,4 +113,3 @@ export const updateMemberShips = async (id, memberShips) => {
     }
     
 }
-
