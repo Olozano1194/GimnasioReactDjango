@@ -60,7 +60,7 @@ const Login = () => {
      
     };
 
-    return (
+    return ( 
         <main className="w-full h-screen flex flex-col justify-center items-center lg:justify-between lg:flex-row lg:pr-48">
             <div className="hidden w-full lg:block lg:w-1/2 h-full relative">
                 <img src="https://cdn.pixabay.com/photo/2020/08/05/15/25/gym-5465776_1280.png" alt="" className="w-full h-full object-fill rounded-md" />

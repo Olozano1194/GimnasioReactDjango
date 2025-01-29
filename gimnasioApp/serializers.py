@@ -7,12 +7,19 @@ from rest_framework.authtoken.models import Token
 
 class UsuarioSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=False)
-    avatar = serializers.SerializerMethodField()
+    avatar = serializers.ImageField(required=False, allow_null=True)
 
     class Meta:
         model = Usuario
         fields = '__all__'
         read_only_fields = ('id','created_at', 'is_active',)
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Hacemos que el email sea solo lectura si estamos actualizando un usuario
+        if self.instance:
+            self.fields['email'].read_only = True
     
     def validate_password(self, value):
         if len(value) < 6:
@@ -48,6 +55,10 @@ class UsuarioSerializer(serializers.ModelSerializer):
             if 'password' in validated_data:
                 password = validated_data.pop('password')
                 instance.set_password(password)
+            
+            # Manejo del avatar
+            if 'avatar' in validated_data:
+                instance.avatar = validated_data['avatar']
 
             # Actualizar los demás campos
             for attr, value in validated_data.items():

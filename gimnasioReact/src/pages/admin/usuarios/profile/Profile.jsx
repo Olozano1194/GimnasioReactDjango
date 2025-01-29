@@ -41,7 +41,7 @@ const Profile = () => {
                     //setLoading(false);
                                 
                 }else {
-                    console.log('Datos de usuario o estudiante faltantes:', userData);
+                    console.log('Datos de usuario faltantes:', userData);
                 }         
                 
             }catch (error) {
@@ -80,8 +80,11 @@ const Profile = () => {
                 name: formData.name,
                 lastname: formData.lastname,
                 roles: formData.roles,
-                avatar: formData.avatar instanceof File ? formData.avatar : undefined
+                avatar: formData.avatar instanceof File ? formData.avatar : null,
             };
+
+            console.log('Datos a actualizar', dataToUpdate);
+            
 
             const updatedProfile = await updateUser(formData.id, dataToUpdate);
             
@@ -95,8 +98,10 @@ const Profile = () => {
                 }));
             }
         } catch (error) {
-            console.error('Error al actualizar perfil:', error);
-            // Aquí podrías mostrar un mensaje de error al usuario
+            console.error('Error al actualizar perfil:', {status: error.response?.status,
+                data: JSON.stringify(error.response?.data),
+                message: error.message});
+            // Aquí se podría mostrar un mensaje de error al usuario
         }
     };
 
@@ -163,7 +168,7 @@ const Profile = () => {
                                 type="text" 
                                 className="w-full py-2 px-4 outline-none rounded-lg bg-dark text-white"
                                 placeholder='Apellido(s)'
-                                id="lastName"
+                                id="lastname"
                                 name='lastname'
                                 value={formData.lastname}
                                 onChange={handleChanges}

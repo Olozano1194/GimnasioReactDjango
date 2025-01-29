@@ -236,33 +236,18 @@ const SideBar = () => {
                                         </ul>
                                     </li>                           
                                 </ul>
-                                {/* MemberShips */}
-                                <ul className="flex flex-col gap-2">
-                                    <button onClick={() => handleToggleSubMenu('menu4')}  
-                                                className="w-full flex items-center justify-between py-2 px-4 rounded-lg hover:bg-slate-200 text-dark font-semibold transition-colors"><span className="flex items-center gap-2"><RiUserLine className="text-primary" />Membresía</span>
-                                                <RiArrowRightSLine className={`mt-1 ${showSubMenu.menu4 ? 'rotate-90' : ''} transition-all`} />
-                                    </button>
-                                    <ul className={`mt-2 ${!showSubMenu.menu4 ? 'hidden' : ''} transition-all`} >
-                                            <li>
-                                                <Link to='registrar-membresia' className="py-2 px-4 border-l border-slate-400 block ml-6 text-dark font-semibold relative before:w-3 before:h-3 before:absolute before:bg-primary before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-secondary hover:text-white transition-colors">Registrar Membresía</Link>
-                                            </li>
-                                            <li>
-                                                <Link to='memberships-list' className="py-2 px-4 border-l border-slate-400 block ml-6 text-dark font-semibold relative before:w-3 before:h-3 before:absolute before:bg-primary before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-secondary hover:text-white transition-colors">Ver Membresías</Link>
-                                            </li>
-                                    </ul>
-                                </ul>
                                 {/* Asignar MemberShips */}
                                 <ul className="flex flex-col gap-2">
-                                    <button onClick={() => handleToggleSubMenu('menu4')}  
-                                                className="w-full flex items-center justify-between py-2 px-4 rounded-lg hover:bg-slate-200 text-dark font-semibold transition-colors"><span className="flex items-center gap-2"><RiUserLine className="text-primary" />Membresía</span>
-                                                <RiArrowRightSLine className={`mt-1 ${showSubMenu.menu4 ? 'rotate-90' : ''} transition-all`} />
+                                    <button onClick={() => handleToggleSubMenu('menu5')}  
+                                                className="w-full flex items-center justify-between py-2 px-4 rounded-lg hover:bg-slate-200 text-dark font-semibold transition-colors"><span className="flex items-center gap-2"><FaTag className="text-primary" />Asignar Membresía</span>
+                                                <RiArrowRightSLine className={`mt-1 ${showSubMenu.menu5 ? 'rotate-90' : ''} transition-all`} />
                                     </button>
-                                    <ul className={`mt-2 ${!showSubMenu.menu4 ? 'hidden' : ''} transition-all`} >
+                                    <ul className={`mt-2 ${!showSubMenu.menu5 ? 'hidden' : ''} transition-all`} >
                                             <li>
-                                                <Link to='registrar-membresia' className="py-2 px-4 border-l border-slate-400 block ml-6 text-dark font-semibold relative before:w-3 before:h-3 before:absolute before:bg-primary before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-secondary hover:text-white transition-colors">Registrar Membresía</Link>
+                                                <Link to='asignar-membresia' className="py-2 px-4 border-l border-slate-400 block ml-6 text-dark font-semibold relative before:w-3 before:h-3 before:absolute before:bg-primary before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-secondary hover:text-white transition-colors">Asignar Membresía</Link>
                                             </li>
                                             <li>
-                                                <Link to='memberships-list' className="py-2 px-4 border-l border-slate-400 block ml-6 text-dark font-semibold relative before:w-3 before:h-3 before:absolute before:bg-primary before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-secondary hover:text-white transition-colors">Ver Membresías</Link>
+                                                <Link to='asignar-membresia-list' className="py-2 px-4 border-l border-slate-400 block ml-6 text-dark font-semibold relative before:w-3 before:h-3 before:absolute before:bg-primary before:rounded-full before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2 before:border-4 before:border-secondary hover:text-white transition-colors">Ver Asignaciones de Membresías</Link>
                                             </li>
                                     </ul>
                                 </ul>

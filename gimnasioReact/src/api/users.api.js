@@ -5,16 +5,20 @@ const gymApi = axios.create({
     baseURL: import.meta.env.MODE === 'development' 
     ? 'http://localhost:8000/gym/api/v1'
     : 'https://gimnasioreactdjango.onrender.com/gym/api/v1',
-    headers: {
-        'Content-Type': 'multipart/form-data',
-      },
+    // headers: {
+    //     'Content-Type': 'application/json',
+    //   },
 
 });
 
 // Creamos un usuario
 export const CreateUsers = async (user) => {
     try {
-        const response = await gymApi.post('/User/', user, );
+        const response = await gymApi.post('/User/', user, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        } );
         const { token } = response.data;
 
         //Almacenamos el token en el localstorage para las futuras solicitudes
@@ -97,6 +101,7 @@ export const updateUser = async (id, user) => {
     if (user.name) formData.append('name', user.name);
     if (user.lastname) formData.append('lastname', user.lastname);
     if (user.roles) formData.append('roles', user.roles);
+    //if (user.email) formData.append('email', user.email);
 
     if (user.avatar) {
         formData.append('avatar', user.avatar);
@@ -113,8 +118,8 @@ export const updateUser = async (id, user) => {
             headers: {
                 'Authorization': `Token ${token}`,
                 'Content-Type': 'multipart/form-data',
-                },
-            });
+            },
+        });
         return response.data;
         
     } catch (error) {
