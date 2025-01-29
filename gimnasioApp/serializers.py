@@ -19,7 +19,8 @@ class UsuarioSerializer(serializers.ModelSerializer):
 
         # Hacemos que el email sea solo lectura si estamos actualizando un usuario
         if self.instance:
-            self.fields['email'].read_only = True
+            #self.fields['email'].read_only = True
+            self.fields['email'].required = False
     
     def validate_password(self, value):
         if len(value) < 6:
