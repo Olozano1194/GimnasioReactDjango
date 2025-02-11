@@ -118,7 +118,7 @@ const Login = () => {
                     <RiLoginBoxLine className='text-2xl text-purple-800' />Iniciar Sesión 
                 </button>
                 {/* Contenedor de registrar usuario o recuperar contraseña */}
-                {/* <div className='flex flex-col gap-2 text-center md:flex-row md:gap-4'>
+                {/*<div className='flex flex-col gap-2 text-center md:flex-row md:gap-4'>
                     <p className='text-gray-500 text-sm'>¿No tienes cuenta? 
                         <Link
                             to='/register'
@@ -132,7 +132,7 @@ const Login = () => {
                         </Link>
                     </p>
 
-                </div> */}
+                </div>*/}
             </form>
         </main>
     );
