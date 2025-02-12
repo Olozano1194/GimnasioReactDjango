@@ -51,13 +51,16 @@ Este es un proyecto web para gestionar un gimnasio, realizado con React, Tailwin
 
 ## Estructura del proyecto
 
-### Backend (Django Rest Framework)
-
 - **models.py**: Contiene la definición de las entidades del modelo de datos.
+
 - **serializers.py**: Contiene la definición de los serializadores para serializar y           deserializar los datos.
+
 - **views.py**: Contiene la definición de las vistas para manejar las solicitudes HTTP.
+
 - **urls.py**: Contiene la definición de las rutas para manejar las solicitudes.
+
 - **settings.py**: Contiene la configuración del proyecto, incluyendo la base de datos.
+
 - **requirements.txt**: Contiene la lista de dependencias del proyecto.
 
 
@@ -75,20 +78,26 @@ Este es un proyecto web para gestionar un gimnasio, realizado con React, Tailwin
         ```
 
 2. **Ejecutar el proyecto**:
+    - Ejecutar el proyecto con el comando
         ```bash
             npm run dev
         ```
 
 ### Estructura del proyecto
 
-## Frontend (React)
-
 - `src/components/ui/`: Carpeta en donde estan los Componentes reutilizables (botones,inputs,label), para los formularios.
+
 - `src/components/Header/`: Componente para el header, que se mostrará al momento que el usuario este en la página principal.
+
 - `src/components/Sidebar/`: Componente para el menu, que se mostrará en la parte izquierda de la página principal.
+
 - `src/components/Table/`: Componente para mostrar la tabla principal en los diferentes modulos donde se requiera.
+
 - `src/layouts/Admin/`: Componente en el cual se renderiza el header, el sidebar y el contenido principal.
+
 - `src/pages/admin/`: Carpeta en donde se encuentran todos los componentes que se estan usando para los modulos (miembros, usuarios, etc...).
+
 - `src/pages/auth/`: Carpeta en donde se encuentran todos los componentes que se estan usando para los modulos de autenticación (login, register, etc...).
+
 - `src/api/`: Carpeta en donde se encuentran los archivos que se estan usando para hacer las peticiones a la API.
 
