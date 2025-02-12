@@ -51,8 +51,6 @@ Este es un proyecto web para gestionar un gimnasio, realizado con React, Tailwin
 
 ## Estructura del proyecto
 
-### Backend (Django Rest Framework)
-
 - **models.py**: Contiene la definición de las entidades del modelo de datos.
 
 - **serializers.py**: Contiene la definición de los serializadores para serializar y           deserializar los datos.
@@ -86,8 +84,6 @@ Este es un proyecto web para gestionar un gimnasio, realizado con React, Tailwin
         ```
 
 ### Estructura del proyecto
-
-## Frontend (React)
 
 - `src/components/ui/`: Carpeta en donde estan los Componentes reutilizables (botones,inputs,label), para los formularios.
 
