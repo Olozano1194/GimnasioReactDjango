@@ -12,7 +12,7 @@ import { CiUser } from 'react-icons/ci';
 import { toast } from "react-hot-toast";
 
 //ui
-import { Input, Label, Button } from '../../../component/ui/index';
+import { Input, Label, Button } from '../../../components/ui/index';
 
 //API
 //MemberShips

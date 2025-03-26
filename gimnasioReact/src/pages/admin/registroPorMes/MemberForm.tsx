@@ -12,7 +12,7 @@ import { LiaAddressCardSolid } from "react-icons/lia";
 import { toast } from "react-hot-toast";
 
 //ui
-import { Input, Label, Button } from '../../../component/ui/index';
+import { Input, Label, Button } from '../../../components/ui/index';
 
 //API
 import { createMember, updateMember, getMember } from '../../../api/userGym.api';

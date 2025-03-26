@@ -12,7 +12,7 @@ import { FaTag } from 'react-icons/fa';
 import { toast } from "react-hot-toast";
 
 //ui
-import { Input, Label, Button } from '../../../component/ui/index';
+import { Input, Label, Button } from '../../../components/ui/index';
 
 //API
 import { createMemberShips, updateMemberShips, getMemberShips } from '../../../api/memberShips.api';

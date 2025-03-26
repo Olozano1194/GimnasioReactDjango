@@ -29,12 +29,13 @@ import ProtectRoute from './pages/admin/protectedRoute/ProtectRoute';
 
 import Error404 from './pages/Error404';
 //Notificaciones
-import { Toaster } from 'react-hot-toast'
+import { Toaster } from 'react-hot-toast';
 
 function App() {
+  
 
   return (
-      <BrowserRouter>
+    <BrowserRouter>
         <Routes>        
           <Route path="/" element={<Navigate to='/login' />} />
           <Route path="login" element={<Login />} />
@@ -67,8 +68,8 @@ function App() {
           <Route path="*" element={<Error404 />} />
         </Routes>
         <Toaster />      
-      </BrowserRouter>    
-  );
+      </BrowserRouter>
+  )
 }
 
 export default App

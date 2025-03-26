@@ -1,26 +1,27 @@
 //Estados
 import { useEffect, useState } from "react";
+
 //API
-import { getMemberList, deleteMemberShips } from '../../../api/memberShips.api';
+import { getMembers, deleteMember } from '../../../api/userGym.api';
 
 import { createColumnHelper } from '@tanstack/react-table';
 
 //Componente principal para la listas
-import Table from '../../../component/Table';
+import Table from '../../../components/Table';
 //Enlaces
 import { Link } from "react-router-dom";
 //Mensajes
 import { toast } from 'react-hot-toast';
 
-
-const ListMemberShips= () => {
-    const [memberShips, setMemberShips] = useState([]);
+const ListMiembro = () => {
+    const [users, setUser] = useState([]);
+    
 
     useEffect(() => {
         const axiosUserData = async () => {
             try {
-                const data = await getMemberList();
-                setMemberShips(data);
+                const data = await getMembers();
+                setUser(data);
             }catch (error) {
                 console.error(error);
             }
@@ -39,7 +40,7 @@ const ListMemberShips= () => {
             },
         }),
         columnHelper.accessor('name', {
-            header: 'Nombre del plan',
+            header: 'Nombre',
             cell: (info) => {
                 const value = info.getValue();
                 // Si es la fila de total, mostrar en negrita y centrado
@@ -48,8 +49,24 @@ const ListMemberShips= () => {
                 ) : value;
             }
         }),
-        columnHelper.accessor('duration', {
-            header: 'Duración de la membresía',
+        columnHelper.accessor('lastname', {
+            header: 'Apellido',
+            cell: (info) => info.row.original.id === 'total' ? '' : info.getValue()
+        }),
+        columnHelper.accessor('phone', {
+            header: 'Telefono',
+            cell: (info) => info.row.original.id === 'total' ? '' : info.getValue()
+        }),
+        columnHelper.accessor('address', {
+            header: 'Dirección',
+            cell: (info) => info.row.original.id === 'total' ? '' : info.getValue()
+        }),
+        columnHelper.accessor('dateInitial', {
+            header: 'Fecha Inicial',
+            cell: (info) => info.row.original.id === 'total' ? '' : info.getValue()
+        }),
+        columnHelper.accessor('dateFinal', {
+            header: 'Fecha Final',
             cell: (info) => info.row.original.id === 'total' ? '' : info.getValue()
         }),
         columnHelper.accessor('price', {
@@ -73,16 +90,16 @@ const ListMemberShips= () => {
                 
                 return (
                     <div className="flex justify-center items-center gap-x-4">
-                        <Link to={`/dashboard/membresia/${row.original.id}`} className="bg-green-500 text-white p-2 rounded-md">
+                        <Link to={`/dashboard/miembro/${row.original.id}`} className="bg-green-500 text-white p-2 rounded-md">
                             Editar
                         </Link>
-                        <button
+                        <button 
                             onClick={ async () => {
-                                const accepted = window.confirm('¿Estás seguro de eliminar este miembro?');
-                                if (accepted) {
-                                    await deleteMemberShips(row.original.id);
-                                    setUser(memberShips.filter(memberShips => memberShips.id !== row.original.id));
-                                    toast.success('Membresía Eliminada', {
+                               const accepted = window.confirm('¿Estás seguro de eliminar este miembro?');
+                               if (accepted) {
+                                   await deleteMember(row.original.id);
+                                   setUser(users.filter(user => user.id !== row.original.id));
+                                   toast.success('Miembro Eliminado', {
                                         duration: 3000,
                                         position: 'bottom-right',
                                         style: {
@@ -92,11 +109,11 @@ const ListMemberShips= () => {
                                             borderRadios: '8px',
                                         },
                 
-                                    });  
-                                }                                
-                             }} 
+                                    });   
+                               }                                
+                            }}
                             className="bg-red-500 text-white p-2 rounded-md">
-                                Eliminar
+                            Eliminar
                         </button>
                     </div>
                 );
@@ -105,16 +122,16 @@ const ListMemberShips= () => {
     ];
 
     //Calculamos el total de los precios
-    const total = memberShips.reduce((acc, user) => acc + parseFloat(user.price), 0);
+    const total = users.reduce((acc, user) => acc + parseFloat(user.price), 0);
 
     // Añadir una fila extra con el total
     //const dataWithTotal = [...users, { id: 'total', name: 'Total', price: total.toFixed(2) }];
 
     return (
         <main className="cards bg-secondary w-full flex flex-col justify-center items-center gap-y-4 p-4 rounded-xl">
-            <h1 className='text-xl font-bold pb-4'>Listado de Membresías</h1>
-            <Table data={memberShips} columns={columns} totalRow={{ id: 'total', name: 'Total', price: total.toFixed(2) }} />
+            <h1 className='text-xl font-bold pb-4 md:text-2xl md:pt-2'>Listado de Miembros</h1>
+            <Table data={users} columns={columns} totalRow={{ id: 'total', name: 'Total', price: total.toFixed(2) }} />
         </main>
     );
 }
-export default ListMemberShips;
+export default ListMiembro;

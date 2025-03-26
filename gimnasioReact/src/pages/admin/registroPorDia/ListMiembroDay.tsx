@@ -6,7 +6,7 @@ import { getMembersDay, deleteMember } from '../../../api/userGymDay.api';
 import { createColumnHelper } from '@tanstack/react-table';
 
 //Componente principal para la listas
-import Table from '../../../component/Table';
+import Table from '../../../components/Table';
 //Enlaces
 import { Link } from "react-router-dom";
 //Mensajes

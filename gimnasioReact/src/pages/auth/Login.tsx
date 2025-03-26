@@ -1,5 +1,5 @@
 import {useForm} from 'react-hook-form';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 //Icons
 import { CiUser } from 'react-icons/ci';
 import { RiLockPasswordLine, RiLoginBoxLine } from "react-icons/ri";
@@ -7,7 +7,7 @@ import { RiLockPasswordLine, RiLoginBoxLine } from "react-icons/ri";
 import { login } from "../../api/users.api";
 
 //ui
-import { Input } from '../../component/ui/index';
+import { Input } from '../../components/ui/index';
 //Mensajes
 import { toast } from 'react-hot-toast';
 

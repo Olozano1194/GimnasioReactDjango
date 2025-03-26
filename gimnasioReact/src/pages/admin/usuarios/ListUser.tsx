@@ -7,7 +7,7 @@ import { createColumnHelper } from '@tanstack/react-table';
 import { Link } from "react-router-dom";
 
 //Componente principal para la listas
-import Table from '../../../component/Table';
+import Table from '../../../components/Table';
 
 
 const ListUser = () => {

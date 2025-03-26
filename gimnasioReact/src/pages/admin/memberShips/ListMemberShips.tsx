@@ -1,24 +1,25 @@
 //Estados
 import { useEffect, useState } from "react";
 //API
-import { getAsignarMemberList, deleteAsignarMemberShips } from '../../../api/asignarMemberShips.api';
+import { getMemberList, deleteMemberShips } from '../../../api/memberShips.api';
 
 import { createColumnHelper } from '@tanstack/react-table';
 
 //Componente principal para la listas
-import Table from '../../../component/Table';
+import Table from '../../../components/Table';
 //Enlaces
 import { Link } from "react-router-dom";
 //Mensajes
 import { toast } from 'react-hot-toast';
 
-const ListAsignarMemberShips = () => {
+
+const ListMemberShips= () => {
     const [memberShips, setMemberShips] = useState([]);
 
     useEffect(() => {
         const axiosUserData = async () => {
             try {
-                const data = await getAsignarMemberList();
+                const data = await getMemberList();
                 setMemberShips(data);
             }catch (error) {
                 console.error(error);
@@ -34,27 +35,35 @@ const ListAsignarMemberShips = () => {
             header: 'N°',
             cell: (info) => {
                 // Solo mostrar el número si no es la fila de total
-                return info.row.index + 1;
+                return info.row.original.id !== 'total' ? info.row.index + 1 : '';
             },
         }),
-        columnHelper.accessor('miembro', {
-            header: 'Nombre del Miembro',
+        columnHelper.accessor('name', {
+            header: 'Nombre del plan',
             cell: (info) => {
-                const miembro = info.getValue();
-                return `${miembro.name} ${miembro.lastname}`;                 
+                const value = info.getValue();
+                // Si es la fila de total, mostrar en negrita y centrado
+                return info.row.original.id === 'total' ? (
+                    <div className="font-bold text-right">Total:</div>
+                ) : value;
             }
         }),
-        columnHelper.accessor('membresia.name', {
-            header: 'Membresía',
-            // cell: (info) => info.row.original.id === 'total' ? '' : info.getValue()
+        columnHelper.accessor('duration', {
+            header: 'Duración de la membresía',
+            cell: (info) => info.row.original.id === 'total' ? '' : info.getValue()
         }),
-        columnHelper.accessor('dateInitial', {
-            header: 'Fecha Inicial',
-            //cell: info => info.row.original.id === 'total' ? '' : info.getValue()
-        }),
-        columnHelper.accessor('dateFinal', {
-            header: 'Fecha Final',
-            //cell: info => info.row.original.id === 'total' ? '' : info.getValue()
+        columnHelper.accessor('price', {
+            header: 'Precio',
+            cell: info => {
+                const price = parseFloat(info.getValue());
+                if (!isNaN(price)) {
+                    // Si es la fila de total, mostrar en negrita
+                    return info.row.original.id === 'total' ? (
+                        <div className="font-bold">${price.toFixed(2)}</div>
+                    ) : `$${price.toFixed(2)}`;
+                }
+                return '$0.00';
+            },
         }),
         columnHelper.accessor('actions', {
             header: 'Acciones',
@@ -71,7 +80,7 @@ const ListAsignarMemberShips = () => {
                             onClick={ async () => {
                                 const accepted = window.confirm('¿Estás seguro de eliminar este miembro?');
                                 if (accepted) {
-                                    await deleteAsignarMemberShips(row.original.id);
+                                    await deleteMemberShips(row.original.id);
                                     setUser(memberShips.filter(memberShips => memberShips.id !== row.original.id));
                                     toast.success('Membresía Eliminada', {
                                         duration: 3000,
@@ -96,7 +105,7 @@ const ListAsignarMemberShips = () => {
     ];
 
     //Calculamos el total de los precios
-    //const total = memberShips.reduce((acc, user) => acc + parseFloat(user.price), 0);
+    const total = memberShips.reduce((acc, user) => acc + parseFloat(user.price), 0);
 
     // Añadir una fila extra con el total
     //const dataWithTotal = [...users, { id: 'total', name: 'Total', price: total.toFixed(2) }];
@@ -104,9 +113,8 @@ const ListAsignarMemberShips = () => {
     return (
         <main className="cards bg-secondary w-full flex flex-col justify-center items-center gap-y-4 p-4 rounded-xl">
             <h1 className='text-xl font-bold pb-4'>Listado de Membresías</h1>
-            <Table data={memberShips} columns={columns}  />
+            <Table data={memberShips} columns={columns} totalRow={{ id: 'total', name: 'Total', price: total.toFixed(2) }} />
         </main>
     );
-
-};
-export default ListAsignarMemberShips;
+}
+export default ListMemberShips;
