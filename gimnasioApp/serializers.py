@@ -125,10 +125,20 @@ class MembresiaAsignadaSerializer(serializers.ModelSerializer):
     miembro = UsuarioGymSerializer(read_only=True)
     membresia = MembresiasSerializer(read_only=True)
 
+    miembro_id = serializers.PrimaryKeyRelatedField(
+        source='miembro',
+        queryset=UsuarioGym.objects.all()
+    )
+
+    membresia_id = serializers.PrimaryKeyRelatedField(
+        source='membresia',
+        queryset=Membresia.objects.all()
+    )
+
     class Meta:
         model = MembresiaAsignada
         fields = '__all__'
-        read_only_fields = ('id',)
+        read_only_fields = ('id', 'miembro', 'membresia', 'dateFinal')
 
     def create(self, validated_data):
         membresia = validated_data['membresia']

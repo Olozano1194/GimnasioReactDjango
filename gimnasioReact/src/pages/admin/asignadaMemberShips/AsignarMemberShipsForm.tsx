@@ -1,5 +1,6 @@
 import {useForm} from 'react-hook-form';
 import { useParams, useNavigate } from "react-router-dom";
+import axios from 'axios';
 //Estados
 import { useEffect, useState } from "react";
 //Icons
@@ -20,31 +21,46 @@ import { getMemberList } from '../../../api/memberShips.api';
 //Member
 import { getMembers } from "../../../api/userGym.api";
 //Asignación Membresías
-import { createAsignarMemberShips, updateAsignarMemberShips } from '../../../api/asignarMemberShips.api';
+import { createAsignarMemberShips, updateAsignarMemberShips, getAsignarMemberShips } from '../../../api/asignarMemberShips.api';
+//Models
+import { Membresia } from '../../../model/memberShips.model';
+import { Miembro } from '../../../model/member.model';
+import { CreateAsignarMemberShipsDto } from '../../../model/dto/asignarMemberShips.dto';
 
-
+interface FormData {
+    miembro: string;
+    membresia: string;
+    dateInitial: string;
+}
 
 const MemberShipsForm = () => {
-    const [miembros, setMiembros] = useState([]);
-    const [membresias, setMembresias] = useState([]);
+    const [miembros, setMiembros] = useState<Miembro[]>([]);
+    const [membresias, setMembresias] = useState<Membresia[]>([]);
     const params = useParams();
     const navigate = useNavigate();
-    const { register, handleSubmit, formState: {errors}, watch, reset } = useForm();
-       
+    const { register, handleSubmit, formState: {errors}, reset } = useForm<FormData>();       
     
-    const onSubmit = handleSubmit(async (data) => {
-        //console.log('Form data:', data);
+    const onSubmit = handleSubmit(async (data: FormData) => {
+        //console.log('Form data:', data);        
         try {
-            const requestData = {
-            miembro: data.miembro, 
-            membresia: data.Membresia, 
-            dateInitial: data.dateInitial,
-            dateFinal: data.dateFinal,
+            const miembroId = parseInt(data.miembro);
+            const membresiaId = parseInt(data.membresia);
+
+            if(isNaN(miembroId) || isNaN(membresiaId)){
+                toast.error('Por favor, selecciona un miembro y una membresía válidos');
+                return;
+            }
+
+            //Para la creación/actualización solo enviamos los Ids y las fechas
+            const requestData: CreateAsignarMemberShipsDto = {
+                miembro_id: miembroId, 
+                membresia_id: membresiaId, 
+                dateInitial: data.dateInitial,                
             };
             console.log('Datos que serán enviados:', requestData);
             
             if (params.id) {
-                await updateAsignarMemberShips(params.id, requestData);
+                await updateAsignarMemberShips(parseInt(params.id), requestData);
                 //console.log('Actualizando miembro:', params.id);
                 toast.success('Asignación de Membresía Actualizada', {
                     duration: 3000,
@@ -74,11 +90,14 @@ const MemberShipsForm = () => {
             navigate('/dashboard');
                     
         } catch (error) {
-            console.error("Error al registrar el usuario:", error.response ? error.response.data : error.message);
-            toast.error('Ocurrió un error. Inténtalo de nuevo.', {
-                duration: 3000,
-                position: 'bottom-right',
-            });            
+            if (axios.isAxiosError(error)){
+                console.error("Error al registrar el usuario:", error.response ? error.response.data : error.message);
+                toast.error('Ocurrió un error. Inténtalo de nuevo.', {
+                    duration: 3000,
+                    position: 'bottom-right',
+                });   
+            }
+                     
         }
             
     });
@@ -95,15 +114,15 @@ const MemberShipsForm = () => {
     
                 // Si params.id está presente, cargar los datos específicos para actualizar
                 if (params.id) {
-                    const responseAsignacion = await getAsignacionMembresia(params.id); // Función para obtener una asignación específica
+                    const responseAsignacion = await getAsignarMemberShips(parseInt(params.id)); // Función para obtener una asignación específica
                     console.log("Datos de la asignación para editar:", responseAsignacion);
     
                     // Prellenar los campos del formulario con los datos existentes
                     reset({
-                        miembro: responseAsignacion.miembro,
-                        membresia: responseAsignacion.membresia,
-                        fechaInicio: responseAsignacion.fechaInicio,
-                        fechaFin: responseAsignacion.fechaFin,
+                        miembro: responseAsignacion.miembro.id?.toString(),
+                        membresia: responseAsignacion.membresia.id?.toString(),
+                        dateInitial: responseAsignacion.dateInitial,
+                        dateFinal: responseAsignacion.dateFinal,
                     });
                 }
             } catch (error) {
@@ -114,8 +133,7 @@ const MemberShipsForm = () => {
     
         fetchData();
     }, [params.id, reset]);
-    
-    
+        
     
     return (
         <main className="w-full min-h-screen flex flex-col justify-center items-center">
@@ -123,7 +141,7 @@ const MemberShipsForm = () => {
                 <h1 className="text-xl font-bold pt-3 pb-2 md:pt-3">{ params.id ? 'Actualizar la Asignación de Membresía' : 'Asignar Membresía' }</h1>
 
                 {/* Miembro */}
-                <Label htmlFor="Miembro"><span className='flex gap-2 items-center'><CiUser className='lg:text-2xl xl:text-xl' />Niembro</span><select name='miembro_id' className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500'
+                <Label htmlFor="Miembro"><span className='flex gap-2 items-center'><CiUser className='lg:text-2xl xl:text-xl' />Niembro</span><select className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500'
                 {...register('miembro',{
                     required: {
                         value: true,
@@ -138,11 +156,11 @@ const MemberShipsForm = () => {
                     </select>
                 </Label>
                 {
-                    errors.miembro && <span className='text-red-500 text-sm'>{errors.miembro.message}</span>                }
+                    errors.miembro && typeof errors.miembro.message === 'string' && <span className='text-red-500 text-sm'>{errors.miembro.message}</span>                }
                 
                 {/* Membreship */}
-                <Label htmlFor="Membresia"><span className='flex gap-2 items-center'><FaTag className='lg:text-2xl' />Membresía</   span><select name='membresia_id' className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500'
-                {...register('Membresia',{
+                <Label htmlFor="Membresia"><span className='flex gap-2 items-center'><FaTag className='lg:text-2xl' />Membresía</   span><select className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500'
+                {...register('membresia',{
                     required: {
                         value: true,
                         message: 'Membresia requerido'
@@ -157,10 +175,10 @@ const MemberShipsForm = () => {
                 </select>
                 </Label>
                 {
-                    errors.Membresia && <span className='text-red-500 text-sm'>{errors.Membresia.message}</span>
+                    errors.membresia && typeof errors.membresia.message === 'string' && <span className='text-red-500 text-sm'>{errors.membresia.message}</span>
                 }
                 {/* Date Initial */}
-                <Label htmlFor="DateInitial"><span className='flex gap-2 items-center'><BsCalendar2Date className='lg:text-2xl' />Fecha Inicial</span><Input type="date" name='dateInitial'
+                <Label htmlFor="DateInitial"><span className='flex gap-2 items-center'><BsCalendar2Date className='lg:text-2xl' />Fecha Inicial</span><Input type="date"
                 {...register('dateInitial',{
                     required: {
                         value: true,
@@ -170,10 +188,10 @@ const MemberShipsForm = () => {
                 />
                 </Label>
                 {
-                    errors.dateInitial && <span className='text-red-500 text-center text-sm'>{errors.dateInitial.message}</span>
+                    errors.dateInitial && typeof errors.dateInitial.message === 'string' && <span className='text-red-500 text-center text-sm'>{errors.dateInitial.message}</span>
                 }
                 {/* Date final */}
-                <Label htmlFor="DateFinal"><span className='flex gap-2 items-center'><BsCalendar2Date className='lg:text-2xl' />Fecha Final</span><Input type="date" name='dateFinal'
+                {/* <Label htmlFor="DateFinal"><span className='flex gap-2 items-center'><BsCalendar2Date className='lg:text-2xl' />Fecha Final</span><Input type="date"
                 {...register('dateFinal',{
                     required: {
                         value: true,
@@ -183,8 +201,8 @@ const MemberShipsForm = () => {
                 />
                 </Label>
                 {
-                    errors.dateFinal && <span className='text-red-500 text-center text-sm'>{errors.dateFinal.message}</span>
-                }
+                    errors.dateFinal && typeof errors.dateFinal.message === 'string' && <span className='text-red-500 text-center text-sm'>{errors.dateFinal.message}</span>
+                } */}
                 {/* btn Register */}
                 <Button type="submit">
                     <RiLoginBoxLine className='text-purple-800' />{ params.id ? 'Actualizar' : 'Asignar' }

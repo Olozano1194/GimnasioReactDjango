@@ -111,7 +111,7 @@ class MembresiaAsignada(models.Model):
     dateInitial = models.DateField(max_length=200)
     dateFinal = models.DateField(max_length=200, null=True, blank=True)
 
-    def __srt__(self):
+    def __str__(self):
         return f"{self.miembro.name} - {self.miembro.lastname} - {self.membresia.name}"   
     
     class Meta:
