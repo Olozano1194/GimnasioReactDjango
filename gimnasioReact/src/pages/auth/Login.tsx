@@ -5,20 +5,20 @@ import { CiUser } from 'react-icons/ci';
 import { RiLockPasswordLine, RiLoginBoxLine } from "react-icons/ri";
 //Apis
 import { login } from "../../api/users.api";
-
 //ui
 import { Input } from '../../components/ui/index';
 //Mensajes
 import { toast } from 'react-hot-toast';
+//Models
+import { LoginUserDto } from '../../model/dto/user.dto'; 
 
 const Login = () => {
     const navigate = useNavigate();
-    const { register, handleSubmit, formState: {errors} } = useForm();
+    const { register, handleSubmit, formState: {errors} } = useForm<LoginUserDto>();
 
-    const onSubmit = async data => {
+    const onSubmit = handleSubmit(async (data: LoginUserDto) => {
         try {
-            const { email, password } = data;
-            const response = await login(email, password);
+            const response = await login(data);
             //console.log('Login successful, result:', response);
 
             if (response && response.token) {                
@@ -38,10 +38,9 @@ const Login = () => {
                         background: '#4b5563',   // Fondo negro
                         color: '#fff',           // Texto blanco
                         padding: '16px',
-                        borderRadios: '8px',
+                        borderRadius: '8px',
                     },
-                });
-                
+                });                
             }           
                       
             } catch (error) {
@@ -53,12 +52,12 @@ const Login = () => {
                         background: '#4b5563',   // Fondo negro
                         color: '#fff',           // Texto blanco
                         padding: '16px',
-                        borderRadios: '8px',
+                        borderRadius: '8px',
                     },
                 });
             }
      
-    };
+    });
 
     return ( 
         <main className="w-full h-screen flex flex-col justify-center items-center lg:justify-between lg:flex-row lg:pr-48">
@@ -66,23 +65,20 @@ const Login = () => {
                 <img src="https://cdn.pixabay.com/photo/2020/08/05/15/25/gym-5465776_1280.png" alt="" className="w-full h-full object-fill rounded-md" />
             </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="w-[75%] bg-slate-300 flex flex-col justify-center items-center text-slate-600 gap-6 p-3 rounded-md md:w-[60%] md:gap-8 lg:w-[45%] xl:max-w-[30%]">
+            <form onSubmit={onSubmit} className="w-[75%] bg-slate-300 flex flex-col justify-center items-center text-slate-600 gap-6 p-3 rounded-md md:w-[60%] md:gap-8 lg:w-[45%] xl:max-w-[30%]">
                 <h1 className="text-2xl font-bold pb-2 md:pt-3">Inicio de sesión</h1>
                 {/* email */}
                 <label className="flex gap-3 font-semibold md:gap-5" htmlFor="email">
                     <CiUser className='text-2xl text-gray-950' />
                     <Input
                         type='email'
-                        name='email'                        
                         placeholder='Escribe el email'
                         {...register('email',{
                             required: {
                                 value: true,
                                 message: 'Email requerido'
-                            },
-                           
-                    })} 
-
+                            },                        
+                        })}
                     />
                     
                 </label>
@@ -96,7 +92,6 @@ const Login = () => {
                     <RiLockPasswordLine className='text-2xl text-gray-950' />
                     <Input 
                         type="password" 
-                        name="password" 
                         id="password"
                         {...register('password', {
                             required: {
@@ -111,7 +106,7 @@ const Login = () => {
                     errors.password && <span className='text-red-500 text-sm'>{errors.password.message}</span>
                 }
                 {/* btn login */}
-                <button htmlFor="" 
+                <button 
                     className="bg-sky-600 cursor-pointer flex gap-2 items-center rounded-lg p-2 text-slate-100 font-bold mb-2 hover:scale-105 hover:bg-sky-400 hover:text-slate-800"
                     type='submit'
                 >
