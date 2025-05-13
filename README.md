@@ -1,6 +1,6 @@
 # Proyecto de Gestión de Gimnasio
 
-Este es un proyecto web para gestionar un gimnasio, realizado con React, Tailwind Css y Django Rest Framework.
+Este es un proyecto web para gestionar un gimnasio, realizado con React, TypeScript, Tailwind y Django Rest Framework.
 
 ## Requisitos
 
@@ -53,7 +53,7 @@ Este es un proyecto web para gestionar un gimnasio, realizado con React, Tailwin
 
 - **models.py**: Contiene la definición de las entidades del modelo de datos.
 
-- **serializers.py**: Contiene la definición de los serializadores para serializar y           deserializar los datos.
+- **serializers.py**: Contiene la definición de los serializadores para serializar y deserializar los datos.
 
 - **views.py**: Contiene la definición de las vistas para manejar las solicitudes HTTP.
 
