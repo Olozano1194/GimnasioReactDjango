@@ -195,10 +195,11 @@ class MembresiaViewSet(viewsets.ModelViewSet):
 
 class MembresiaAsignadaViewSet(viewsets.ModelViewSet):
     serializer_class = MembresiaAsignadaSerializer
-    queryset = MembresiaAsignada.objects.all()
+    #queryset = MembresiaAsignada.objects.all()
 
     def get_queryset(self):
         miembro_id = self.request.query_params.get('miembro')
+        base_qset = MembresiaAsignada.objects.select_related('miembro', 'membresia')
         if miembro_id:
-            return self.queryset.filter(miembro_id=miembro_id)
-        return self.queryset
+            return base_qset.filter(miembro_id=miembro_id)
+        return base_qset

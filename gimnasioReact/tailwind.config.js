@@ -16,4 +16,3 @@ export default {
   plugins: [],
 }
 
-// cbd5e1
