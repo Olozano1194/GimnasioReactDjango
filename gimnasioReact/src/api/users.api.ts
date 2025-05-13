@@ -2,7 +2,7 @@ import axios, { AxiosResponse } from 'axios';
 //Models
 import { User } from '../model/user.model';
 //DTO
-import { CreateUserDto } from '../model/dto/user.dto';
+import { CreateUserDto, LoginUserDto } from '../model/dto/user.dto';
 
 const gymApi = axios.create({
     //baseURL: 'http://localhost:8000/gym/api/v1/',
@@ -45,12 +45,9 @@ export const CreateUsers = async (user: CreateUserDto) => {
 };
 
 //Inicio de sesión
-export const login = async (email: string, password: string) => {
+export const login = async (credentials: LoginUserDto) => {
   try {
-      const response = await gymApi.post('/login/', {
-          email,
-          password
-      });            
+      const response = await gymApi.post('/login/', credentials);            
       return response.data;
       
   } catch (error) {      

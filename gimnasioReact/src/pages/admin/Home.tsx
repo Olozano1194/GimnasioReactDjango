@@ -24,7 +24,7 @@ const Home = () => {
     loadStats();
   }, []);
   //Función para dar formato a la moneda en este caso pesos colombianos
-  const formatCurrency = (amount) => {
+  const formatCurrency = (amount: number): string => {
     return new Intl.NumberFormat("es-CO", {
       style: "currency",
       currency: "COP",

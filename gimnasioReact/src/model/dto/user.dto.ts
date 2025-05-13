@@ -6,3 +6,9 @@ export interface CreateUserDto {
     password?: string;         
     avatar?: string | File;
 };
+
+
+export interface LoginUserDto {
+    email: string;
+    password: string;    
+}
