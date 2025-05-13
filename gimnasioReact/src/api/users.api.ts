@@ -1,20 +1,33 @@
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
+//Models
+import { User } from '../model/user.model';
+//DTO
+import { CreateUserDto } from '../model/dto/user.dto';
 
 const gymApi = axios.create({
     //baseURL: 'http://localhost:8000/gym/api/v1/',
     baseURL: import.meta.env.MODE === 'development' 
     ? 'http://localhost:8000/gym/api/v1'
     : 'https://gimnasioreactdjango.onrender.com/gym/api/v1',
-    // headers: {
-    //     'Content-Type': 'application/json',
-    //   },
+    headers: {
+        'Content-Type': 'application/json',
+      },
 
 });
 
+const handleApiError = (error: unknown): never => {
+    if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data?.message || error.message;
+        console.error('API Error:', errorMessage);
+        throw new Error(errorMessage);
+    }
+    throw error;
+};
+
 // Creamos un usuario
-export const CreateUsers = async (user) => {
+export const CreateUsers = async (user: CreateUserDto) => {
     try {
-        const response = await gymApi.post('/User/', user, {
+        const response: AxiosResponse<{ token: string }>  = await gymApi.post('/User/', user, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -23,18 +36,16 @@ export const CreateUsers = async (user) => {
 
         //Almacenamos el token en el localstorage para las futuras solicitudes
         //localStorage.setItem('token', token);
-        return response.data;
+        return token;
         
     } catch (error) {
-        console.error('Error fetching users:', error.response ? error.response.data : error.message);
-        throw error;
-            
+        throw handleApiError(error);  
     }
   
 };
 
 //Inicio de sesión
-export const login = async (email, password) => {
+export const login = async (email: string, password: string) => {
   try {
       const response = await gymApi.post('/login/', {
           email,
@@ -42,15 +53,14 @@ export const login = async (email, password) => {
       });            
       return response.data;
       
-  } catch (error) {
-      console.error('Error logging in:',error);
-      throw error;      
+  } catch (error) {      
+      throw handleApiError(error);      
   }
   
 }
 
 //function profile
-export const getUserProfile = async () => {
+export const getUserProfile = async (): Promise<{user: User}> => {
     const token = localStorage.getItem('token');
 
     try {
@@ -65,9 +75,7 @@ export const getUserProfile = async () => {
         return response.data;
         
     } catch (error) {
-        console.error('Error fetching profile:',error);
-        throw error;
-        
+        throw handleApiError(error);        
     }
 };
 
@@ -76,45 +84,36 @@ export const getUsers = async () => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await gymApi.get('/User/', {
+        const response = await gymApi.get<User[]>('/User/', {
             headers: {
                 'Authorization': `Token ${token}`
                 },
             }
         );
-        //console.log('Users response:', response.data);
-        
+        //console.log('Users response:', response.data);        
         return response.data;
         
     } catch (error) {
-        console.error('Error fetching users:',error);
-        throw error;
-        
+        throw handleApiError(error);        
     }
 };
 
 //Actualizar Usuario
-export const updateUser = async (id, user) => {
+export const updateUser = async (id: number, user: CreateUserDto): Promise<User> => {
     const token = localStorage.getItem('token');
     const formData = new FormData();
 
     if (user.name) formData.append('name', user.name);
     if (user.lastname) formData.append('lastname', user.lastname);
-    if (user.roles) formData.append('roles', user.roles);
+    if (typeof user.roles === 'string') formData.append('roles', user.roles);
     //if (user.email) formData.append('email', user.email);
 
     if (user.avatar) {
         formData.append('avatar', user.avatar);
-    }
-
-    // Debug - ver contenido del FormData
-    for (let pair of formData.entries()) {
-        console.log(pair[0] + ': ' + pair[1]);
-    }
-    
+    }      
 
     try {
-        const response = await gymApi.put(`/User/${id}/`, formData, {
+        const response = await gymApi.put<User>(`/User/${id}/`, formData, {
             headers: {
                 'Authorization': `Token ${token}`,
                 'Content-Type': 'multipart/form-data',
@@ -123,13 +122,6 @@ export const updateUser = async (id, user) => {
         return response.data;
         
     } catch (error) {
-        console.error('Error logging in:', {
-            status: error.response?.status,
-            data: error.response?.data,
-            message: error.message
-        });
-        throw error;      
-        
-    }
-    
+        throw handleApiError(error);             
+    }    
 }

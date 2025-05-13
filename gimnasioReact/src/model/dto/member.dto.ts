@@ -1,6 +1,5 @@
-// Interfaz para la respuesta de la API (GET)
-export interface Miembro {
-    id:         number;
+//Interfaz para crear/actualizar (POST/PUT)
+export interface CreateMemberDto{
     dateInitial: string;
     dateFinal:   string;
     name:        string;
@@ -8,4 +7,4 @@ export interface Miembro {
     phone:       string;
     address:     string;
     price:       number;
-}
+};

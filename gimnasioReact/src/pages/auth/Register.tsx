@@ -4,21 +4,29 @@ import { useNavigate } from "react-router-dom";
 import { RiLoginBoxLine, RiMailFill, RiLockFill,  RiUserLine } from "react-icons/ri";
 //Mensajes
 import { toast } from 'react-hot-toast';
-
 //ui
 import { Input, Label, Button } from '../../components/ui/index';
-
 //api
 import { CreateUsers } from "../../api/users.api";
+//Models
+import { User } from '../../model/user.model';
 
 const Register = () => {
-    const { register, handleSubmit, formState: {errors}, watch, reset } = useForm();
+    const { register, handleSubmit, formState: {errors}, watch, reset } = useForm<User>();
     const navigate = useNavigate();
 
-    const onSubmit = handleSubmit(async (data) => {
+    const onSubmit = handleSubmit(async (data: User) => {
         //console.log('Form data:', data);
         try {
-            const rest = await CreateUsers(data);
+            const requestData = {
+                name: data.name,
+                lastname: data.lastname,
+                email: data.email,
+                password: data.password,
+                roles: data.roles,                
+            };
+
+            await CreateUsers(requestData);
             //console.log('Respuesta del servidor:',rest.data);            
             reset();
             toast.success('Usuario Creado', {
@@ -28,14 +36,18 @@ const Register = () => {
                     background: '#4b5563',   // Fondo negro
                     color: '#fff',           // Texto blanco
                     padding: '16px',
-                    borderRadios: '8px',
+                    borderRadius: '8px',
                 },
 
             });
             navigate('/dashboard/listUser');
             
         } catch (error) {
-            console.error("Error al registrar el usuario:", error.response ? error.response.data : error.message);            
+            const errorMessage = error instanceof Error ? error.message : 'Error al registrar el miembro';
+            toast.error(errorMessage, {
+                duration: 3000,
+                position: 'bottom-right',
+            });            
         }
         
     });
@@ -47,7 +59,7 @@ const Register = () => {
                 <h1 className="text-2xl font-bold pb-4 md:pt-3">Registrarse</h1>
 
                 {/* Name */}
-                <Label htmlFor="name"><span className='flex items-center'><RiUserLine className='lg:text-2xl xl:text-xl' />Nombre</span><Input type='text' name='name' placeholder='Escribe el nombre'
+                <Label htmlFor="name"><span className='flex items-center'><RiUserLine className='lg:text-2xl xl:text-xl' />Nombre</span><Input type='text' placeholder='Escribe el nombre'
                 {...register('name',{
                     required: {
                         value: true,
@@ -68,7 +80,7 @@ const Register = () => {
                     errors.name && <span className='text-red-500 text-sm'>{errors.name.message}</span>
                 }
                 {/* LastName */}
-                <Label htmlFor="lastname"><span className='flex gap-2 items-center'><RiUserLine className='lg:text-2xl xl:text-xl' />Apellido</span><Input type="text" name='lastname'  placeholder='Escribe el apellido'
+                <Label htmlFor="lastname"><span className='flex gap-2 items-center'><RiUserLine className='lg:text-2xl xl:text-xl' />Apellido</span><Input type="text" placeholder='Escribe el apellido'
                 {...register('lastname',{
                     required: {
                         value: true,
@@ -89,7 +101,7 @@ const Register = () => {
                     errors.lastname && <span className='text-red-500 text-sm'>{errors.lastname.message}</span>
                 }
                 {/* Roles */}
-                <Label htmlFor="roles"><span className='flex gap-2 items-center'><RiUserLine className='lg:text-2xl xl:text-xl' />Roles</span><select name='roles' className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500'
+                <Label htmlFor="roles"><span className='flex gap-2 items-center'><RiUserLine className='lg:text-2xl xl:text-xl' />Roles</span><select className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500'
                 {...register('roles',{
                     required: {
                         value: true,
@@ -106,7 +118,7 @@ const Register = () => {
                     errors.roles && <span className='text-red-500 text-sm'>{errors.roles.message}</span>
                 }
                 {/* Email */}
-                <Label htmlFor="email"><span className='flex gap-2 items-center'><RiMailFill className='lg:text-2xl xl:text-xl' />Correo</span><Input type="email" name='email'  placeholder='Escribe el correo'
+                <Label htmlFor="email"><span className='flex gap-2 items-center'><RiMailFill className='lg:text-2xl xl:text-xl' />Correo</span><Input type="email" placeholder='Escribe el correo'
                 {...register('email',{
                     required: {
                         value: true,
@@ -123,7 +135,7 @@ const Register = () => {
                     errors.email && <span className='text-red-500 text-sm'>{errors.email.message}</span>
                 }
                 {/* Password */}
-                <Label htmlFor="password"><span className='flex gap-2 items-center'><RiLockFill className='lg:text-2xl xl:text-xl' />Contraseña</span><Input type="password" name='password' placeholder='Escribe la contraseña'
+                <Label htmlFor="password"><span className='flex gap-2 items-center'><RiLockFill className='lg:text-2xl xl:text-xl' />Contraseña</span><Input type="password" placeholder='Escribe la contraseña'
                 {...register('password',{
                     required: {
                         value: true,

@@ -13,6 +13,23 @@ const gymApi = axios.create({
 
 });
 
+
+// type ApiError = {
+//     message: string;
+//     status?: number;
+//     errors?: Record<string, string[]>;
+// };
+
+// Función helper para manejar errores
+const handleApiError = (error: unknown): never => {
+    if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data?.message || error.message;
+        console.error('API Error:', errorMessage);
+        throw new Error(errorMessage);
+    }
+    throw error;
+};
+
 //Creación de miembros del gimnasio
 export const createAsignarMemberShips = async (member: CreateAsignarMemberShipsDto) => {
     const token = localStorage.getItem('token');
@@ -24,10 +41,8 @@ export const createAsignarMemberShips = async (member: CreateAsignarMemberShipsD
             });      
         return data;
         
-    } catch (error: unknown) {
-        if (axios.isAxiosError(error)) {
-            console.error('Error fetching users:', error.response ? error.response.data : error.message);           
-        }           
+    } catch (error) {
+        throw handleApiError(error);              
     }  
 };
 
@@ -36,22 +51,19 @@ export const getAsignarMemberList = async () => {
     const token = localStorage.getItem('token');
 
     try {
-        const { data } = await gymApi.get<AsignarMemberShips>(`/MemberShipsAsignada/`, {
+        const { data } = await gymApi.get<AsignarMemberShips[]>(`/MemberShipsAsignada/`, {
             headers: {
                 'Authorization': `Token ${token}`
                 },
             });
-        //console.log('API Response:', response.data);
-        
+        //console.log('API Response:', response.data);        
         return data;
         
     } catch (error) {
-        console.error('Error logging in:',error);
-        throw error;      
-        
+        throw handleApiError(error);        
     }
     
-}
+};
 
 //Eliminar miembro del gimnasio
 export const deleteAsignarMemberShips = async (id: number): Promise<void> => {
@@ -63,19 +75,15 @@ export const deleteAsignarMemberShips = async (id: number): Promise<void> => {
                 'Authorization': `Token ${token}`
                 },
             });
-        //console.log('API Response:', response.data);
-        
+        //console.log('API Response:', response.data);        
         return response.data;
         
     } catch (error) {
-        console.error('Error logging in:',error);
-        throw error;      
-        
-    }
-    
-}
+        throw handleApiError(error);       
+    }    
+};
 
-//Obtener miembro del gimnasio
+//Obtener una asignación de membresía especifica
 export const getAsignarMemberShips = async (id: number): Promise<AsignarMemberShips> => {
     const token = localStorage.getItem('token');
 
@@ -88,19 +96,17 @@ export const getAsignarMemberShips = async (id: number): Promise<AsignarMemberSh
         return data;
         
     } catch (error) {
-        console.error('Error logging in:',error);
-        throw error;      
-        
+        throw handleApiError(error);        
     }
     
-}
+};
 
 //Actualizar miembro del gimnasio
-export const updateAsignarMemberShips = async (id: number, memberShips: CreateAsignarMemberShipsDto) => {
+export const updateAsignarMemberShips = async (id: number, memberShips: CreateAsignarMemberShipsDto): Promise<AsignarMemberShips> => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await gymApi.put(`/MemberShipsAsignada/${id}/`, memberShips, {
+        const response = await gymApi.put<AsignarMemberShips>(`/MemberShipsAsignada/${id}/`, memberShips, {
             headers: {
                 'Authorization': `Token ${token}`
                 },
@@ -108,9 +114,6 @@ export const updateAsignarMemberShips = async (id: number, memberShips: CreateAs
         return response.data;
         
     } catch (error) {
-        console.error('Error logging in:',error);
-        throw error;      
-        
-    }
-    
-}
+        throw handleApiError(error);        
+    }    
+};

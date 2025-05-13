@@ -1,4 +1,9 @@
 import axios from 'axios';
+//Models
+import { Miembro } from '../model/member.model';
+//DTO
+import { CreateMemberDto } from '../model/dto/member.dto';
+
 
 const gymApi = axios.create({
     //gitbaseURL: 'http://localhost:8000/gym/api/v1/',
@@ -11,23 +16,29 @@ const gymApi = axios.create({
 
 });
 
+const handleApiError = (error: unknown): never => {
+    if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data?.message || error.message;
+        console.error('API Error:', errorMessage);
+        throw new Error(errorMessage);
+    }
+    throw error;
+};
+
 //Creación de miembros del gimnasio
-export const createMember = async (userGym) => {
+export const createMember = async (userGym: CreateMemberDto) => {
     const token = localStorage.getItem('token');
     try {
-        const response = await gymApi.post('/UserGym/', userGym, {
+        const response = await gymApi.post<Miembro>('/UserGym/', userGym, {
             headers: {
                 'Authorization': `Token ${token}`
                 },
             });      
         return response.data;
         
-    } catch (error) {
-        console.error('Error fetching users:', error.response ? error.response.data : error.message);
-        throw error;
-            
-    }
-  
+    } catch (error: unknown) {  
+        throw handleApiError(error);                    
+    } 
 };
 
 //Lista de los miembros del gimnasio
@@ -35,7 +46,7 @@ export const getMembers = async () => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await gymApi.get(`/UserGym/`, {
+        const response = await gymApi.get<Miembro[]>(`/UserGym/`, {
             headers: {
                 'Authorization': `Token ${token}`
                 },
@@ -45,15 +56,14 @@ export const getMembers = async () => {
         return response.data;
         
     } catch (error) {
-        console.error('Error logging in:',error);
-        throw error;      
+        throw handleApiError(error);      
         
     }
     
 }
 
 //Eliminar miembro del gimnasio
-export const deleteMember = async (id) => {
+export const deleteMember = async (id: number): Promise<void> => {
     const token = localStorage.getItem('token');
 
     try {
@@ -67,19 +77,17 @@ export const deleteMember = async (id) => {
         return response.data;
         
     } catch (error) {
-        console.error('Error logging in:',error);
-        throw error;      
+        throw handleApiError(error);     
         
-    }
-    
+    }    
 }
 
 //Obtener miembro del gimnasio
-export const getMember = async (id) => {
+export const getMember = async (id: number): Promise<Miembro> => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await gymApi.get(`/UserGym/${id}/`, {
+        const response = await gymApi.get<Miembro>(`/UserGym/${id}/`, {
             headers: {
                 'Authorization': `Token ${token}`
                 },
@@ -87,19 +95,16 @@ export const getMember = async (id) => {
         return response.data;
         
     } catch (error) {
-        console.error('Error logging in:',error);
-        throw error;      
-        
-    }
-    
+        throw handleApiError(error);        
+    }    
 }
 
 //Actualizar miembro del gimnasio
-export const updateMember = async (id, userGym) => {
+export const updateMember = async (id: number, userGym: CreateMemberDto): Promise<Miembro> => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await gymApi.put(`/UserGym/${id}/`, userGym, {
+        const response = await gymApi.put<Miembro>(`/UserGym/${id}/`, userGym, {
             headers: {
                 'Authorization': `Token ${token}`
                 },
@@ -107,9 +112,6 @@ export const updateMember = async (id, userGym) => {
         return response.data;
         
     } catch (error) {
-        console.error('Error logging in:',error);
-        throw error;      
-        
-    }
-    
+        throw handleApiError(error);       
+    }    
 }

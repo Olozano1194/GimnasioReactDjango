@@ -1,48 +1,51 @@
 import { useEffect, useState } from "react";
-
 // icons
 import { RiNotification3Line, RiArrowDownSLine, RiSettings3Line, RiLogoutCircleRLine, RiThumbUpLine, RiChat3Line } from "react-icons/ri";
-
 //Enlaces
 import { Link, useNavigate } from "react-router-dom";
-
 //react-menu
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
-
 //API
 import { getUserProfile } from '../../api/users.api';
+//Mensajes
+import { toast } from 'react-hot-toast';
 
 function NavHeader() {
     const navigate = useNavigate();
-    const [user, setUser] = useState({ name: '', lastName: '', email: '', avatar: null});
+    const [user, setUser] = useState({ name: '', lastName: '', email: '', avatar: ''});
+    const [_, setLoggedOut] = useState<boolean>(false);
 
     useEffect(() => {
         const axiosUserData = async () => {
             try {
                 const data = await getUserProfile();
                 //console.log('User data received:', data);
+
+                const avatarUrl = data.user.avatar instanceof File ? URL.createObjectURL(data.user.avatar) : data.user.avatar ?? '';
                 
                 setUser({
                     name: data.user.name,
                     lastName: data.user.lastname,
                     email: data.user.email,
-                    avatar: data.user.avatar
+                    avatar: avatarUrl
                 });
             }catch (error) {
-                console.error(error);
+                const errorMessage = error instanceof Error ? error.message : 'Error al registrar el miembro';
+                toast.error(errorMessage, {
+                    duration: 3000,
+                    position: 'bottom-right',
+                });  
             }
         };
         axiosUserData();
     }, []);
 
-    // Esta función nos sirve para cerrar la sesión
-    const setLoggedOut= false;
-    const handleLogout = () => {
+    // Esta función nos sirve para cerrar la sesión    
+    const handleLogOut = () => {
         localStorage.removeItem('token');
-        setLoggedOut(true)
+        setLoggedOut(true);
         console.log('Token removed:', localStorage.getItem('token'));
-        navigate('/', { replace: true});
-        
+        navigate('/');        
     }
     
     return (
@@ -56,7 +59,7 @@ function NavHeader() {
                     <MenuItems anchor='bottom end' className='bg-secondary mt-1 p-4 rounded-lg'>
                         <h1 className="text-dark text-center font-medium">Notificaciones</h1>
                         <hr className="my-6 border-gray-500" />
-                        <MenuItem className='p-0 hover:bg-slate-200'>
+                        <MenuItem as='div' className='p-0 hover:bg-slate-200'>
                             <Link to="/notifications" 
                                 className="flex flex-1 items-center gap-x-2 py-2 px-4 hover:bg-slate-200 transition-colors rounded-lg text-dark">
                                 <img src="https://img.freepik.com/foto-gratis/feliz-optimista-guapo-gerente-ventas-latina-apuntando-lado-mirando-camara_1262-12679.jpg" alt="" className="w-8 h-8 object-cover rounded-full" />
@@ -70,7 +73,7 @@ function NavHeader() {
                             </Link>
                         </MenuItem>
                         <hr className="my-6 border-gray-500" />
-                        <MenuItem className='p-0 hover:bg-slate-200'>
+                        <MenuItem as='div' className='p-0 hover:bg-slate-200'>
                             <Link to="/notifications" 
                                 className="flex flex-1 items-center gap-x-2 py-2 px-4 hover:bg-slate-200 transition-colors rounded-lg text-dark">
                                 <RiThumbUpLine className="p-2 bg-blue-100 text-blue-700 box-content rounded-full" />
@@ -84,7 +87,7 @@ function NavHeader() {
                             </Link>
                         </MenuItem>
                         <hr className="my-6 border-gray-500" />
-                        <MenuItem className='p-0 hover:bg-slate-200'>
+                        <MenuItem as='div' className='p-0 hover:bg-slate-200'>
                             <Link to="/notifications" 
                                 className="flex items-center gap-x-2 py-2 px-4 hover:bg-slate-200 transition-colors rounded-lg text-dark">
                                 <RiChat3Line className="p-2 bg-yellow-100 text-yellow-500 box-content rounded-full" />
@@ -98,7 +101,7 @@ function NavHeader() {
                             </Link>
                         </MenuItem>
                         <hr className="my-6 border-gray-200" />
-                        <MenuItem className='p-0 hover:bg-slate-200 flex justify-center cursor-default'>
+                        <MenuItem as='div' className='p-0 hover:bg-slate-200 flex justify-center cursor-default'>
                         <Link to="/" className="text-dark text-base hover:text-sky-700 transition-colors" >
                             Todas las notificaciones
                         </Link>
@@ -117,7 +120,7 @@ function NavHeader() {
                         <RiArrowDownSLine className="text-2xl" />
                     </MenuButton>
                     <MenuItems anchor='bottom' className='bg-secondary mt-1 p-4 rounded-lg'>
-                        <MenuItem className='p-0 hover:bg-gray-500'>
+                        <MenuItem as='div' className='p-0'>
                             <Link to='#' className="rounded-lg transition-colors text-dark hover:bg-gray-200 flex items-center gap-x-4 py-2 px-4">
                                 <img 
                                     src={user.avatar || "https://img.freepik.com/foto-gratis/feliz-optimista-guapo-gerente-ventas-latina-apuntando-lado-mirando-camara_1262-12679.jpg"} alt="img-user"
@@ -132,7 +135,7 @@ function NavHeader() {
                         </MenuItem>
                         <hr className="my-4 border-gray-900/10" />
 
-                        <MenuItem className='p-0 hover:bg-gray-500'>
+                        <MenuItem as='div' className='p-0'>
                             <Link to='/dashboard/profile' className="rounded-lg transition-colors text-dark hover:bg-gray-200 flex items-center gap-x-4 py-2 px-4 flex-1">
                                 <RiSettings3Line className="text-2xl" />
                                 Configuración                                                
@@ -141,9 +144,10 @@ function NavHeader() {
                         </MenuItem>
                         <hr className="my-4 border-gray-900/10" />
 
-                        <MenuItem className='p-0 hover:bg-gray-500'>
-                            <Link 
-                                onClick={handleLogout}
+                        <MenuItem as='div' className='p-0'>
+                            <Link
+                                to=''
+                                onClick={handleLogOut}
                                 className="rounded-lg transition-colors text-dark hover:bg-gray-200 flex items-centerr gap-x-4 py-2 px-4 flex-1">
                                 <RiLogoutCircleRLine />
                                 Cerrar Sesión                                                

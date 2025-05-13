@@ -7,40 +7,45 @@ import { RiLoginBoxLine } from "react-icons/ri";
 import { MdOutlinePriceChange } from "react-icons/md";
 import { GiDuration } from "react-icons/gi";
 import { FaTag } from 'react-icons/fa';
-
 //Mensajes
 import { toast } from "react-hot-toast";
-
 //ui
 import { Input, Label, Button } from '../../../components/ui/index';
-
 //API
 import { createMemberShips, updateMemberShips, getMemberShips } from '../../../api/memberShips.api';
+//Models
+import { Membresia } from '../../../model/memberShips.model';
 
 
 const MemberShipsForm = () => {
-    const params = useParams();
+    const params = useParams<{ id?: string }>();
     const navigate = useNavigate();
-    const { register, handleSubmit, formState: {errors}, watch, reset } = useForm();    
+    const { register, handleSubmit, formState: {errors}, reset } = useForm<Membresia>();    
     
-    const onSubmit = handleSubmit(async (data) => {
+    const onSubmit = handleSubmit(async (data: Membresia) => {
         //console.log('Form data:', data);
         try {
-        if (params.id) {
-            await updateMemberShips(params.id, data);
-            //console.log('Actualizando miembro:', params.id);
-            toast.success('Membresía Actualizada', {
-                duration: 3000,
-                position: 'bottom-right',
-                style: {
-                    background: '#4b5563',   // Fondo negro
-                    color: '#fff',           // Texto blanco
-                    padding: '16px',
-                    borderRadios: '8px',
-                },
-            });                 
+            const requestData = {
+                name: data.name,
+                price: Number(data.price),
+                duration: data.duration,
+            };
+
+            if (params.id) {
+                await updateMemberShips(parseInt(params.id), requestData);
+                //console.log('Actualizando miembro:', params.id);
+                toast.success('Membresía Actualizada', {
+                    duration: 3000,
+                    position: 'bottom-right',
+                    style: {
+                        background: '#4b5563',   // Fondo negro
+                        color: '#fff',           // Texto blanco
+                        padding: '16px',
+                        borderRadius: '8px',
+                    },
+                });                 
         }else {
-            await createMemberShips(data);
+            await createMemberShips(requestData);
             //console.log('Respuesta del servidor:',rest.data);            
             reset();
             toast.success('Membresía Creada', {
@@ -50,30 +55,34 @@ const MemberShipsForm = () => {
                     background: '#4b5563',   // Fondo negro
                     color: '#fff',           // Texto blanco
                     padding: '16px',
-                    borderRadios: '8px',
+                    borderRadius: '8px',
                 },
             });                
         }
         navigate('/dashboard/memberships-list');
                  
         } catch (error) {
-            console.error("Error al registrar el usuario:", error.response ? error.response.data : error.message);            
+            const errorMessage = error instanceof Error ? error.message : 'Error al registrar la membresía';
+            toast.error(errorMessage, {
+                duration: 3000,
+                position: 'bottom-right',
+            });             
         }
             
     });
     
     useEffect(() => {
-        const axiosUserData = async () => {
+        const fetchUserData = async () => {
             try {
             if (params.id) {
-                const response = await getMemberShips(params.id);
+                const response = await getMemberShips(parseInt(params.id));
                 reset(response);
             }
             }catch (error) {
                 console.error('Error al obtener la membresía',error);
             }
         }
-        axiosUserData();
+        fetchUserData();
     }, [params.id, reset]);
     
     return (
@@ -82,7 +91,7 @@ const MemberShipsForm = () => {
                 <h1 className="text-xl font-bold pt-3 pb-2 md:pt-3">{ params.id ? 'Actualizar Membresía' : 'Registrar Membresía' }</h1>
 
                 {/* Name */}
-                <Label htmlFor="name"><span className='flex gap-2 items-center'><FaTag className='lg:text-2xl xl:text-xl' />Nombre del plan</span><select name='name' className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500'
+                <Label htmlFor="name"><span className='flex gap-2 items-center'><FaTag className='lg:text-2xl xl:text-xl' />Nombre del plan</span><select className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500'
                 {...register('name',{
                     required: {
                         value: true,
@@ -100,7 +109,7 @@ const MemberShipsForm = () => {
                     errors.name && <span className='text-red-500 text-sm'>{errors.name.message}</span>                }
                 
                 {/* Price */}
-                <Label htmlFor="price"><span className='flex gap-2 items-center'><MdOutlinePriceChange className='lg:text-2xl' />Precio</   span><Input type="number" name='price' placeholder='Colocar precio'
+                <Label htmlFor="price"><span className='flex gap-2 items-center'><MdOutlinePriceChange className='lg:text-2xl' />Precio</   span><Input type="number" placeholder='Colocar precio'
                 {...register('price',{
                     required: {
                         value: true,
@@ -113,7 +122,7 @@ const MemberShipsForm = () => {
                     errors.price && <span className='text-red-500 text-sm'>{errors.price.message}</span>
                 }
                 {/* Duration */}
-                <Label htmlFor="duration"><span className='flex gap-2 items-center'><GiDuration className='lg:text-2xl' />Duración</span><Input type="number" name='duration' placeholder='Escribe el nombre'
+                <Label htmlFor="duration"><span className='flex gap-2 items-center'><GiDuration className='lg:text-2xl' />Duración</span><Input type="number" placeholder='Escribe el nombre'
                 {...register('duration',{
                     required: {
                         value: true,

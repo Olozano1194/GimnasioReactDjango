@@ -3,5 +3,13 @@
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
-  ]
+  ],
+  "compilerOptions": {
+    "strict": true,  // Habilita todas las comprobaciones estrictas
+    "noImplicitAny": true,  // Evita el uso de `any` implícito
+    "noImplicitThis": true,  // Detecta el uso implícito de `this`
+    "alwaysStrict": true,  // Habilita el modo estricto de ECMAScript
+    "skipLibCheck": true,  // Omite la comprobación de tipos en bibliotecas (para mejorar el rendimiento)
+    "esModuleInterop": true,  // Permite la interoperabilidad de módulos de ES    
+  }
 }

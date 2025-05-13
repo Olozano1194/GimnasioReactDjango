@@ -122,25 +122,26 @@ class MembresiasSerializer(serializers.ModelSerializer):
         read_only_fields = ('id',)
 
 class MembresiaAsignadaSerializer(serializers.ModelSerializer):
-    miembro = UsuarioGymSerializer(read_only=True)
-    membresia = MembresiasSerializer(read_only=True)
+    miembro_details = UsuarioGymSerializer(source='miembro', read_only=True)
+    membresia_details = MembresiasSerializer(source='membresia', read_only=True)
 
-    miembro_id = serializers.PrimaryKeyRelatedField(
-        source='miembro',
-        queryset=UsuarioGym.objects.all()
-    )
+    # miembro_id = serializers.PrimaryKeyRelatedField(
+    #     source='miembro',
+    #     queryset=UsuarioGym.objects.all()
+    # )
 
-    membresia_id = serializers.PrimaryKeyRelatedField(
-        source='membresia',
-        queryset=Membresia.objects.all()
-    )
+    # membresia_id = serializers.PrimaryKeyRelatedField(
+    #     source='membresia',
+    #     queryset=Membresia.objects.all()
+    # )
 
     class Meta:
         model = MembresiaAsignada
-        fields = '__all__'
-        read_only_fields = ('id', 'miembro', 'membresia', 'dateFinal')
+        fields = ['id', 'miembro', 'membresia', 'dateInitial', 'dateFinal', 'miembro_details', 'membresia_details']
+        read_only_fields = ('id','dateFinal')
 
     def create(self, validated_data):
         membresia = validated_data['membresia']
         validated_data['dateFinal'] = validated_data['dateInitial'] + timedelta(days=membresia.duration)
-        return super().create(validated_data)
+        instance = super().create(validated_data)
+        return instance

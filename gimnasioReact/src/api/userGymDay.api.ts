@@ -1,4 +1,9 @@
 import axios from 'axios';
+//Models
+import { MemberDay } from '../model/memberDay.model';
+//DTO
+import { CreateMemberDayDto } from '../model/dto/memberDay.dto';
+
 
 const gymApi = axios.create({
     //baseURL: 'http://localhost:8000/gym/api/v1/',
@@ -11,11 +16,20 @@ const gymApi = axios.create({
 
 });
 
+const handleApiError = (error: unknown): never => {
+    if (axios.isAxiosError(error)) {
+        const errorMessage = error.response?.data?.message || error.message;
+        console.error('API Error:', errorMessage);
+        throw new Error(errorMessage);
+    }
+    throw error;
+};
+
 //Creación de miembros del gimnasio
-export const createMemberDay = async (userGymDay) => {
+export const createMemberDay = async (userGymDay: CreateMemberDayDto) => {
     const token = localStorage.getItem('token');
     try {
-        const response = await gymApi.post('/UserGymDay/', userGymDay, {
+        const response = await gymApi.post<MemberDay>('/UserGymDay/', userGymDay, {
             headers: {
                 'Authorization': `Token ${token}`
             },
@@ -24,10 +38,8 @@ export const createMemberDay = async (userGymDay) => {
         return response.data;
         
     } catch (error) {
-        console.error('Error fetching users:', error.response ? error.response.data : error.message);
-        throw error;            
-    }
-  
+        throw handleApiError(error);                
+    } 
 };
 
 //Lista de los miembros del gimnasio
@@ -35,7 +47,7 @@ export const getMembersDay = async () => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await gymApi.get(`/UserGymDay/`, {
+        const response = await gymApi.get<MemberDay[]>(`/UserGymDay/`, {
             headers: {
                 'Authorization': `Token ${token}`
                 },
@@ -45,15 +57,13 @@ export const getMembersDay = async () => {
         return response.data;
         
     } catch (error) {
-        console.error('Error logging in:',error);
-        throw error;      
-        
+        throw handleApiError(error);        
     }
     
 }
 
 //Eliminar miembro del gimnasio
-export const deleteMember = async (id) => {
+export const deleteMember = async (id: number): Promise<void> => {
     const token = localStorage.getItem('token');
 
     try {
@@ -67,19 +77,16 @@ export const deleteMember = async (id) => {
         return response.data;
         
     } catch (error) {
-        console.error('Error logging in:',error);
-        throw error;      
-        
-    }
-    
+        throw handleApiError(error);        
+    }    
 }
 
 //Obtener miembro del gimnasio
-export const getMember = async (id) => {
+export const getMember = async (id: number): Promise<MemberDay> => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await gymApi.get(`/UserGymDay/${id}/`, {
+        const response = await gymApi.get<MemberDay>(`/UserGymDay/${id}/`, {
             headers: {
                 'Authorization': `Token ${token}`
                 },
@@ -87,19 +94,16 @@ export const getMember = async (id) => {
         return response.data;
         
     } catch (error) {
-        console.error('Error logging in:',error);
-        throw error;      
-        
-    }
-    
+        throw handleApiError(error);        
+    }    
 }
 
 //Actualizar miembro del gimnasio
-export const updateMember = async (id, userGym) => {
+export const updateMember = async (id: number, userGym: CreateMemberDayDto) => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await gymApi.put(`/UserGymDay/${id}/`, userGym, {
+        const response = await gymApi.put<MemberDay>(`/UserGymDay/${id}/`, userGym, {
             headers: {
                 'Authorization': `Token ${token}`
                 },
@@ -107,11 +111,8 @@ export const updateMember = async (id, userGym) => {
         return response.data;
         
     } catch (error) {
-        console.error('Error logging in:',error);
-        throw error;      
-        
-    }
-    
+        throw handleApiError(error);        
+    }    
 }
 
 export const getHome = async () => {
@@ -124,9 +125,6 @@ export const getHome = async () => {
             });
         return response.data;
     } catch (error) {
-        console.error('Error al mostrar los datos en el Home:',error);
-        throw error;      
-        
-    }
-    
+        throw handleApiError(error);        
+    }    
 };

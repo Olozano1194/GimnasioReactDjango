@@ -1,7 +1,7 @@
-import {useForm} from 'react-hook-form';
-import { useParams, useNavigate } from "react-router-dom";
 //Estados
 import { useEffect } from "react";
+import {useForm} from 'react-hook-form';
+import { useParams, useNavigate } from "react-router-dom";
 //Icons
 import { CiUser } from 'react-icons/ci';
 import { RiLoginBoxLine } from "react-icons/ri";
@@ -10,23 +10,35 @@ import { BsCalendar2Date } from "react-icons/bs";
 import { LiaAddressCardSolid } from "react-icons/lia";
 //Mensajes
 import { toast } from "react-hot-toast";
-
 //ui
 import { Input, Label, Button } from '../../../components/ui/index';
-
 //API
 import { createMember, updateMember, getMember } from '../../../api/userGym.api';
+//Models
+import { Miembro } from "../../../model/member.model";
+
 
 const RegisterMiembro = () => {
-    const params = useParams();
+    const params = useParams<{ id?: string }>();
     const navigate = useNavigate();
-    const { register, handleSubmit, formState: {errors}, watch, reset } = useForm();    
+    const { register, handleSubmit, formState: {errors}, reset } = useForm<Miembro>();    
 
-    const onSubmit = handleSubmit(async (data) => {
+    const onSubmit = handleSubmit(async (data: Miembro) => {
         //console.log('Form data:', data);
         try {
+            //preparamos datos para el back
+            const requestData = {
+                name: data.name,
+                lastname: data.lastname,
+                phone: data.phone,
+                address: data.address,
+                dateInitial: data.dateInitial,
+                dateFinal: data.dateFinal,
+                price: Number(data.price)
+            }            
+
             if (params.id) {
-                await updateMember(params.id, data);
+                await updateMember(parseInt(params.id), requestData);
                 //console.log('Actualizando miembro:', params.id);
                 toast.success('Miembro Actualizado', {
                     duration: 3000,
@@ -35,12 +47,12 @@ const RegisterMiembro = () => {
                         background: '#4b5563',   // Fondo negro
                         color: '#fff',           // Texto blanco
                         padding: '16px',
-                        borderRadios: '8px',
+                        borderRadius: '8px',
                     },
 
                 });                 
             }else {
-                await createMember(data);
+                await createMember(requestData);
                 //console.log('Respuesta del servidor:',rest.data);            
                 reset();
                 toast.success('Miembro Creado', {
@@ -50,7 +62,7 @@ const RegisterMiembro = () => {
                         background: '#4b5563',   // Fondo negro
                         color: '#fff',           // Texto blanco
                         padding: '16px',
-                        borderRadios: '8px',
+                        borderRadius: '8px',
                     },
 
                 });                
@@ -58,20 +70,23 @@ const RegisterMiembro = () => {
             //Se retrasa la navegación para que se muestre la notificación
             //setTimeout(() => {
             navigate('/dashboard/miembros');
-            //}, 1000);
-           
+            //}, 1000);           
             
         } catch (error) {
-            console.error("Error al registrar el usuario:", error.response ? error.response.data : error.message);            
+            const errorMessage = error instanceof Error ? error.message : 'Error al registrar el miembro';
+            toast.error(errorMessage, {
+                duration: 3000,
+                position: 'bottom-right',
+            });              
         }
         
     });
 
     useEffect(() => {
-        const axiosUserData = async () => {
+        const fetchUserData = async () => {
             try {
                 if (params.id) {
-                    const response = await getMember(params.id);
+                    const response = await getMember(parseInt(params.id));
 
                     //formateamos la fecha antes de pasarla al formulario
                     if (response.dateInitial && response.dateFinal) {
@@ -85,10 +100,10 @@ const RegisterMiembro = () => {
                 console.error('Error al obtener el miembro',error);
             }
         }
-        axiosUserData();
+        fetchUserData();
     }, [params.id, reset]);
 
-    const formatDate = (date) => {
+    const formatDate = (date: string): string => {
         if (!date) return ''; // Retorna un valor vacío si la fecha es undefined o null
         try {
             const [day, month, year] = date.split('-');
@@ -105,7 +120,7 @@ const RegisterMiembro = () => {
                 <h1 className="text-xl font-bold pt-3 pb-2 md:pt-3">{ params.id ? 'Actualizar Miembro' : 'Registrar Miembro' }</h1>
 
                 {/* Name */}
-                <Label htmlFor="name"><span className='flex gap-2 items-center'><CiUser className='lg:text-2xl' />Nombre</span><Input type="text" name='name' placeholder='Escribe el nombre'
+                <Label htmlFor="name"><span className='flex gap-2 items-center'><CiUser className='lg:text-2xl' />Nombre</span><Input type="text" placeholder='Escribe el nombre'
                 {...register('name',{
                     required: {
                         value: true,
@@ -126,7 +141,7 @@ const RegisterMiembro = () => {
                     errors.name && <span className='text-red-500 text-sm'>{errors.name.message}</span>
                 }
                 {/* LastName */}
-                <Label htmlFor="lastname"><span className='flex gap-2 items-center'><CiUser className='lg:text-2xl' />Apellido</span><Input type="text" name='lastname' placeholder='Escribe el apellido'
+                <Label htmlFor="lastname"><span className='flex gap-2 items-center'><CiUser className='lg:text-2xl' />Apellido</span><Input type="text" placeholder='Escribe el apellido'
                 {...register('lastname',{
                     required: {
                         value: true,
@@ -147,7 +162,7 @@ const RegisterMiembro = () => {
                     errors.lastname && <span className='text-red-500 text-sm'>{errors.lastname.message}</span>
                 }
                 {/* Phone */}
-                <Label htmlFor="phone"><span className='flex gap-2 items-center'><MdOutlinePhoneAndroid className='lg:text-2xl' />Telefono</span><Input type="number" name='phone' placeholder='Escribe el telefono'
+                <Label htmlFor="phone"><span className='flex gap-2 items-center'><MdOutlinePhoneAndroid className='lg:text-2xl' />Telefono</span><Input type="tel" placeholder='Escribe el telefono'
                 {...register('phone',{
                     required: {
                         value: true,
@@ -168,7 +183,7 @@ const RegisterMiembro = () => {
                     errors.phone && <span className='text-red-500 text-sm'>{errors.phone.message}</span>
                 }
                 {/* Address */}
-                <Label htmlFor="address"><span className='flex gap-2 items-center'><LiaAddressCardSolid className='lg:text-2xl' />Dirección</span><Input type="text" name='address' placeholder='Colocar la direccion'
+                <Label htmlFor="address"><span className='flex gap-2 items-center'><LiaAddressCardSolid className='lg:text-2xl' />Dirección</span><Input type="text" placeholder='Colocar la direccion'
                 {...register('address',{
                     required: {
                         value: true,
@@ -185,7 +200,7 @@ const RegisterMiembro = () => {
                     errors.address && <span className='text-red-500 text-sm'>{errors.address.message}</span>
                 }               
                 {/* Date Initial */}
-                <Label htmlFor="DateInitial"><span className='flex gap-2 items-center'><BsCalendar2Date className='lg:text-2xl' />Fecha Inicial</span><Input type="date" name='dateInitial'
+                <Label htmlFor="DateInitial"><span className='flex gap-2 items-center'><BsCalendar2Date className='lg:text-2xl' />Fecha Inicial</span><Input type="date"
                 {...register('dateInitial',{
                     required: {
                         value: true,
@@ -198,7 +213,7 @@ const RegisterMiembro = () => {
                     errors.dateInitial && <span className='text-red-500 text-center text-sm'>{errors.dateInitial.message}</span>
                 }
                 {/* Date final */}
-                <Label htmlFor="DateFinal"><span className='flex gap-2 items-center'><BsCalendar2Date className='lg:text-2xl' />Fecha Final</span><Input type="date" name='dateFinal'
+                <Label htmlFor="DateFinal"><span className='flex gap-2 items-center'><BsCalendar2Date className='lg:text-2xl' />Fecha Final</span><Input type="date"
                 {...register('dateFinal',{
                     required: {
                         value: true,
@@ -211,7 +226,7 @@ const RegisterMiembro = () => {
                     errors.dateFinal && <span className='text-red-500 text-center text-sm'>{errors.dateFinal.message}</span>
                 }
                 {/* Price */}
-                <Label htmlFor="price"><span className='flex gap-2 items-center'><MdOutlinePriceChange className='lg:text-2xl' />Precio</span><Input type="number" name='price' placeholder='Colocar precio'
+                <Label htmlFor="price"><span className='flex gap-2 items-center'><MdOutlinePriceChange className='lg:text-2xl' />Precio</span><Input type="number" placeholder='Colocar precio'
                 {...register('price',{
                     required: {
                         value: true,

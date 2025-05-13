@@ -1,8 +1,3 @@
-import { Link } from "react-router-dom";
-
-// Icons
-import { CgGym } from "react-icons/cg";
-
 //Components
 import NavHeader from "./headerNav/NavHeader";
 

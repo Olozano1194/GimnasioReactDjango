@@ -1,50 +1,64 @@
 import { useEffect, useState } from "react";
 //API
 import { getUsers } from '../../../api/users.api';
-
-import { createColumnHelper } from '@tanstack/react-table';
-//Enlaces
-import { Link } from "react-router-dom";
-
+//Table
+import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 //Componente principal para la listas
 import Table from '../../../components/Table';
+//Mensajes
+import { toast } from 'react-hot-toast';
+//Models
+import { User } from '../../../model/user.model';
 
 
 const ListUser = () => {
-    const [users, setUser] = useState([]);
+    const [users, setUser] = useState<User[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
-        const axiosUserData = async () => {
+        const fetchUserData = async () => {
+            setIsLoading(true);
             try {
                 const data = await getUsers();
-                //console.log('User data received:', data);
-                
+                //console.log('User data received:', data);                
                 setUser(data);
             }catch (error) {
-                console.error(error);
+                const errorMessage = error instanceof Error ? error.message : 'Error al cargar los datos';
+                toast.error(errorMessage);
+            }finally {
+                setIsLoading(false);
             }
         };
-        axiosUserData();
+        fetchUserData();
     }, []);
 
-    const columnHelper = createColumnHelper();
+    const columnHelper = createColumnHelper<User>();
 
     const columns = [
-        columnHelper.accessor('index', {
+        columnHelper.accessor((_, index) => index + 1, {
+            id: 'index',
             header: 'N°',
-            cell: ((info) => info.row.index + 1),
+            cell: (info) => {
+                // Solo mostrar el número si no es la fila de total
+                return info.row.index + 1;
+            },
         }),
-        columnHelper.accessor('name', {
+        columnHelper.accessor(row => `${row.name}`, {
+            id: 'name',
             header: 'Nombre',
-
+            cell: (info) => info.getValue(),
         }),
-        columnHelper.accessor('lastname', {
+        columnHelper.accessor(row => row.lastname, {
+            id: 'lastname',
             header: 'Apellido',
+            cell: (info) => info.getValue(),
         }),
-        columnHelper.accessor('email', {
+        columnHelper.accessor(row => row.email, {
+            id: 'email',
             header: 'Correo',
         }),
-        columnHelper.accessor('roles', {
+        columnHelper.accessor(row => row.roles, {
+            id: 'roles',
             header: 'Rol',
         }),
         // columnHelper.accessor('actions', {
@@ -56,12 +70,22 @@ const ListUser = () => {
         //         </div>
         //     )),
         // }),
-    ];
+    ] as ColumnDef<User>[];
 
     return (
         <main className="cards bg-secondary w-full flex flex-col justify-center items-center gap-y-4 p-4 rounded-xl">
             <h1 className='text-xl font-bold pb-4' >Listado de Usuarios</h1>
-            <Table data={users} columns={columns} />         
+            {
+                isLoading ? (
+                    <div className="text-center py-4">Cargando...</div>
+
+                ): (
+                    <Table 
+                        data={users} 
+                        columns={columns}                          
+                    />
+                )
+            }               
         </main>
     );
 

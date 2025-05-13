@@ -1,6 +1,5 @@
 import {useForm} from 'react-hook-form';
 import { useParams, useNavigate } from "react-router-dom";
-import axios from 'axios';
 //Estados
 import { useEffect, useState } from "react";
 //Icons
@@ -8,13 +7,10 @@ import { RiLoginBoxLine } from "react-icons/ri";
 import { FaTag } from 'react-icons/fa';
 import { BsCalendar2Date } from "react-icons/bs";
 import { CiUser } from 'react-icons/ci';
-
 //Mensajes
 import { toast } from "react-hot-toast";
-
 //ui
 import { Input, Label, Button } from '../../../components/ui/index';
-
 //API
 //MemberShips
 import { getMemberList } from '../../../api/memberShips.api';
@@ -36,7 +32,7 @@ interface FormData {
 const MemberShipsForm = () => {
     const [miembros, setMiembros] = useState<Miembro[]>([]);
     const [membresias, setMembresias] = useState<Membresia[]>([]);
-    const params = useParams();
+    const params = useParams<{ id?: string }>();
     const navigate = useNavigate();
     const { register, handleSubmit, formState: {errors}, reset } = useForm<FormData>();       
     
@@ -45,7 +41,7 @@ const MemberShipsForm = () => {
         try {
             const miembroId = parseInt(data.miembro);
             const membresiaId = parseInt(data.membresia);
-
+                
             if(isNaN(miembroId) || isNaN(membresiaId)){
                 toast.error('Por favor, selecciona un miembro y una membresía válidos');
                 return;
@@ -53,11 +49,11 @@ const MemberShipsForm = () => {
 
             //Para la creación/actualización solo enviamos los Ids y las fechas
             const requestData: CreateAsignarMemberShipsDto = {
-                miembro_id: miembroId, 
-                membresia_id: membresiaId, 
+                miembro: miembroId, 
+                membresia: membresiaId, 
                 dateInitial: data.dateInitial,                
             };
-            console.log('Datos que serán enviados:', requestData);
+            //console.log('Datos que serán enviados:', requestData);
             
             if (params.id) {
                 await updateAsignarMemberShips(parseInt(params.id), requestData);
@@ -87,30 +83,27 @@ const MemberShipsForm = () => {
                 });
                 reset();                
             }
-            navigate('/dashboard');
+            navigate('/dashboard/asignar-membresia-list');
                     
         } catch (error) {
-            if (axios.isAxiosError(error)){
-                console.error("Error al registrar el usuario:", error.response ? error.response.data : error.message);
-                toast.error('Ocurrió un error. Inténtalo de nuevo.', {
+            const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+                toast.error(errorMessage, {
                     duration: 3000,
                     position: 'bottom-right',
-                });   
-            }
-                     
-        }
-            
+                });                    
+        }            
     });
     
     useEffect(() => {
         const fetchData = async () => {
             try {
                 // Cargar listas de miembros y membresías
-                const responseMemberShips = await getMemberList();
+                const responseMemberShips: Membresia[] = await getMemberList(); // Función para obtener la lista de membresías
+                const responseMembers: Miembro[] = await getMembers(); // Función para obtener la lista de miembros
+
                 setMembresias(responseMemberShips);
-    
-                const responseMembers = await getMembers();
                 setMiembros(responseMembers);
+                
     
                 // Si params.id está presente, cargar los datos específicos para actualizar
                 if (params.id) {
@@ -119,15 +112,15 @@ const MemberShipsForm = () => {
     
                     // Prellenar los campos del formulario con los datos existentes
                     reset({
-                        miembro: responseAsignacion.miembro.id?.toString(),
-                        membresia: responseAsignacion.membresia.id?.toString(),
+                        miembro: responseAsignacion.miembro.toString(),
+                        membresia: responseAsignacion.membresia.toString(),
                         dateInitial: responseAsignacion.dateInitial,
-                        dateFinal: responseAsignacion.dateFinal,
+                        //dateFinal: responseAsignacion.dateFinal,
                     });
                 }
             } catch (error) {
-                console.error('Error al obtener los datos:', error);
-                toast.error("Error al cargar los datos. Por favor, intenta nuevamente.");
+                const errorMessage = error instanceof Error ? error.message : 'Error al cargar los datos';
+                toast.error(errorMessage);
             }
         };
     
@@ -141,7 +134,7 @@ const MemberShipsForm = () => {
                 <h1 className="text-xl font-bold pt-3 pb-2 md:pt-3">{ params.id ? 'Actualizar la Asignación de Membresía' : 'Asignar Membresía' }</h1>
 
                 {/* Miembro */}
-                <Label htmlFor="Miembro"><span className='flex gap-2 items-center'><CiUser className='lg:text-2xl xl:text-xl' />Niembro</span><select className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500'
+                <Label htmlFor="Miembro"><span className='flex gap-2 items-center'><CiUser className='lg:text-2xl xl:text-xl' />Miembro</span><select className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500'
                 {...register('miembro',{
                     required: {
                         value: true,
@@ -151,7 +144,7 @@ const MemberShipsForm = () => {
                 >
                     <option value="">Seleccione un Miembro</option>
                     {miembros.map((miembro) => (
-                        <option key={miembro.id} value={miembro.id}>{miembro.name}</option>
+                        <option key={miembro.id} value={miembro.id?.toString()}>{miembro.name}</option>
                     ))}
                     </select>
                 </Label>
@@ -169,7 +162,7 @@ const MemberShipsForm = () => {
                 >
                     <option value="">Seleccione una Membresía</option>
                     {membresias.map((membresia) => (
-                        <option key={membresia.id} value={membresia.id}>{membresia.name}</option>
+                        <option key={membresia.id} value={membresia.id?.toString()}>{membresia.name}</option>
                     ))}
                     
                 </select>

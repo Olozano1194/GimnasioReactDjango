@@ -1,23 +1,33 @@
 //hooks
 import { useState, useEffect } from "react";
 //Api
-import { getUserProfile, getUsers, updateUser } from "../../../../api/users.api";
+import { getUserProfile, updateUser } from "../../../../api/users.api";
 //icons
 import { RiEdit2Line } from "react-icons/ri";
-//form
-import {useForm} from 'react-hook-form';
+//models
+import { User } from "../../../../model/user.model";
+//Mensajes
+import { toast } from "react-hot-toast";
+
+interface FormData {
+    name: string;
+    lastname: string;
+    roles: string[];
+    avatar: string | File | undefined;
+    id: string;
+};
 
 const Profile = () => {
     
-    const [user, setUser] = useState([]);
+    const [_, setUser] = useState<User>();
     const [ editingUser, seteditingUser ] = useState(false);
     //const [loading, setLoading] = useState(true);
-    const { handleSubmit, setValue } = useForm();
-    const [formData, setFormData] = useState({
+    //const { handleSubmit, setValue } = useForm();
+    const [formData, setFormData] = useState<FormData>({
         name: '',
         lastname: '',
-        roles: '',
-        avatar: null,
+        roles: [],
+        avatar: undefined,
         id: ''
     });
 
@@ -26,7 +36,11 @@ const Profile = () => {
         const fetchData = async () => {
             try {
                 const userData = await getUserProfile();
-                console.log('Respuesta del servidor:', userData);
+                //console.log('Respuesta del servidor:', userData);
+
+                const avatarUrl = userData.user.avatar instanceof File ? URL.createObjectURL(userData.user.avatar) : userData.user.avatar ?? '';
+
+                const rolesArray = Array.isArray(userData.user.roles) ? userData.user.roles : [userData.user.roles];
                 
                 if (userData && userData.user) {
                     setUser(userData.user);
@@ -34,9 +48,9 @@ const Profile = () => {
                     setFormData({
                         name: userData.user.name,
                         lastname: userData.user.lastname,
-                        roles: userData.user.roles,
-                        avatar: userData.user.avatar,
-                        id: userData.user.id,
+                        roles: rolesArray,
+                        avatar: avatarUrl,
+                        id: userData.user.id.toString(),
                     });
                     //setLoading(false);
                                 
@@ -45,15 +59,18 @@ const Profile = () => {
                 }         
                 
             }catch (error) {
-                console.error('Error fetching data:', error);
-                //setLoading(false);
+                const errorMessage = error instanceof Error ? error.message : 'Error al mostrar el perfil del usuario';
+                toast.error(errorMessage, {
+                    duration: 3000,
+                    position: 'bottom-right',
+                });  
             }
         };
         fetchData();
     }, []);
 
     //Función donde manejamos los cambios en el formulario
-    const handleChanges = (data) => {
+    const handleChanges = (data: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
         const { name, value } = data.target;
         setFormData((prevData) => ({ 
             ...prevData,
@@ -62,8 +79,8 @@ const Profile = () => {
     };
 
     //Función para las imagenes
-    const handleFileChange = (event) => {
-        const file = event.target.files[0];
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files ? event.target.files[0] : null;
         if (file) {
             setFormData(prev => ({
                 ...prev,
@@ -75,18 +92,17 @@ const Profile = () => {
     //Función para guardar los cambios en el formulario
     const handleSave = async () => {
         try {
+            const rolesArray = Array.isArray(formData.roles) ? formData.roles : [formData.roles];
             // Enviamos solo los campos necesarios
             const dataToUpdate = {
                 name: formData.name,
                 lastname: formData.lastname,
-                roles: formData.roles,
-                avatar: formData.avatar instanceof File ? formData.avatar : null,
+                roles: rolesArray,
+                avatar: formData.avatar instanceof File ? formData.avatar : undefined,
             };
 
-            console.log('Datos a actualizar', dataToUpdate);
-            
-
-            const updatedProfile = await updateUser(formData.id, dataToUpdate);
+            //console.log('Datos a actualizar', dataToUpdate);
+            const updatedProfile = await updateUser(parseInt(formData.id), dataToUpdate);
             
             if (updatedProfile) {
                 setUser(updatedProfile);
@@ -94,14 +110,18 @@ const Profile = () => {
                 // Actualizar el formData con los nuevos datos
                 setFormData(prev => ({
                     ...prev,
-                    ...updatedProfile,
+                    name: updatedProfile.name,
+                    lastname: updatedProfile.lastname,
+                    roles: updatedProfile.roles,
+                    avatar: updatedProfile.avatar,
                 }));
             }
         } catch (error) {
-            console.error('Error al actualizar perfil:', {status: error.response?.status,
-                data: JSON.stringify(error.response?.data),
-                message: error.message});
-            // Aquí se podría mostrar un mensaje de error al usuario
+            const errorMessage = error instanceof Error ? error.message : 'Error al actualizar el Usuario';
+            toast.error(errorMessage, {
+                    duration: 3000,
+                    position: 'bottom-right',
+            });            
         }
     };
 
@@ -186,7 +206,6 @@ const Profile = () => {
                         <div className="w-full md:w-1/2">
                             <select 
                                 name="roles" 
-                                id=""
                                 value={formData.roles}
                                 onChange={handleChanges}
                                 disabled={!editingUser} 
