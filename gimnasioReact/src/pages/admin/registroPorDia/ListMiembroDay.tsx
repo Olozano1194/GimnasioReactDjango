@@ -11,6 +11,8 @@ import { Link } from "react-router-dom";
 import { toast } from 'react-hot-toast';
 //Models
 import { MemberDay } from "../../../model/memberDay.model";
+//Icons
+import { RiDeleteBinLine, RiPencilLine } from "react-icons/ri";
 
 interface MiembroTotal {
     id: 'total';
@@ -112,8 +114,8 @@ const ListMiembroDay = () => {
 
                 return (
                     <div className="flex justify-center items-center gap-x-4">
-                        <Link to={`/dashboard/miembro-day/${id}`} className="bg-green-500 text-white p-2 rounded-md">
-                            Editar
+                        <Link to={`/dashboard/miembro-day/${id}`} className="bg-green-500 text-white p-2 rounded-md hover:scale-110">
+                            <RiPencilLine />
                         </Link>
                         <button
                             onClick={ async () => {
@@ -137,8 +139,8 @@ const ListMiembroDay = () => {
                                     }
                                 }                                
                              }} 
-                            className="bg-red-500 text-white p-2 rounded-md">
-                                Eliminar
+                            className="bg-red-500 text-white p-2 rounded-md hover:scale-110">
+                                <RiDeleteBinLine />
                         </button>
                     </div>
                 );

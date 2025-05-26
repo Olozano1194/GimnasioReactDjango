@@ -145,13 +145,12 @@ function NavHeader() {
                         <hr className="my-4 border-gray-900/10" />
 
                         <MenuItem as='div' className='p-0'>
-                            <Link
-                                to=''
+                            <button
                                 onClick={handleLogOut}
                                 className="rounded-lg transition-colors text-dark hover:bg-gray-200 flex items-centerr gap-x-4 py-2 px-4 flex-1">
                                 <RiLogoutCircleRLine />
                                 Cerrar Sesión                                                
-                            </Link>
+                            </button>
                             
                         </MenuItem>
                     </MenuItems>

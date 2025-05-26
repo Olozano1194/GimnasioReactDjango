@@ -12,6 +12,8 @@ import Table from '../../../components/Table';
 import { Link } from "react-router-dom";
 //Mensajes
 import { toast } from 'react-hot-toast';
+//Icons
+import { RiDeleteBinLine, RiPencilLine } from "react-icons/ri";
 
 
 const ListAsignarMemberShips = () => {
@@ -73,8 +75,8 @@ const ListAsignarMemberShips = () => {
                 // No mostrar botones si es la fila de total
                 //if (props.row.original.id === 'total') return null;
                 <div className="flex justify-center items-center gap-x-4">
-                <Link to={`/dashboard/membresia/${props.row.original.id}`} className="bg-green-500 text-white p-2 rounded-md">
-                    Editar
+                <Link to={`/dashboard/membresia/${props.row.original.id}`} className="bg-green-500 text-white p-2 rounded-md hover:scale-110">
+                    <RiPencilLine />
                 </Link>
                 <button
                     onClick={ async () => {
@@ -98,8 +100,8 @@ const ListAsignarMemberShips = () => {
                             }                               
                         }                                
                     }} 
-                    className="bg-red-500 text-white p-2 rounded-md">
-                    Eliminar                       
+                    className="bg-red-500 text-white p-2 rounded-md hover:scale-110">
+                    <RiDeleteBinLine />                      
                 </button>                       
             </div>
         ),
