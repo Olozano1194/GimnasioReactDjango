@@ -73,6 +73,10 @@ const Register = () => {
                         value: 20,
                         message: 'El nombre debe tener como maximo 20 letras'
                     },
+                    pattern: {
+                            value: /^[a-zA-Z]+$/,
+                            message: 'Nombre invalido'
+                    },
                 })} 
                 />                
                 </Label>
@@ -93,6 +97,10 @@ const Register = () => {
                     maxLength: {
                         value: 20,
                         message: 'El apellido debe tener como maximo 20 letras'
+                    },
+                    pattern: {
+                        value: /^[a-zA-Z]+$/,
+                        message: 'Apellido invalido'
                     },
                 })}
                 />
@@ -147,7 +155,7 @@ const Register = () => {
                     },
                     maxLength: {
                         value: 20,
-                        message: 'La contraseña debe tener como maximo 20 letras'
+                        message: 'La contraseña debe tener como maximo 20 caracteres'
                     },
                 })} 
                 />

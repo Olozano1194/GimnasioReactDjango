@@ -92,12 +92,12 @@ const MemberShipsForm = () => {
 
                 {/* Name */}
                 <Label htmlFor="name"><span className='flex gap-2 items-center'><FaTag className='lg:text-2xl xl:text-xl' />Nombre del plan</span><select className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500'
-                {...register('name',{
-                    required: {
-                        value: true,
-                        message: 'Nombre requerido'
-                    },                   
-                })}
+                    {...register('name',{
+                        required: {
+                            value: true,
+                            message: 'Nombre requerido'
+                        },                   
+                    })}
                 >
                     <option value="">Escoge El Plan</option>
                     <option value="basico">Básico</option>
@@ -109,35 +109,43 @@ const MemberShipsForm = () => {
                     errors.name && <span className='text-red-500 text-sm'>{errors.name.message}</span>                }
                 
                 {/* Price */}
-                <Label htmlFor="price"><span className='flex gap-2 items-center'><MdOutlinePriceChange className='lg:text-2xl' />Precio</   span><Input type="number" placeholder='Colocar precio'
-                {...register('price',{
-                    required: {
-                        value: true,
-                        message: 'Precio requerido'
-                    },                    
-                })} 
-                />
+                <Label htmlFor="price"><span className='flex gap-2 items-center'><MdOutlinePriceChange className='lg:text-2xl' />Precio</   span><Input inputMode='decimal' type="text" placeholder='Colocar precio'
+                    {...register('price',{
+                        required: {
+                            value: true,
+                            message: 'Precio requerido'
+                        },
+                        pattern: {
+                            value: /^[0-9]+$/,
+                            message: 'Precio invalido'
+                        },                    
+                    })} 
+                    />
                 </Label>
                 {
                     errors.price && <span className='text-red-500 text-sm'>{errors.price.message}</span>
                 }
                 {/* Duration */}
-                <Label htmlFor="duration"><span className='flex gap-2 items-center'><GiDuration className='lg:text-2xl' />Duración</span><Input type="number" placeholder='Escribe el nombre'
-                {...register('duration',{
-                    required: {
-                        value: true,
-                        message: 'Duración requerida'
-                    },
-                    min: {
-                        value: 15,
-                        message: 'La duración debe ser de almenos 15 días'
-                    },
-                    max: {
-                        value: 30,
-                        message: 'La duración no debe exceder los 30 días'
-                    },
-                })}
-                />
+                <Label htmlFor="duration"><span className='flex gap-2 items-center'><GiDuration className='lg:text-2xl' />Duración</span><Input type="text" inputMode='decimal' placeholder='Escribe la duración de la membresía'
+                    {...register('duration',{
+                        required: {
+                            value: true,
+                            message: 'Duración requerida'
+                        },
+                        min: {
+                            value: 15,
+                            message: 'La duración debe ser de almenos 15 días'
+                        },
+                        max: {
+                            value: 30,
+                            message: 'La duración no debe exceder los 30 días'
+                        },
+                        pattern: {
+                            value: /^[0-9]+$/,
+                            message: 'Duración invalido'
+                        },
+                    })}
+                    />
                 </Label>
                 {
                     errors.duration && <span className='text-red-500 text-sm'>{errors.duration.message}</span>
