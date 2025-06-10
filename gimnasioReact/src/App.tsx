@@ -32,8 +32,6 @@ import Error404 from './pages/Error404';
 import { Toaster } from 'react-hot-toast';
 
 function App() {
-  
-
   return (
     <BrowserRouter>
         <Routes>        

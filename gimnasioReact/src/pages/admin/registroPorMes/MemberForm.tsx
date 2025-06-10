@@ -134,6 +134,10 @@ const RegisterMiembro = () => {
                         value: 20,
                         message: 'El nombre debe tener como maximo 20 letras'
                     },
+                    pattern: {
+                            value: /^[a-zA-Z]+$/,
+                            message: 'Nombre invalido'
+                    },
                 })}
                 />
                 </Label>
@@ -155,6 +159,10 @@ const RegisterMiembro = () => {
                         value: 20,
                         message: 'El apellido debe tener como maximo 20 letras'
                     },
+                    pattern: {
+                            value: /^[a-zA-Z]+$/,
+                            message: 'Apellido invalido'
+                    },
                 })}
                 />
                 </Label>
@@ -175,6 +183,10 @@ const RegisterMiembro = () => {
                     maxLength: {
                         value: 10,
                         message: 'El Telefono debe tener como maximo 10 número'
+                    },
+                    pattern: {
+                            value: /^[0-9]+$/,
+                            message: 'Numero celular invalido'
                     },
                 })} 
                 />
@@ -226,11 +238,15 @@ const RegisterMiembro = () => {
                     errors.dateFinal && <span className='text-red-500 text-center text-sm'>{errors.dateFinal.message}</span>
                 }
                 {/* Price */}
-                <Label htmlFor="price"><span className='flex gap-2 items-center'><MdOutlinePriceChange className='lg:text-2xl' />Precio</span><Input type="number" placeholder='Colocar precio'
+                <Label htmlFor="price"><span className='flex gap-2 items-center'><MdOutlinePriceChange className='lg:text-2xl' />Precio</span><Input inputMode="decimal" type="text" placeholder='Colocar precio'
                 {...register('price',{
                     required: {
                         value: true,
                         message: 'Precio requerido'
+                    },
+                    pattern: {
+                        value: /^[0-9]+$/,
+                        message: 'Precio invalido'
                     },                    
                 })} 
                 />

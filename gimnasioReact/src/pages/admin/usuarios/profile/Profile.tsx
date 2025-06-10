@@ -151,12 +151,12 @@ const Profile = () => {
                             />
                             {editingUser && (
                                 <>
-                                        <label htmlFor="avatar" className="absolute bg-secondary p-2 rounded-full hover:cursor-pointer -top-2 left-24"><RiEdit2Line className='text-primary' /></label>
-                                        <input type="file" name="avatar" id="avatar"        className="hidden" 
-                                            // {...register("avatar")} 
-                                            accept='image/*' 
-                                            onChange={handleFileChange}
-                                        />
+                                    <label htmlFor="avatar" className="absolute bg-secondary p-2 rounded-full hover:cursor-pointer -top-2 left-24"><RiEdit2Line className='text-primary' /></label>
+                                    <input type="file" name="avatar" id="avatar"        className="hidden" 
+                                    // {...register("avatar")} 
+                                    accept='image/*' 
+                                    onChange={handleFileChange}
+                                    />
                                 </>
                             )}                            
                         </div>
