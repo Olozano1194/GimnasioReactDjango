@@ -16,6 +16,8 @@ import { Input, Label, Button } from '../../../components/ui/index';
 import { createMember, updateMember, getMember } from '../../../api/userGym.api';
 //Models
 import { Miembro } from "../../../model/member.model";
+//img
+import Logo from '../../../../public/favicon-32x32.png'
 
 
 const RegisterMiembro = () => {
@@ -116,9 +118,22 @@ const RegisterMiembro = () => {
 
     return (
         <main className="w-full min-h-screen flex flex-col justify-center items-center">
-            <form onSubmit={onSubmit} className="formRegister w-[85%] bg-slate-300 flex flex-col justify-center items-center text-slate-600 gap-6 p-3 rounded-md m-7 md:w-[55%] md:gap-8 lg:w-[47%] lg:px-8 xl:max-w-[43%]">
-                <h1 className="text-xl font-bold pt-3 pb-2 md:pt-3">{ params.id ? 'Actualizar Miembro' : 'Registrar Miembro' }</h1>
-
+            <form onSubmit={onSubmit} className="formRegister w-full bg-slate-300 flex flex-col justify-center items-center text-slate-600 gap-6 p-3 rounded-md m-7 md:w-[55%] md:gap-8 lg:w-[47%] lg:px-8 xl:max-w-[43%]">
+                <div className='w-full flex justify-center'>
+                    <h1 className="text-2xl font-bold flex justify-center items-center pb-2 md:pt-3 md:text-3xl"><img className='w-9 h-7 rounded-lg mr-1' src={Logo} alt="" />{ 
+                        params.id ? (
+                            <>
+                            Actualizar
+                            <span className='text-sky-600 pl-2'>Miembro</span>
+                            </>) 
+                            : (
+                            <>
+                            Registrar
+                            <span className='text-sky-600 pl-2'>Miembro</span>
+                            </>
+                        )}
+                    </h1>
+                </div>
                 {/* Name */}
                 <Label htmlFor="name"><span className='flex gap-2 items-center'><CiUser className='lg:text-2xl' />Nombre</span><Input type="text" placeholder='Escribe el nombre'
                 {...register('name',{

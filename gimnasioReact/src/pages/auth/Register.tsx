@@ -10,6 +10,8 @@ import { Input, Label, Button } from '../../components/ui/index';
 import { CreateUsers } from "../../api/users.api";
 //Models
 import { User } from '../../model/user.model';
+//img
+import Logo from '../../../public/favicon-32x32.png';
 
 const Register = () => {
     const { register, handleSubmit, formState: {errors}, watch, reset } = useForm<User>();
@@ -56,8 +58,9 @@ const Register = () => {
         <main className="w-full min-h-screen flex flex-col justify-center items-center">
             {/* formulario */}
             <form onSubmit={onSubmit} className="formRegister w-[85%] bg-slate-300 flex flex-col justify-center items-center text-slate-600 gap-8 p-3 rounded-md m-7 md:w-[55%] md:gap-6 lg:w-[47%] lg:px-8 xl:max-w-[43%]">
-                <h1 className="text-2xl font-bold pb-4 md:pt-3">Registrarse</h1>
-
+                <div className='w-full flex justify-center'>
+                    <h1 className="text-2xl font-bold flex justify-center items-center pb-2 md:pt-3 md:text-3xl"><img className='w-9 h-7 rounded-lg mr-1' src={Logo} alt="" />Registrarse</h1>
+                </div>
                 {/* Name */}
                 <Label htmlFor="name"><span className='flex items-center'><RiUserLine className='lg:text-2xl xl:text-xl' />Nombre</span><Input type='text' placeholder='Escribe el nombre'
                 {...register('name',{
