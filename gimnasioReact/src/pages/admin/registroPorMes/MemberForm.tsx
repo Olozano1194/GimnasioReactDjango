@@ -5,8 +5,8 @@ import { useParams, useNavigate } from "react-router-dom";
 //Icons
 import { CiUser } from 'react-icons/ci';
 import { RiLoginBoxLine } from "react-icons/ri";
-import { MdOutlinePhoneAndroid, MdOutlinePriceChange } from "react-icons/md";
-import { BsCalendar2Date } from "react-icons/bs";
+import { MdOutlinePhoneAndroid } from "react-icons/md";
+//import { BsCalendar2Date } from "react-icons/bs";
 import { LiaAddressCardSolid } from "react-icons/lia";
 //Mensajes
 import { toast } from "react-hot-toast";
@@ -34,9 +34,9 @@ const RegisterMiembro = () => {
                 lastname: data.lastname,
                 phone: data.phone,
                 address: data.address,
-                dateInitial: data.dateInitial,
-                dateFinal: data.dateFinal,
-                price: Number(data.price)
+                // dateInitial: data.dateInitial,
+                // dateFinal: data.dateFinal,
+                // price: Number(data.price)
             }            
 
             if (params.id) {
@@ -91,10 +91,10 @@ const RegisterMiembro = () => {
                     const response = await getMember(parseInt(params.id));
 
                     //formateamos la fecha antes de pasarla al formulario
-                    if (response.dateInitial && response.dateFinal) {
-                        response.dateInitial = formatDate(response.dateInitial);
-                        response.dateFinal = formatDate(response.dateFinal);                        
-                    }
+                    // if (response.dateInitial && response.dateFinal) {
+                    //     response.dateInitial = formatDate(response.dateInitial);
+                    //     response.dateFinal = formatDate(response.dateFinal);                        
+                    // }
                     
                     reset(response);
                 }
@@ -105,16 +105,16 @@ const RegisterMiembro = () => {
         fetchUserData();
     }, [params.id, reset]);
 
-    const formatDate = (date: string): string => {
-        if (!date) return ''; // Retorna un valor vacío si la fecha es undefined o null
-        try {
-            const [day, month, year] = date.split('-');
-            return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-        } catch (error) {
-            console.error('Error al formatear la fecha:', error);
-            return '';
-        }
-    };
+    // const formatDate = (date: string): string => {
+    //     if (!date) return ''; // Retorna un valor vacío si la fecha es undefined o null
+    //     try {
+    //         const [day, month, year] = date.split('-');
+    //         return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+    //     } catch (error) {
+    //         console.error('Error al formatear la fecha:', error);
+    //         return '';
+    //     }
+    // };
 
     return (
         <main className="w-full min-h-screen flex flex-col justify-center items-center">
@@ -227,7 +227,7 @@ const RegisterMiembro = () => {
                     errors.address && <span className='text-red-500 text-sm'>{errors.address.message}</span>
                 }               
                 {/* Date Initial */}
-                <Label htmlFor="DateInitial"><span className='flex gap-2 items-center'><BsCalendar2Date className='lg:text-2xl' />Fecha Inicial</span><Input type="date"
+                {/* <Label htmlFor="DateInitial"><span className='flex gap-2 items-center'><BsCalendar2Date className='lg:text-2xl' />Fecha Inicial</span><Input type="date"
                 {...register('dateInitial',{
                     required: {
                         value: true,
@@ -238,9 +238,9 @@ const RegisterMiembro = () => {
                 </Label>
                 {
                     errors.dateInitial && <span className='text-red-500 text-center text-sm'>{errors.dateInitial.message}</span>
-                }
+                } */}
                 {/* Date final */}
-                <Label htmlFor="DateFinal"><span className='flex gap-2 items-center'><BsCalendar2Date className='lg:text-2xl' />Fecha Final</span><Input type="date"
+                {/* <Label htmlFor="DateFinal"><span className='flex gap-2 items-center'><BsCalendar2Date className='lg:text-2xl' />Fecha Final</span><Input type="date"
                 {...register('dateFinal',{
                     required: {
                         value: true,
@@ -251,9 +251,9 @@ const RegisterMiembro = () => {
                 </Label>
                 {
                     errors.dateFinal && <span className='text-red-500 text-center text-sm'>{errors.dateFinal.message}</span>
-                }
+                } */}
                 {/* Price */}
-                <Label htmlFor="price"><span className='flex gap-2 items-center'><MdOutlinePriceChange className='lg:text-2xl' />Precio</span><Input inputMode="decimal" type="text" placeholder='Colocar precio'
+                {/* <Label htmlFor="price"><span className='flex gap-2 items-center'><MdOutlinePriceChange className='lg:text-2xl' />Precio</span><Input inputMode="decimal" type="text" placeholder='Colocar precio'
                 {...register('price',{
                     required: {
                         value: true,
@@ -268,7 +268,7 @@ const RegisterMiembro = () => {
                 </Label>
                 {
                     errors.price && <span className='text-red-500 text-sm'>{errors.price.message}</span>
-                }
+                } */}
                 {/* btn Register */}
                 <Button type="submit">
                     <RiLoginBoxLine className='text-purple-800' />{ params.id ? 'Actualizar' : 'Registrar' }

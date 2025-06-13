@@ -110,7 +110,13 @@ const MemberShipsForm = () => {
                 // Si params.id está presente, cargar los datos específicos para actualizar
                 if (params.id) {
                     const responseAsignacion = await getAsignarMemberShips(parseInt(params.id)); // Función para obtener una asignación específica
-                    console.log("Datos de la asignación para editar:", responseAsignacion);
+                    //console.log("Datos de la asignación para editar:", responseAsignacion);
+
+                    //formateamos la fecha antes de pasarla al formulario
+                    if (responseAsignacion.dateInitial && responseAsignacion.dateFinal) {
+                        responseAsignacion.dateInitial = formatDate(responseAsignacion.dateInitial);
+                        responseAsignacion.dateFinal = formatDate(responseAsignacion.dateFinal);                        
+                    }
     
                     // Prellenar los campos del formulario con los datos existentes
                     reset({
@@ -128,6 +134,17 @@ const MemberShipsForm = () => {
     
         fetchData();
     }, [params.id, reset]);
+
+    const formatDate = (date: string): string => {
+        if (!date) return ''; // Retorna un valor vacío si la fecha es undefined o null
+        try {
+            const [day, month, year] = date.split('-');
+            return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+        } catch (error) {
+            console.error('Error al formatear la fecha:', error);
+            return '';
+        }
+    };
         
     
     return (

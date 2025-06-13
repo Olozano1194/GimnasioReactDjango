@@ -15,7 +15,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 
 
 # Create your views here.
-#esto nos sirve para que podamos crear de una vez el crud completo
+#esto nos sirve para que podamos crear el crud completo de los usuarios
 class UserViewSet(viewsets.ModelViewSet): 
     serializer_class = UsuarioSerializer
     queryset = get_user_model().objects.all()
@@ -137,12 +137,12 @@ class userProfileView(APIView):
         except Exception as e:
            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)    
         
-#clase para la crud de  miembros del gimnasio
+#clase para el crud de  miembros del gimnasio
 class UsuarioGymViewSet(viewsets.ModelViewSet):
     serializer_class = UsuarioGymSerializer
     queryset = UsuarioGym.objects.all()
 
-#clase para la crud de  miembros del gimnasio por día
+#clase para el crud de  miembros del gimnasio por día
 class UsuarioGymDayViewSet(viewsets.ModelViewSet):
     serializer_class = UsuarioGymDaySerializer
     queryset = UsuarioGymDay.objects.all()
@@ -150,7 +150,7 @@ class UsuarioGymDayViewSet(viewsets.ModelViewSet):
 #funcion para mostrar los datos en las cards
 class Home(APIView):
     def get(self, request):
-        UserGymList = UsuarioGym.objects.all().order_by('-id')
+        UserGymList = MembresiaAsignada.objects.all().order_by('-id')
         UserDayList = UsuarioGymDay.objects.all().order_by('-id')
 
         now = timezone.now()
@@ -158,10 +158,10 @@ class Home(APIView):
         year = now.year
 
         #Calculamos el numero de miembros 
-        num_miembros = UsuarioGym.objects.count()
+        num_miembros = MembresiaAsignada.objects.count()
 
         #Filtramos los miembros del gimnasio registrados en el mes
-        miembros_mes = UsuarioGym.objects.filter(dateInitial__month=month, dateInitial__year=year)
+        miembros_mes = MembresiaAsignada.objects.filter(dateInitial__month=month, dateInitial__year=year)
         #Cantidad de dinero miembros mensualidad
         total_gym_mes = sum(user.price for user in miembros_mes)
 
@@ -174,7 +174,7 @@ class Home(APIView):
         total_month = total_gym_mes + total_day_mes
 
         #Filtramos los miembros registrados en el mes actual
-        miembros_mes = UsuarioGym.objects.filter(dateInitial__month=month, dateInitial__year=year).count()
+        miembros_mes = MembresiaAsignada.objects.filter(dateInitial__month=month, dateInitial__year=year).count()
 
         #Total de dinero en el gym
         total_gym = sum(user.price for user in UserGymList)
@@ -186,7 +186,7 @@ class Home(APIView):
             'total_month': total_month, 
             'miembros_mes': miembros_mes,
             'total': total
-            })
+        })
 
 # clase para el crud de los miembros del gimnasio
 class MembresiaViewSet(viewsets.ModelViewSet):
@@ -195,11 +195,10 @@ class MembresiaViewSet(viewsets.ModelViewSet):
 
 class MembresiaAsignadaViewSet(viewsets.ModelViewSet):
     serializer_class = MembresiaAsignadaSerializer
-    #queryset = MembresiaAsignada.objects.all()
+    queryset = MembresiaAsignada.objects.select_related('miembro', 'membresia')
 
     def get_queryset(self):
         miembro_id = self.request.query_params.get('miembro')
-        base_qset = MembresiaAsignada.objects.select_related('miembro', 'membresia')
-        if miembro_id:
-            return base_qset.filter(miembro_id=miembro_id)
-        return base_qset
+        # base_qset = MembresiaAsignada.objects.select_related('miembro', 'membresia')
+        qs = super().get_queryset()
+        return qs.filter(miembro_id=miembro_id) if miembro_id else qs

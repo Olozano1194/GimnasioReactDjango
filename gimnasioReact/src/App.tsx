@@ -61,6 +61,7 @@ function App() {
               {/* Asignación Membresía */}
               <Route path="asignar-membresia" element={<AsignarMemberShipsForm /> } />
               <Route path="asignar-membresia-list" element={<ListAsignarMemberShips /> } />
+              <Route path="asignar-membresia/:id" element={<AsignarMemberShipsForm />} />
             </Route> 
           </Route>       
           <Route path="*" element={<Error404 />} />

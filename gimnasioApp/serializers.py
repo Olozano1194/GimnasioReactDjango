@@ -74,25 +74,25 @@ class UsuarioSerializer(serializers.ModelSerializer):
 
 class UsuarioGymSerializer(serializers.ModelSerializer):
     #Formato para mostrar las fechas
-    dateInitial = serializers.DateField(format="%d-%m-%Y", input_formats=['%Y-%m-%d', '%d-%m-%Y'])
-    dateFinal = serializers.DateField(format="%d-%m-%Y", input_formats=['%Y-%m-%d', '%d-%m-%Y'])
+    # dateInitial = serializers.DateField(format="%d-%m-%Y", input_formats=['%Y-%m-%d', '%d-%m-%Y'])
+    # dateFinal = serializers.DateField(format="%d-%m-%Y", input_formats=['%Y-%m-%d', '%d-%m-%Y'])
 
     class Meta:
         model = UsuarioGym
         fields = '__all__'
         read_only_fields = ('id',)
 
-    def to_representation(self, instance):
-        # Esto nos permite personalizar aún más la representación de los datos
-        representation = super().to_representation(instance)
+    # def to_representation(self, instance):
+    #     # Esto nos permite personalizar aún más la representación de los datos
+    #     representation = super().to_representation(instance)
         
-        # Aseguramos que las fechas estén en el formato correcto
-        if instance.dateInitial:
-            representation['dateInitial'] = instance.dateInitial.strftime("%d-%m-%Y")
-        if instance.dateFinal:
-            representation['dateFinal'] = instance.dateFinal.strftime("%d-%m-%Y")
+    #     # Aseguramos que las fechas estén en el formato correcto
+    #     if instance.dateInitial:
+    #         representation['dateInitial'] = instance.dateInitial.strftime("%d-%m-%Y")
+    #     if instance.dateFinal:
+    #         representation['dateFinal'] = instance.dateFinal.strftime("%d-%m-%Y")
             
-        return representation
+    #     return representation
 
 class UsuarioGymDaySerializer(serializers.ModelSerializer):
     #Formato para mostrar las fechas
@@ -125,23 +125,47 @@ class MembresiaAsignadaSerializer(serializers.ModelSerializer):
     miembro_details = UsuarioGymSerializer(source='miembro', read_only=True)
     membresia_details = MembresiasSerializer(source='membresia', read_only=True)
 
-    # miembro_id = serializers.PrimaryKeyRelatedField(
-    #     source='miembro',
-    #     queryset=UsuarioGym.objects.all()
-    # )
+    #Formato para mostrar las fechas
+    dateInitial = serializers.DateField(format="%d-%m-%Y", input_formats=['%Y-%m-%d', '%d-%m-%Y'])
+    dateFinal = serializers.DateField(format="%d-%m-%Y", input_formats=['%Y-%m-%d', '%d-%m-%Y'])
 
-    # membresia_id = serializers.PrimaryKeyRelatedField(
-    #     source='membresia',
-    #     queryset=Membresia.objects.all()
-    # )
+    price = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
 
     class Meta:
         model = MembresiaAsignada
-        fields = ['id', 'miembro', 'membresia', 'dateInitial', 'dateFinal', 'miembro_details', 'membresia_details']
-        read_only_fields = ('id','dateFinal')
+        fields = '__all__'
+        read_only_fields = ('id','dateFinal', 'price',)
 
     def create(self, validated_data):
+        # extraemos datos
         membresia = validated_data['membresia']
-        validated_data['dateFinal'] = validated_data['dateInitial'] + timedelta(days=membresia.duration)
+        dateInitial = validated_data['dateInitial']
+        # Calculamos la fecha de finalización y precio
+        validated_data['dateFinal'] = dateInitial + timedelta(days=membresia.duration)
+        validated_data['price'] = membresia.price
+        # Creamos la instancia
         instance = super().create(validated_data)
         return instance
+    
+    def to_representation(self, instance):
+        # Esto nos permite personalizar aún más la representación de los datos
+        representation = super().to_representation(instance)
+        
+        # Aseguramos que las fechas estén en el formato correcto
+        if instance.dateInitial:
+            representation['dateInitial'] = instance.dateInitial.strftime("%d-%m-%Y")
+        if instance.dateFinal:
+            representation['dateFinal'] = instance.dateFinal.strftime("%d-%m-%Y")
+            
+        return representation
+    
+    def validate(self, data):
+        miembro = data['miembro']
+        inicio = data['dateInitial']
+        fin = inicio + timedelta(days=data['membresia'].duration)
+        suscripcion = MembresiaAsignada.objects.filter(
+            miembro=miembro, dateInitial__lte=fin, dateFinal__gte=inicio
+        )
+        if suscripcion.exists():
+            raise serializers.ValidationError('El miembro ya tiene una suscripción activa en este rango de fechas')
+        return data

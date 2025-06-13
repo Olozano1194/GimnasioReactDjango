@@ -1,6 +1,7 @@
 from django.db import models
-from django.utils import timezone
+from datetime import timedelta, date
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
+from django.core.exceptions import ValidationError
 
 
 # Create your models here.
@@ -54,12 +55,12 @@ class UsuarioGym(models.Model):
     phone = models.CharField(max_length=10)
     # user = models.OneToOneField(User, on_delete=models.CASCADE)
     address = models.CharField(max_length=50)
-    dateInitial = models.DateField(max_length=50)
-    dateFinal = models.DateField(max_length=50)
-    price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    # dateInitial = models.DateField(max_length=50)
+    # dateFinal = models.DateField(max_length=50)
+    # price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     def __str__(self):
-        return self.name
+        return f"{self.name} {self.lastname}"
     
     class Meta:
         verbose_name = 'UsuarioGym'
@@ -88,14 +89,11 @@ class Membresia(models.Model):
         ('premium', 'Premium'),
         ('VIP', 'VIP'),
     ]    
-    name = models.CharField(max_length=10, choices=OPCIONES_NAME, default='basico')
-    price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    duration = models.PositiveIntegerField()
+    name = models.CharField(max_length=10, choices=OPCIONES_NAME, default='básico')
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    duration = models.PositiveIntegerField(help_text="Duración en días (ej: 15, 30, 45)")
     is_active = models.BooleanField(default=True)
 
-    
-
-    
 
     def __str__(self):
         return self.name
@@ -106,15 +104,35 @@ class Membresia(models.Model):
         db_table = 'membresia'
 
 class MembresiaAsignada(models.Model):
-    miembro = models.ForeignKey(UsuarioGym, on_delete=models.CASCADE, related_name='miembros')
+    miembro = models.ForeignKey(UsuarioGym, on_delete=models.CASCADE, related_name='miembro')
     membresia = models.ForeignKey(Membresia, on_delete=models.CASCADE)
-    dateInitial = models.DateField(max_length=200)
-    dateFinal = models.DateField(max_length=200, null=True, blank=True)
+    dateInitial = models.DateField()
+    dateFinal = models.DateField(editable=False)
+    price = models.DecimalField(max_digits=10, decimal_places=2, editable=False)
 
-    def __str__(self):
-        return f"{self.miembro.name} - {self.miembro.lastname} - {self.membresia.name}"   
-    
     class Meta:
         verbose_name = 'MembresiaAsignada'
         verbose_name_plural = 'MembresiaAsignadas'
         db_table = 'membresiaAsignada'
+        ordering = ['-dateInitial']
+    
+    def save(self, *args, **kwargs):
+        # Se calcula la fecha final de la membresia + precio al guardarlo
+        self.dateFinal = self.dateInitial + timedelta(days=self.membresia.duration)
+        self.price = self.membresia.price
+        super().save(*args, **kwargs)  # Llamar al método save de la clase padre
+
+    def clean(self):
+        if MembresiaAsignada.objects.filter(miembro=self.miembro,
+                                            dateInitial__lte=self.dateFinal,
+                                            dateFinal__gte=self.dateInitial).exclude(pk=self.pk).exists():
+            raise ValidationError('Ya existe una membresia asignada para este usuario en el rango de fechas indicado')
+                                  
+    
+    @property
+    def activa(self):
+        hoy = date.today()
+        return self.dateInitial <= hoy <= self.dateFinal
+
+    def __str__(self):
+        return f"{self.miembro.name} - {self.miembro.lastname} - {self.membresia.name}"   

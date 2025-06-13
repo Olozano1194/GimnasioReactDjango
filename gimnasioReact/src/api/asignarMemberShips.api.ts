@@ -13,13 +13,6 @@ const gymApi = axios.create({
 
 });
 
-
-// type ApiError = {
-//     message: string;
-//     status?: number;
-//     errors?: Record<string, string[]>;
-// };
-
 // Función helper para manejar errores
 const handleApiError = (error: unknown): never => {
     if (axios.isAxiosError(error)) {
