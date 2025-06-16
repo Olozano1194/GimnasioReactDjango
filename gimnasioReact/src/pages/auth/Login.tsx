@@ -10,7 +10,9 @@ import { Input } from '../../components/ui/index';
 //Mensajes
 import { toast } from 'react-hot-toast';
 //Models
-import { LoginUserDto } from '../../model/dto/user.dto'; 
+import { LoginUserDto } from '../../model/dto/user.dto';
+//img
+import Logo from '../../../public/favicon-32x32.png';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -62,11 +64,13 @@ const Login = () => {
     return ( 
         <main className="w-full h-screen flex flex-col justify-center items-center lg:justify-between lg:flex-row lg:pr-48">
             <div className="hidden w-full lg:block lg:w-1/2 h-full relative">
-                <img src="https://cdn.pixabay.com/photo/2020/08/05/15/25/gym-5465776_1280.png" alt="" className="w-full h-full object-fill rounded-md" />
+                <img src="https://cdn.pixabay.com/photo/2020/08/05/15/25/gym-5465776_1280.png" alt="Logo del gym" className="w-full h-full object-fill rounded-md" />
             </div>
 
-            <form onSubmit={onSubmit} className="w-[75%] bg-slate-300 flex flex-col justify-center items-center text-slate-600 gap-6 p-3 rounded-md md:w-[60%] md:gap-8 lg:w-[45%] xl:max-w-[30%]">
-                <h1 className="text-2xl font-bold pb-2 md:pt-3">Inicio de sesión</h1>
+            <form onSubmit={onSubmit} className="w-[90%] bg-slate-300 flex flex-col justify-center items-center text-slate-600 gap-6 p-4 rounded-md md:w-[56%] md:gap-8 lg:w-[45%] xl:max-w-[30%]">
+                <div className='w-full flex justify-center'>
+                    <h1 className="text-2xl font-bold flex justify-center items-center pb-2 md:pt-3 md:text-3xl"><img className='w-9 h-7 rounded-lg mr-1' src={Logo} alt="" />Inicio de<span className='text-sky-600 pl-2'>sesión</span></h1>
+                </div>                
                 {/* email */}
                 <label className="flex gap-3 font-semibold md:gap-5" htmlFor="email">
                     <CiUser className='text-2xl text-gray-950' />

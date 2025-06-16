@@ -22,6 +22,8 @@ import { createAsignarMemberShips, updateAsignarMemberShips, getAsignarMemberShi
 import { Membresia } from '../../../model/memberShips.model';
 import { Miembro } from '../../../model/member.model';
 import { CreateAsignarMemberShipsDto } from '../../../model/dto/asignarMemberShips.dto';
+//img
+import Logo from '../../../../public/favicon-32x32.png';
 
 interface FormData {
     miembro: string;
@@ -108,7 +110,13 @@ const MemberShipsForm = () => {
                 // Si params.id está presente, cargar los datos específicos para actualizar
                 if (params.id) {
                     const responseAsignacion = await getAsignarMemberShips(parseInt(params.id)); // Función para obtener una asignación específica
-                    console.log("Datos de la asignación para editar:", responseAsignacion);
+                    //console.log("Datos de la asignación para editar:", responseAsignacion);
+
+                    //formateamos la fecha antes de pasarla al formulario
+                    if (responseAsignacion.dateInitial && responseAsignacion.dateFinal) {
+                        responseAsignacion.dateInitial = formatDate(responseAsignacion.dateInitial);
+                        responseAsignacion.dateFinal = formatDate(responseAsignacion.dateFinal);                        
+                    }
     
                     // Prellenar los campos del formulario con los datos existentes
                     reset({
@@ -126,13 +134,37 @@ const MemberShipsForm = () => {
     
         fetchData();
     }, [params.id, reset]);
+
+    const formatDate = (date: string): string => {
+        if (!date) return ''; // Retorna un valor vacío si la fecha es undefined o null
+        try {
+            const [day, month, year] = date.split('-');
+            return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+        } catch (error) {
+            console.error('Error al formatear la fecha:', error);
+            return '';
+        }
+    };
         
     
     return (
         <main className="w-full min-h-screen flex flex-col justify-center items-center">
-            <form onSubmit={onSubmit} className="formRegister w-[85%] bg-slate-300 flex flex-col justify-center items-center text-slate-600 gap-6 p-3 rounded-md m-7 md:w-[55%] md:gap-8 lg:w-[47%] lg:px-8 xl:max-w-[43%]">
-                <h1 className="text-xl font-bold pt-3 pb-2 md:pt-3">{ params.id ? 'Actualizar la Asignación de Membresía' : 'Asignar Membresía' }</h1>
-
+            <form onSubmit={onSubmit} className="formRegister w-full bg-slate-300 flex flex-col justify-center items-center text-slate-600 gap-6 p-3 rounded-md m-7 md:w-[55%] md:gap-8 lg:w-[47%] lg:px-8 xl:max-w-[43%]">
+                <div className='w-full flex justify-center'>
+                    <h1 className="text-2xl font-bold flex justify-center items-center pb-2 md:pt-3 md:text-3xl"><img className='w-9 h-7 rounded-lg mr-1' src={Logo} alt="" />{ 
+                        params.id ? (
+                            <>
+                            Actualizar 
+                            <span className='text-sky-600 pl-2'>Asignación</span>
+                            </>) 
+                            : (
+                            <>
+                            Asignar
+                            <span className='text-sky-600 pl-2'>Membresía</span>
+                            </>
+                        )}
+                    </h1>
+                </div>
                 {/* Miembro */}
                 <Label htmlFor="Miembro"><span className='flex gap-2 items-center'><CiUser className='lg:text-2xl xl:text-xl' />Miembro</span><select className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500'
                 {...register('miembro',{
