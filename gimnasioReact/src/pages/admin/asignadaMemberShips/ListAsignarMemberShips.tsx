@@ -16,7 +16,7 @@ import { toast } from 'react-hot-toast';
 import { RiDeleteBinLine, RiPencilLine } from "react-icons/ri";
 
 interface AsignacionTotal {
-    id: 'total';
+    id: 'total' | number;
     name: string;
     miembro_details?: {
         id: number;
@@ -61,16 +61,15 @@ const ListAsignarMemberShips = () => {
 
     //Calculamos el total de los precios
     //const total = users.reduce((acc, user) => acc + Number((user.price)), 0);
-    const total = asignarMemberShips.reduce((acc, user) => {
-        const price = typeof user.price === 'string' ? parseFloat(user.price) : user.price;
+    const total = asignarMemberShips.reduce((acc, item) => {
+        const price = typeof item.price === 'string' ? parseFloat(item.price) : item.price;
         return acc + price;
     }, 0);
         
 
-    const totalRow: AsignacionTotal = {
+    const totalRow: Partial<AsignarMemberShips> & { id: string } = {
         id: 'total',
-        name: 'Total',
-        price: `$ ${total}`, 
+        price: `$ ${total}`,       
     };
 
     const columns = [
@@ -82,7 +81,7 @@ const ListAsignarMemberShips = () => {
                 return info.row.index + 1;
             },
         }),
-        columnHelper.accessor(row => `${row.membresia_details?.name} ${row.miembro_details?.lastname}`, {
+        columnHelper.accessor(row => `${row.miembro_details?.name} ${row.miembro_details?.lastname}`, {
             id: 'nombreCompleto',
             header: 'Nombre del Miembro',
             cell: (info) => info.getValue(),            
