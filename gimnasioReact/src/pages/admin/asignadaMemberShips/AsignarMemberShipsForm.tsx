@@ -7,6 +7,7 @@ import { RiLoginBoxLine } from "react-icons/ri";
 import { FaTag } from 'react-icons/fa';
 import { BsCalendar2Date } from "react-icons/bs";
 import { CiUser } from 'react-icons/ci';
+import { PiCurrencyDollarBold } from 'react-icons/pi';
 //Mensajes
 import { toast } from "react-hot-toast";
 //ui
@@ -34,6 +35,7 @@ interface FormData {
 const MemberShipsForm = () => {
     const [miembros, setMiembros] = useState<Miembro[]>([]);
     const [membresias, setMembresias] = useState<Membresia[]>([]);
+    const [selectedPrice, setSelectedPrice] = useState<number | null>(null);
     const params = useParams<{ id?: string }>();
     const navigate = useNavigate();
     const { register, handleSubmit, formState: {errors}, reset } = useForm<FormData>();       
@@ -49,11 +51,28 @@ const MemberShipsForm = () => {
                 return;
             }
 
+            //Encontrar la membresía para seleccionar la duración
+            const selectMembresia = membresias.find((m) => m.id === membresiaId);
+            if (!selectMembresia) {
+                toast.error('Membresía no encontrada');
+                return;
+            }
+
+            //Calculamos la fecha final
+            const initialDate = new Date(data.dateInitial);
+            const finalDate = new Date(initialDate);
+            finalDate.setDate(finalDate.getDate() + selectMembresia.duration);
+
+            //Formateamos la fecha en el formato correcto
+            const dateInitial = initialDate.toISOString().split('T')[0];
+            const dateFinal = finalDate.toISOString().split('T')[0];
+
             //Para la creación/actualización solo enviamos los Ids y las fechas
             const requestData: CreateAsignarMemberShipsDto = {
                 miembro: miembroId, 
                 membresia: membresiaId, 
-                dateInitial: data.dateInitial,                
+                dateInitial: dateInitial,
+                dateFinal: dateFinal
             };
             //console.log('Datos que serán enviados:', requestData);
             
@@ -88,11 +107,19 @@ const MemberShipsForm = () => {
             navigate('/dashboard/asignar-membresia-list');
                     
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-                toast.error(errorMessage, {
-                    duration: 3000,
-                    position: 'bottom-right',
-                });                    
+            if (error instanceof Error) {
+                console.error('Error detallado:', error);
+                toast.error(`Error: ${error.message}`);
+                
+            }else {
+                console.error('Error desconocido:', error);
+                toast.error('Error desconocido al procesar la solicitud');
+            }
+            // const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+            //     toast.error(errorMessage, {
+            //         duration: 3000,
+            //         position: 'bottom-right',
+            //     });                    
         }            
     });
     
@@ -145,6 +172,17 @@ const MemberShipsForm = () => {
             return '';
         }
     };
+
+    const handleMemberShipsChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        const membresiaId = parseInt(event.target.value);
+        const selectedMembresia = membresias.find((membresia) => membresia.id === membresiaId);
+
+        if (selectedMembresia) {
+            setSelectedPrice(selectedMembresia.price);
+        }else {
+            setSelectedPrice(null);
+        }
+    };
         
     
     return (
@@ -176,7 +214,7 @@ const MemberShipsForm = () => {
                 >
                     <option value="">Seleccione un Miembro</option>
                     {miembros.map((miembro) => (
-                        <option key={miembro.id} value={miembro.id?.toString()}>{miembro.name}</option>
+                        <option key={miembro.id} value={miembro.id?.toString()}>{miembro.name} {miembro.lastname}</option>
                     ))}
                     </select>
                 </Label>
@@ -184,17 +222,21 @@ const MemberShipsForm = () => {
                     errors.miembro && typeof errors.miembro.message === 'string' && <span className='text-red-500 text-sm'>{errors.miembro.message}</span>                }
                 
                 {/* Membreship */}
-                <Label htmlFor="Membresia"><span className='flex gap-2 items-center'><FaTag className='lg:text-2xl' />Membresía</   span><select className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500'
+                <Label htmlFor="Membresia"><span className='flex gap-2 items-center'><FaTag className='lg:text-2xl' />Membresía</span><select className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500'
                 {...register('membresia',{
                     required: {
                         value: true,
                         message: 'Membresia requerido'
                     },                    
-                })} 
+                })}
+                onChange={(e) => {
+                    register('membresia').onChange(e);
+                    handleMemberShipsChange(e);
+                }} 
                 >
                     <option value="">Seleccione una Membresía</option>
                     {membresias.map((membresia) => (
-                        <option key={membresia.id} value={membresia.id?.toString()}>{membresia.name}</option>
+                        <option key={membresia.id} value={membresia.id?.toString()}>{membresia.name} - ${membresia.price}</option>
                     ))}
                     
                 </select>
@@ -202,6 +244,13 @@ const MemberShipsForm = () => {
                 {
                     errors.membresia && typeof errors.membresia.message === 'string' && <span className='text-red-500 text-sm'>{errors.membresia.message}</span>
                 }
+                { selectedPrice !== null && (
+                    // <div className='text-lg font-semibold'>
+                    //     Precio: ${selectedPrice}
+                    // </div>
+                    <label htmlFor="" ><span className='flex gap-1 justify-center items-center font-semibold text-xl text-slate-600'><PiCurrencyDollarBold className='lg:text-2xl xl:text-xl'/>Precio</span><div className='w-full border-solid border-b-2 border-slate-100 bg-slate-300 font-semibold outline-none pt-3 text-slate-600 text-2xl text-center'>$ {selectedPrice}</div></label>
+
+                )}
                 {/* Date Initial */}
                 <Label htmlFor="DateInitial"><span className='flex gap-2 items-center'><BsCalendar2Date className='lg:text-2xl' />Fecha Inicial</span><Input type="date"
                 {...register('dateInitial',{

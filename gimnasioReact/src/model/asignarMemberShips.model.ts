@@ -9,8 +9,8 @@ export interface AsignarMemberShips {
     membresia:   Membresia;
     dateInitial: string;
     dateFinal:   string;
-    price: number | string;
     name?: string;
+    price: number | string;    
     miembro_details: {
         id: number;
         name: string;
