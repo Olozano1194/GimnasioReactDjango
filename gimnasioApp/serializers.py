@@ -134,18 +134,38 @@ class MembresiaAsignadaSerializer(serializers.ModelSerializer):
     class Meta:
         model = MembresiaAsignada
         fields = '__all__'
-        read_only_fields = ('id','dateFinal', 'price',)
+        read_only_fields = ('id','price',)
+
+    def validate(self, data):           
+        miembro = data['miembro']
+        inicio = data['dateInitial']
+        fin = data['dateFinal']
+
+        # Calculamos la fecha final antes de la validación
+        membresia = data['membresia']
+        expected_final = inicio + timedelta(membresia.duration)
+        if fin != expected_final:
+            raise serializers.ValidationError("La fecha final no coincide con la fecha de inicio y la duración de la membresia")
+        
+        suscripcion = MembresiaAsignada.objects.filter(
+            miembro=miembro, dateInitial__lte=fin, dateFinal__gte=inicio
+        )
+        if suscripcion.exists():
+            raise serializers.ValidationError('El miembro ya tiene una suscripción activa en este rango de fechas')
+        return data        
 
     def create(self, validated_data):
-        # extraemos datos
-        membresia = validated_data['membresia']
-        dateInitial = validated_data['dateInitial']
-        # Calculamos la fecha de finalización y precio
-        validated_data['dateFinal'] = dateInitial + timedelta(days=membresia.duration)
-        validated_data['price'] = membresia.price
-        # Creamos la instancia
-        instance = super().create(validated_data)
-        return instance
+        # # extraemos datos
+        # membresia = validated_data['membresia']
+        # dateInitial = validated_data['dateInitial']
+        # # Calculamos la fecha de finalización y precio
+        # validated_data['dateFinal'] = dateInitial + timedelta(days=membresia.duration)
+        # validated_data['price'] = membresia.price
+        # # Creamos la instancia
+        # instance = super().create(validated_data)
+        # return instance
+        validated_data['price'] = validated_data['membresia'].price
+        return super().create(validated_data)
     
     def to_representation(self, instance):
         # Esto nos permite personalizar aún más la representación de los datos
@@ -157,15 +177,5 @@ class MembresiaAsignadaSerializer(serializers.ModelSerializer):
         if instance.dateFinal:
             representation['dateFinal'] = instance.dateFinal.strftime("%d-%m-%Y")
             
-        return representation
+        return representation   
     
-    def validate(self, data):
-        miembro = data['miembro']
-        inicio = data['dateInitial']
-        fin = inicio + timedelta(days=data['membresia'].duration)
-        suscripcion = MembresiaAsignada.objects.filter(
-            miembro=miembro, dateInitial__lte=fin, dateFinal__gte=inicio
-        )
-        if suscripcion.exists():
-            raise serializers.ValidationError('El miembro ya tiene una suscripción activa en este rango de fechas')
-        return data

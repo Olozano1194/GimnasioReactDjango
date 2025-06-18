@@ -152,7 +152,7 @@ const MemberShipsForm = () => {
                             message: 'La duración debe ser de almenos 15 días'
                         },
                         max: {
-                            value: 30,
+                            value: 45,
                             message: 'La duración no debe exceder los 30 días'
                         },
                         pattern: {

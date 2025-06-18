@@ -34,7 +34,7 @@ export const createAsignarMemberShips = async (member: CreateAsignarMemberShipsD
             });      
         return data;
         
-    } catch (error) {
+    } catch (error) {        
         throw handleApiError(error);              
     }  
 };

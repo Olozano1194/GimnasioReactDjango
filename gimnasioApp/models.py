@@ -107,7 +107,7 @@ class MembresiaAsignada(models.Model):
     miembro = models.ForeignKey(UsuarioGym, on_delete=models.CASCADE, related_name='miembro')
     membresia = models.ForeignKey(Membresia, on_delete=models.CASCADE)
     dateInitial = models.DateField()
-    dateFinal = models.DateField(editable=False)
+    dateFinal = models.DateField(editable=False, null=True, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, editable=False)
 
     class Meta:

@@ -1,6 +1,7 @@
 //Interfaz para crear/actualizar (POST/PUT)
 export interface CreateAsignarMemberShipsDto{
-    membresia: number,
-    miembro: number, 
-    dateInitial: string,      
+    membresia: number;
+    miembro: number;
+    dateInitial: string;
+    dateFinal: string;          
 };
