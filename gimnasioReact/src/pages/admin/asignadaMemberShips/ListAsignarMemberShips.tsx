@@ -161,7 +161,7 @@ const ListAsignarMemberShips = () => {
         ] as ColumnDef<AsignarMemberShips>[];
         return (
                 <main className="cards bg-secondary w-full flex flex-col justify-center items-center gap-y-4 p-4 rounded-xl">            
-                    <h1 className='text-xl font-bold pb-4'>Listado de Asignaciones de Membresías</h1>
+                    <h1 className='text-xl font-bold pb-4'>Listado de Asignaciones</h1>
                     {
                         isLoading ? (
                             <div className="text-center py-4">Cargando...</div>
