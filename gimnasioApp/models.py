@@ -95,7 +95,7 @@ class Membresia(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     duration = models.PositiveIntegerField(help_text="Duración en días (ej: 15, 30, 45)")
     is_active = models.BooleanField(default=True)
-    # created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 
     def __str__(self):
@@ -105,7 +105,7 @@ class Membresia(models.Model):
         verbose_name = 'Membresia'
         verbose_name_plural = 'Membresias'
         db_table = 'membresia'
-        # ordering = ['created_at']
+        ordering = ['created_at']
 
 class MembresiaAsignada(models.Model):
     miembro = models.ForeignKey(UsuarioGym, on_delete=models.CASCADE, related_name='miembro')
