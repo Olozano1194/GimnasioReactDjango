@@ -43,15 +43,18 @@ export const createMemberDay = async (userGymDay: CreateMemberDayDto) => {
 };
 
 //Lista de los miembros del gimnasio
-export const getMembersDay = async () => {
+export const getMembersDay = async (search = ''): Promise<MemberDay[]> => {
     const token = localStorage.getItem('token');
 
     try {
         const response = await gymApi.get<MemberDay[]>(`/UserGymDay/`, {
             headers: {
                 'Authorization': `Token ${token}`
-                },
-            });
+            },
+            params: {
+                search: search
+            }
+        });
         //console.log('API Response:', response.data);
         
         return response.data;

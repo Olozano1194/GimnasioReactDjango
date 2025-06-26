@@ -40,15 +40,18 @@ export const createAsignarMemberShips = async (member: CreateAsignarMemberShipsD
 };
 
 //Lista de los miembros del gimnasio
-export const getAsignarMemberList = async () => {
+export const getAsignarMemberList = async (search = ''): Promise<AsignarMemberShips[]> => {
     const token = localStorage.getItem('token');
 
     try {
         const { data } = await gymApi.get<AsignarMemberShips[]>(`/MemberShipsAsignada/`, {
             headers: {
                 'Authorization': `Token ${token}`
-                },
-            });
+            },
+            params: {
+                search: search
+            }
+        });
         //console.log('API Response:', response.data);        
         return data;
         

@@ -1,5 +1,5 @@
 //Estados
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 //API
 import { getAsignarMemberList, deleteAsignarMemberShips } from '../../../api/asignarMemberShips.api';
 //models
@@ -38,6 +38,21 @@ type Asignacion = AsignacionTotal | AsignarMemberShips;
 const ListAsignarMemberShips = () => {
     const [asignarMemberShips, setAsignarMemberShips] = useState<AsignarMemberShips[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [filteredData, setFilteredData] = useState<number | null>(null);
+    const [search, setSearch] = useState('');
+
+    // Función en donde se buscan los datos
+    const handleSearch = useCallback(async(user: string) => {
+        setIsLoading(true);
+        try {
+            const response = await getAsignarMemberList(user);
+            setAsignarMemberShips(response);
+        } catch (error) {
+            console.error('Error al buscar el miembro diario:', error);
+        }finally {
+            setIsLoading(false);
+        }       
+    }, []);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -55,7 +70,23 @@ const ListAsignarMemberShips = () => {
             }
         };
         fetchData();
+        //Limpiamos el timeout cada vez que se renderiza la página
+        return () => {
+            if (filteredData) clearTimeout(filteredData);
+        };
     }, []);
+
+    //Manejamos el evento de búsqueda
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const searchValue = e.target.value.toLowerCase();
+        setSearch(searchValue);
+
+        if (filteredData) clearTimeout(filteredData);
+
+        setFilteredData(setTimeout(() => {
+            handleSearch(searchValue)
+        }, 500));
+    }
 
     const columnHelper = createColumnHelper<Asignacion>();
 
@@ -75,15 +106,18 @@ const ListAsignarMemberShips = () => {
     const columns = [
         columnHelper.accessor((_, index) => index + 1, {
             id: 'index',
-            header: 'N°',
+            header: 'N°',            
             cell: (info) => {
                 // Solo mostrar el número si no es la fila de total
                 return info.row.index + 1;
             },
+            meta: {
+                className: 'w-16 text-sm'
+            }                       
         }),
         columnHelper.accessor(row => `${row.miembro_details?.name} ${row.miembro_details?.lastname}`, {
             id: 'nombreCompleto',
-            header: 'Nombre del Miembro',
+            header: 'Nombre',
             cell: (info) => info.getValue(),            
         }),
         columnHelper.accessor(row => row.membresia_details?.name, {
@@ -156,12 +190,22 @@ const ListAsignarMemberShips = () => {
                     </div>
                     );
                 },
-            }),               
+        }),               
                 
         ] as ColumnDef<AsignarMemberShips>[];
         return (
                 <main className="cards bg-secondary w-full flex flex-col justify-center items-center gap-y-4 p-4 rounded-xl">            
                     <h1 className='text-xl font-bold pb-4'>Listado de Asignaciones</h1>
+                    {/* Busqueda */}
+                    <section className="flex justify-end items-center gap-x-4 p-4 md:w-96">
+                        <input 
+                            type="text"
+                            placeholder="Buscar asignación..."
+                            className="bg-gray-100 rounded-md outline-slate-400 p-2 w-full md:w-1/2"
+                            value={search}
+                            onChange={handleSearchChange}
+                        />
+                    </section>
                     {
                         isLoading ? (
                             <div className="text-center py-4">Cargando...</div>

@@ -42,17 +42,19 @@ export const createMember = async (userGym: CreateMemberDto) => {
 };
 
 //Lista de los miembros del gimnasio
-export const getMembers = async () => {
+export const getMembers = async (search = ''): Promise<Miembro[]> => {
     const token = localStorage.getItem('token');
 
     try {
         const response = await gymApi.get<Miembro[]>(`/UserGym/`, {
             headers: {
                 'Authorization': `Token ${token}`
-                },
-            });
-        //console.log('API Response:', response.data);
-        
+            },
+            params: {
+                search: search
+            }
+        });
+        //console.log('API Response:', response.data);        
         return response.data;
         
     } catch (error) {

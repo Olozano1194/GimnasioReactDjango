@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 // icons
 import { RiMenu3Line, RiCloseLine, RiMessage3Fill, RiCalendarTodoLine, RiLogoutCircleLine, RiHome8Line, RiUserLine, RiArrowRightSLine } from "react-icons/ri";
 import { MdOutlineSupportAgent } from "react-icons/md";
-import { FaTag } from 'react-icons/fa';
+import { FaCreditCard } from 'react-icons/fa';
 //API
 import { getUserProfile } from '../api/users.api';
 //Mensajes
@@ -137,7 +137,7 @@ const SideBar = () => {
                                 {/* MemberShips */}
                                 <ul className="flex flex-col gap-2">
                                     <button onClick={() => handleToggleSubMenu('menu4')}  
-                                                className="w-full flex items-center justify-between py-2 px-4 rounded-lg hover:bg-slate-200 text-dark font-semibold transition-colors"><span className="flex items-center gap-2"><FaTag className="text-primary" />Membresía</span>
+                                                className="w-full flex items-center justify-between py-2 px-4 rounded-lg hover:bg-slate-200 text-dark font-semibold transition-colors"><span className="flex items-center gap-2"><FaCreditCard className="text-primary" />Membresía</span>
                                                 <RiArrowRightSLine className={`mt-1 ${showSubMenu.menu4 ? 'rotate-90' : ''} transition-all`} />
                                     </button>
                                     <ul className={`mt-2 ${!showSubMenu.menu4 ? 'hidden' : ''} transition-all`} >
@@ -152,7 +152,7 @@ const SideBar = () => {
                                 {/* Asignar MemberShips */}
                                 <ul className="flex flex-col gap-2">
                                     <button onClick={() => handleToggleSubMenu('menu5')}  
-                                                className="w-full flex items-center justify-between py-2 px-4 rounded-lg hover:bg-slate-200 text-dark font-semibold transition-colors"><span className="flex items-center gap-2"><FaTag className="text-primary" />Asignar Membresía</span>
+                                                className="w-full flex items-center justify-between py-2 px-4 rounded-lg hover:bg-slate-200 text-dark font-semibold transition-colors"><span className="flex items-center gap-2"><FaCreditCard className="text-primary" />Asignar Membresía</span>
                                                 <RiArrowRightSLine className={`mt-1 ${showSubMenu.menu5 ? 'rotate-90' : ''} transition-all`} />
                                     </button>
                                     <ul className={`mt-2 ${!showSubMenu.menu5 ? 'hidden' : ''} transition-all`} >
@@ -243,7 +243,7 @@ const SideBar = () => {
                                 {/* Asignar MemberShips */}
                                 <ul className="flex flex-col gap-2">
                                     <button onClick={() => handleToggleSubMenu('menu5')}  
-                                                className="w-full flex items-center justify-between py-2 px-4 rounded-lg hover:bg-slate-200 text-dark font-semibold transition-colors"><span className="flex items-center gap-2"><FaTag className="text-primary" />Asignar Membresía</span>
+                                                className="w-full flex items-center justify-between py-2 px-4 rounded-lg hover:bg-slate-200 text-dark font-semibold transition-colors"><span className="flex items-center gap-2"><FaCreditCard className="text-primary" />Asignar Membresía</span>
                                                 <RiArrowRightSLine className={`mt-1 ${showSubMenu.menu5 ? 'rotate-90' : ''} transition-all`} />
                                     </button>
                                     <ul className={`mt-2 ${!showSubMenu.menu5 ? 'hidden' : ''} transition-all`} >
