@@ -105,7 +105,7 @@ class Membresia(models.Model):
         verbose_name = 'Membresia'
         verbose_name_plural = 'Membresias'
         db_table = 'membresia'
-        # ordering = ['created_at']
+        # ordering = ['-created_at']
 
 class MembresiaAsignada(models.Model):
     miembro = models.ForeignKey(UsuarioGym, on_delete=models.CASCADE, related_name='miembro')

@@ -225,50 +225,7 @@ const RegisterMiembro = () => {
                 </Label>
                 {
                     errors.address && <span className='text-red-500 text-sm'>{errors.address.message}</span>
-                }               
-                {/* Date Initial */}
-                {/* <Label htmlFor="DateInitial"><span className='flex gap-2 items-center'><BsCalendar2Date className='lg:text-2xl' />Fecha Inicial</span><Input type="date"
-                {...register('dateInitial',{
-                    required: {
-                        value: true,
-                        message: 'Fecha requerido'
-                    },                    
-                })} 
-                />
-                </Label>
-                {
-                    errors.dateInitial && <span className='text-red-500 text-center text-sm'>{errors.dateInitial.message}</span>
-                } */}
-                {/* Date final */}
-                {/* <Label htmlFor="DateFinal"><span className='flex gap-2 items-center'><BsCalendar2Date className='lg:text-2xl' />Fecha Final</span><Input type="date"
-                {...register('dateFinal',{
-                    required: {
-                        value: true,
-                        message: 'Fecha requerido'
-                    },                    
-                })} 
-                />
-                </Label>
-                {
-                    errors.dateFinal && <span className='text-red-500 text-center text-sm'>{errors.dateFinal.message}</span>
-                } */}
-                {/* Price */}
-                {/* <Label htmlFor="price"><span className='flex gap-2 items-center'><MdOutlinePriceChange className='lg:text-2xl' />Precio</span><Input inputMode="decimal" type="text" placeholder='Colocar precio'
-                {...register('price',{
-                    required: {
-                        value: true,
-                        message: 'Precio requerido'
-                    },
-                    pattern: {
-                        value: /^[0-9]+$/,
-                        message: 'Precio invalido'
-                    },                    
-                })} 
-                />
-                </Label>
-                {
-                    errors.price && <span className='text-red-500 text-sm'>{errors.price.message}</span>
-                } */}
+                }                
                 {/* btn Register */}
                 <Button type="submit">
                     <RiLoginBoxLine className='text-purple-800' />{ params.id ? 'Actualizar' : 'Registrar' }
