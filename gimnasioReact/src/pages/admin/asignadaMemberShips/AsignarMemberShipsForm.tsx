@@ -4,7 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 //Icons
 import { RiLoginBoxLine } from "react-icons/ri";
-import { FaTag } from 'react-icons/fa';
+import { FaCreditCard } from 'react-icons/fa';
 import { BsCalendar2Date } from "react-icons/bs";
 import { CiUser } from 'react-icons/ci';
 import { PiCurrencyDollarBold } from 'react-icons/pi';
@@ -222,7 +222,7 @@ const MemberShipsForm = () => {
                     errors.miembro && typeof errors.miembro.message === 'string' && <span className='text-red-500 text-sm'>{errors.miembro.message}</span>                }
                 
                 {/* Membreship */}
-                <Label htmlFor="Membresia"><span className='flex gap-2 items-center'><FaTag className='lg:text-2xl' />Membresía</span><select className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500'
+                <Label htmlFor="Membresia"><span className='flex gap-2 items-center'><FaCreditCard className='lg:text-2xl' />Membresía</span><select className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500'
                 {...register('membresia',{
                     required: {
                         value: true,
@@ -244,12 +244,11 @@ const MemberShipsForm = () => {
                 {
                     errors.membresia && typeof errors.membresia.message === 'string' && <span className='text-red-500 text-sm'>{errors.membresia.message}</span>
                 }
-                { selectedPrice !== null && (
-                    // <div className='text-lg font-semibold'>
-                    //     Precio: ${selectedPrice}
-                    // </div>
-                    <label htmlFor="" ><span className='flex gap-1 justify-center items-center font-semibold text-xl text-slate-600'><PiCurrencyDollarBold className='lg:text-2xl xl:text-xl'/>Precio</span><div className='w-full border-solid border-b-2 border-slate-100 bg-slate-300 font-semibold outline-none pt-3 text-slate-600 text-2xl text-center'>$ {selectedPrice}</div></label>
-
+                { selectedPrice !== null && (                    
+                    <Label htmlFor="">
+                        <span className='flex gap-1 justify-center items-center font-semibold text-xl text-slate-600'><PiCurrencyDollarBold className='lg:text-2xl xl:text-xl'/>Precio</span>
+                        <div className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 outline-none text-gray-500 text-lg placeholder:text-gray-500'>$ {selectedPrice}</div>
+                    </Label>
                 )}
                 {/* Date Initial */}
                 <Label htmlFor="DateInitial"><span className='flex gap-2 items-center'><BsCalendar2Date className='lg:text-2xl' />Fecha Inicial</span><Input type="date"

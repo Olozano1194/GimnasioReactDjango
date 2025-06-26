@@ -141,23 +141,19 @@ const MemberShipsForm = () => {
                     errors.price && <span className='text-red-500 text-sm'>{errors.price.message}</span>
                 }
                 {/* Duration */}
-                <Label htmlFor="duration"><span className='flex gap-2 items-center'><GiDuration className='lg:text-2xl' />Duración</span><Input type="text" inputMode='decimal' placeholder='Escribe la duración de la membresía'
+                <Label htmlFor="duration"><span className='flex gap-2 items-center'><GiDuration className='lg:text-2xl' />Duración</span><Input type="text" inputMode='decimal' placeholder='Duración en días (ej: 15, 30, 45)'
                     {...register('duration',{
                         required: {
                             value: true,
                             message: 'Duración requerida'
                         },
-                        min: {
-                            value: 15,
-                            message: 'La duración debe ser de almenos 15 días'
-                        },
-                        max: {
-                            value: 45,
-                            message: 'La duración no debe exceder los 30 días'
+                        validate: (value) => {
+                            const num = Number(value);
+                            return [15, 30, 45].includes(num) || 'Solo se permiten los valores 15, 30 o 45';
                         },
                         pattern: {
                             value: /^[0-9]+$/,
-                            message: 'Duración invalido'
+                            message: 'Duración invalida'
                         },
                     })}
                     />

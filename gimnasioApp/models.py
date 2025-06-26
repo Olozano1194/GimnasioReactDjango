@@ -48,6 +48,7 @@ class Usuario(AbstractBaseUser):
         verbose_name = 'Usuario'
         verbose_name_plural = 'Usuarios'
         db_table = 'usuario'
+        ordering = ['created_at']
 
 class UsuarioGym(models.Model):
     name = models.CharField(max_length=100)
@@ -55,9 +56,7 @@ class UsuarioGym(models.Model):
     phone = models.CharField(max_length=10)
     # user = models.OneToOneField(User, on_delete=models.CASCADE)
     address = models.CharField(max_length=50)
-    # dateInitial = models.DateField(max_length=50)
-    # dateFinal = models.DateField(max_length=50)
-    # price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.name} {self.lastname}"
@@ -66,6 +65,7 @@ class UsuarioGym(models.Model):
         verbose_name = 'UsuarioGym'
         verbose_name_plural = 'UsuarioGyms'
         db_table = 'usuarioGym'
+        ordering = ['-created_at']
     
 class UsuarioGymDay(models.Model):
     name = models.CharField(max_length=100)
@@ -74,6 +74,7 @@ class UsuarioGymDay(models.Model):
     # user = models.OneToOneField(User, on_delete=models.CASCADE)
     dateInitial = models.DateField(max_length=200)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
@@ -82,6 +83,7 @@ class UsuarioGymDay(models.Model):
         verbose_name = 'UsuarioGymDay'
         verbose_name_plural = 'UsuarioGymDays'
         db_table = 'usuarioGymDay'
+        ordering = ['-created_at']
 
 class Membresia(models.Model):
     OPCIONES_NAME = [
@@ -93,6 +95,7 @@ class Membresia(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     duration = models.PositiveIntegerField(help_text="Duración en días (ej: 15, 30, 45)")
     is_active = models.BooleanField(default=True)
+    # created_at = models.DateTimeField(auto_now_add=True)
 
 
     def __str__(self):
@@ -102,6 +105,7 @@ class Membresia(models.Model):
         verbose_name = 'Membresia'
         verbose_name_plural = 'Membresias'
         db_table = 'membresia'
+        # ordering = ['created_at']
 
 class MembresiaAsignada(models.Model):
     miembro = models.ForeignKey(UsuarioGym, on_delete=models.CASCADE, related_name='miembro')
@@ -127,8 +131,7 @@ class MembresiaAsignada(models.Model):
                                             dateInitial__lte=self.dateFinal,
                                             dateFinal__gte=self.dateInitial).exclude(pk=self.pk).exists():
             raise ValidationError('Ya existe una membresia asignada para este usuario en el rango de fechas indicado')
-                                  
-    
+   
     @property
     def activa(self):
         hoy = date.today()

@@ -11,7 +11,9 @@ from django.utils import timezone
 from django.http import JsonResponse
 #para la imagen
 from rest_framework.parsers import MultiPartParser, FormParser
-# from rest_framework.exceptions import ValidationError
+#Para las filtraciones en la base de datos
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter
 
 
 # Create your views here.
@@ -141,11 +143,15 @@ class userProfileView(APIView):
 class UsuarioGymViewSet(viewsets.ModelViewSet):
     serializer_class = UsuarioGymSerializer
     queryset = UsuarioGym.objects.all()
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    search_fields = ['name', 'lastname']
 
 #clase para el crud de  miembros del gimnasio por día
 class UsuarioGymDayViewSet(viewsets.ModelViewSet):
     serializer_class = UsuarioGymDaySerializer
     queryset = UsuarioGymDay.objects.all()
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    search_fields = ['name', 'lastname']
 
 #funcion para mostrar los datos en las cards
 class Home(APIView):
@@ -196,6 +202,8 @@ class MembresiaViewSet(viewsets.ModelViewSet):
 class MembresiaAsignadaViewSet(viewsets.ModelViewSet):
     serializer_class = MembresiaAsignadaSerializer
     queryset = MembresiaAsignada.objects.select_related('miembro', 'membresia')
+    filter_backends = [DjangoFilterBackend, SearchFilter]
+    search_fields = ['miembro__name', 'miembro__lastname']
 
     def get_queryset(self):
         miembro_id = self.request.query_params.get('miembro')

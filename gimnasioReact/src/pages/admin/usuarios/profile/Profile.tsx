@@ -135,7 +135,7 @@ const Profile = () => {
 
     return (
         <section className="bg-secondary p-8 rounded-xl">
-            <h1 className="text-xl text-dark font-bold md:text-2xl">Profile</h1>
+            <h1 className="text-xl text-dark font-bold md:text-2xl">Perfil</h1>
             <hr className="my-8 border-gray-500" />
             <form>
                 {/* Avatar */}

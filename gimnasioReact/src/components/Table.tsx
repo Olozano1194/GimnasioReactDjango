@@ -47,9 +47,9 @@ const Table = <T,> ({ data, columns, totalRow }: TableProps<T>) => {
 
     return (
         <main className="cards bg-secondary w-full flex flex-col justify-center items-center gap-y-4 p-4 rounded-xl">
-            <div className="overflow-x-auto w-full">
+            <div className="overflow-x-auto w-full">                
                 <table className="min-w-full border"> 
-                    <thead className="bg-slate-500 text-white">
+                    <thead className="bg-slate-500 text-white text-sm lg:text-lg">
                         {
                             table.getHeaderGroups().map(headerGroup => (
                                 <tr key={headerGroup.id}>
@@ -69,7 +69,7 @@ const Table = <T,> ({ data, columns, totalRow }: TableProps<T>) => {
                             ))
                         }
                     </thead>
-                    <tbody>
+                    <tbody className="text-sm lg:text-lg">
                         {
                             table.getRowModel().rows.map(row => (
                                 <tr key={row.id}>
@@ -100,32 +100,32 @@ const Table = <T,> ({ data, columns, totalRow }: TableProps<T>) => {
                     </tbody>
                 </table>
                 {/* contenedor de los btn de paginación */}
-                <div className="flex justify-center items-center gap-x-4 pt-4">
+                <div className="w-full flex md:justify-center md:items-center gap-x-4 pt-4">
                     <button 
                         onClick={() => table.setPageIndex(0)}
                         disabled={!table.getCanPreviousPage()}
-                        className="px-3 py-1 bg-blue-500 text-white rounded disabled:bg-gray-300" 
+                        className="px-3 py-1 bg-blue-500 text-white text-sm rounded disabled:bg-gray-400 md:ml-0" 
                     >
                         Primera Página
                     </button>
                     <button 
                         onClick={() => table.previousPage()}
                         disabled={!table.getCanPreviousPage()}
-                        className="px-3 py-1 bg-blue-500 text-white rounded disabled:bg-gray-300"
+                        className="px-3 py-1 bg-blue-500 text-white text-sm rounded disabled:bg-gray-400"
                     >
                         Página Anterior
                     </button>
                     <button 
                         onClick={() => table.nextPage()}
-                        disabled={!table.getCanPreviousPage()}
-                        className="px-3 py-1 bg-blue-500 text-white rounded disabled:bg-gray-300"
+                        disabled={!table.getCanNextPage()}
+                        className="px-3 py-1 bg-blue-500 text-white text-sm rounded disabled:bg-gray-400"
                     >
                         Página Siguiente
                     </button>
                     <button 
                         onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                        disabled={!table.getCanPreviousPage()}
-                        className="px-3 py-1 bg-blue-500 text-white rounded disabled:bg-gray-300"
+                        disabled={!table.getCanNextPage()}
+                        className="px-3 py-1 bg-blue-500 text-white text-sm rounded disabled:bg-gray-400"
                     >
                         Última Página
                     </button>
