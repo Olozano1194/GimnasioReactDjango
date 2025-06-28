@@ -4,7 +4,7 @@ import { User } from '../model/user.model';
 //DTO
 import { CreateUserDto, LoginUserDto } from '../model/dto/user.dto';
 
-const gymApi = axios.create({
+export const gymApi = axios.create({
     //baseURL: 'http://localhost:8000/gym/api/v1/',
     baseURL: import.meta.env.MODE === 'development' 
     ? 'http://localhost:8000/gym/api/v1'
@@ -15,7 +15,7 @@ const gymApi = axios.create({
 
 });
 
-const handleApiError = (error: unknown): never => {
+export const handleApiError = (error: unknown): never => {
     if (axios.isAxiosError(error)) {
         const errorMessage = error.response?.data?.message || error.message;
         console.error('API Error:', errorMessage);

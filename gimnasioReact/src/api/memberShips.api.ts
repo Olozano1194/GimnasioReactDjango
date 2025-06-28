@@ -1,30 +1,33 @@
-import axios from 'axios';
 //Models
 import { Membresia } from '../model/memberShips.model';
 //DTO
 import { CreateMemberShipsDTO } from '../model/dto/memberShips.dto';
+//axios y errores
+import { gymApi } from './users.api';
+import { handleApiError } from './users.api';
 
-const gymApi = axios.create({
-    //gitbaseURL: 'http://localhost:8000/gym/api/v1/',
-    baseURL: import.meta.env.MODE === 'development' 
-        ? 'http://localhost:8000/gym/api/v1'
-        : 'https://gimnasioreactdjango.onrender.com/gym/api/v1',
-    headers: {
-        'Content-Type': 'application/json',
-      },
+// const gymApi = axios.create({
+//     //gitbaseURL: 'http://localhost:8000/gym/api/v1/',
+//     baseURL: import.meta.env.MODE === 'development' 
+//         ? 'http://localhost:8000/gym/api/v1'
+//         : 'https://gimnasioreactdjango.onrender.com/gym/api/v1',
+//     headers: {
+//         'Content-Type': 'application/json',
+//       },
 
-});
+// });
 
-const handleApiError = (error: unknown): never => {
-    if (axios.isAxiosError(error)) {
-        const errorMessage = error.response?.data?.message || error.message;
-        console.error('API Error:', errorMessage);
-        throw new Error(errorMessage);
-    }
-    throw error;
-};
+// const handleApiError = (error: unknown): never => {
+//     if (axios.isAxiosError(error)) {
+//         const errorMessage = error.response?.data?.message || error.message;
+//         console.error('API Error:', errorMessage);
+//         throw new Error(errorMessage);
+//     }
+//     throw error;
+// };
 
 //Creación de miembros del gimnasio
+
 export const createMemberShips = async (member: CreateMemberShipsDTO) => {
     const token = localStorage.getItem('token');
     try {
