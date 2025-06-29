@@ -16,7 +16,7 @@ import { toast } from 'react-hot-toast';
 import { RiDeleteBinLine, RiPencilLine } from "react-icons/ri";
 
 interface AsignacionTotal {
-    id: 'total' | number;
+    id: 'total';
     name: string;
     miembro_details?: {
         id: number;
@@ -35,8 +35,8 @@ interface AsignacionTotal {
 
 type Asignacion = AsignacionTotal | AsignarMemberShips;
 
-const ListAsignarMemberShips = () => {
-    const [asignarMemberShips, setAsignarMemberShips] = useState<AsignarMemberShips[]>([]);
+const ListAsignarMemberShips = () => {    
+    const [asignarMemberShips, setAsignarMemberShips] = useState<Asignacion[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [filteredData, setFilteredData] = useState<number | null>(null);
     const [search, setSearch] = useState('');
@@ -59,9 +59,9 @@ const ListAsignarMemberShips = () => {
             setIsLoading(true);
             try {                
                 const response = await getAsignarMemberList();
-                //console.log('Datos recibidos:', response);
-                
+                //console.log('Datos recibidos:', response);                
                 setAsignarMemberShips(response);
+
             }catch (error) {
                 const errorMessage = error instanceof Error ? error.message : 'Error al cargar los datos';
                 toast.error(errorMessage);
@@ -95,27 +95,31 @@ const ListAsignarMemberShips = () => {
     const total = asignarMemberShips.reduce((acc, item) => {
         const price = typeof item.price === 'string' ? parseFloat(item.price) : item.price;
         return acc + price;
-    }, 0);
-        
+    }, 0);        
 
-    const totalRow: Partial<AsignarMemberShips> & { id: string } = {
+    const totalRow: AsignacionTotal = {
         id: 'total',
-        price: `$ ${total}`,       
+        name: 'Total',
+        //price: `$ ${total}`,
+        price: total       
     };
 
+    const rowsConTotal: Asignacion[] = [...asignarMemberShips, totalRow];
+
     const columns = [
-        columnHelper.accessor((_, index) => index + 1, {
+        columnHelper.display({
             id: 'index',
-            header: 'N°',            
-            cell: (info) => {
-                // Solo mostrar el número si no es la fila de total
-                return info.row.index + 1;
-            },
-            meta: {
-                className: 'w-16 text-sm'
-            }                       
+            header: 'N°',
+            cell: info => {
+                const isTotalRow = info.row.original.id === 'total';
+                return (
+                    <div className={isTotalRow ? 'font-bold md:text-lg' : ''}>
+                        {isTotalRow ? '' : info.row.index + 1}
+                    </div>
+                );
+            },           
         }),
-        columnHelper.accessor(row => `${row.miembro_details?.name} ${row.miembro_details?.lastname}`, {
+        columnHelper.accessor(row => row.id === 'total' ? row.name : `${row.miembro_details?.name} ${row.miembro_details?.lastname}`, {
             id: 'nombreCompleto',
             header: 'Nombre',
             cell: (info) => info.getValue(),            
@@ -141,13 +145,13 @@ const ListAsignarMemberShips = () => {
             cell: info => {
                 const isTotalRow = info.row.original.id === 'total';
                 const raw = info.getValue<Asignacion['price']>();
-                const priceNum  = typeof raw === 'string' ? parseFloat(raw) : raw;              
+                const priceNum  = typeof raw === 'string' ? parseFloat(raw) : raw;                              
                 // Si es la fila de total, mostrar en negrita
                 return (
                     <div className={isTotalRow ? 'font-bold' : ''}>
-                        ${priceNum.toFixed(2)}
+                        ${priceNum.toFixed(0)}
                     </div>
-                )              
+                )          
             },
         }),
         columnHelper.display({
@@ -192,10 +196,11 @@ const ListAsignarMemberShips = () => {
                 },
         }),               
                 
-        ] as ColumnDef<AsignarMemberShips>[];
+        ] as ColumnDef<Asignacion>[];
+        
         return (
-                <main className="cards bg-secondary w-full flex flex-col justify-center items-center gap-y-4 p-4 rounded-xl">            
-                    <h1 className='text-xl font-bold pb-4'>Listado de Asignaciones</h1>
+            <main className="cards bg-secondary w-full flex flex-col justify-center items-center gap-y-4 p-4 rounded-xl">            
+                <h1 className='text-xl font-bold pb-4'>Listado de Asignaciones</h1>
                     {/* Busqueda */}
                     <section className="flex justify-end items-center gap-x-4 p-4 md:w-96">
                         <input 
@@ -208,18 +213,16 @@ const ListAsignarMemberShips = () => {
                     </section>
                     {
                         isLoading ? (
-                            <div className="text-center py-4">Cargando...</div>
+                            <div className="text-center py-4">Cargando...</div>         
 
-                        ): (
+                        ) : (                            
                             <Table 
-                                data={asignarMemberShips} 
-                                columns={columns} 
-                                totalRow={totalRow} 
+                                data={rowsConTotal} 
+                                columns={columns}                                 
                             />
                         )
                     }             
-                </main>
-            );
-
+            </main>
+        );
 };
 export default ListAsignarMemberShips;

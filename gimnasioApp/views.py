@@ -14,6 +14,11 @@ from rest_framework.parsers import MultiPartParser, FormParser
 #Para las filtraciones en la base de datos
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
+#Para las notificaciones
+from datetime import datetime, timedelta
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 
 
 # Create your views here.
@@ -210,3 +215,48 @@ class MembresiaAsignadaViewSet(viewsets.ModelViewSet):
         # base_qset = MembresiaAsignada.objects.select_related('miembro', 'membresia')
         qs = super().get_queryset()
         return qs.filter(miembro_id=miembro_id) if miembro_id else qs
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def membership_notifications(request):
+    # Filtramos solo si el usuario es admin o recepción
+    # if request.user.role not in ['admin', 'recepcion']:
+    #     return Response([])
+
+    # Membresías que expiran en el mes actual
+    today = datetime.now().date()
+    three_day_later = today + timedelta(days=3)
+
+    expiring_memberships = MembresiaAsignada.objects.filter(
+        dateFinal__gte=today,
+        dateFinal__lte=three_day_later
+    ).select_related('miembro', 'membresia')
+
+    # Membresías ya vencidas
+    expired_memberships = MembresiaAsignada.objects.filter(
+        dateFinal__lte=today
+    ).select_related('miembro', 'membresia')
+
+    notifications = []
+
+    # Notificaciones para membresias próximas a expirar
+    for membership in expiring_memberships:
+        days_left = (membership.dateFinal - today).days
+        notifications.append({
+            'type': 'warning',
+            'title': 'Membresía próxima a expirar',
+            'message': f'La membresía de {membership.miembro.name} {membership.miembro.        lastname} - {membership.membresia.name} expirará en {days_left} días.',
+            'date': membership.dateFinal.strftime('%d/%m/%Y'),
+            'link': f'/dashboard/membresia/{membership.id}/'
+        })
+    
+    # Notificaciones para membresias ya vencidas
+    for membership in expired_memberships:
+        notifications.append({
+            'type': 'danger',
+            'title': 'Membresía vencida',
+            'message': f'La membresía de {membership.miembro.name} {membership.miembro.       lastname} - {membership.membresia.name} ya venció.',
+            'date': membership.dateFinal.strftime('%d/%m/%Y'),
+            'link': f'/dashboard/membresia/{membership.id}/'
+        })
+    return Response(notifications)
