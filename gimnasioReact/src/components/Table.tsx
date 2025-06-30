@@ -85,7 +85,7 @@ const Table = <T,> ({ data, columns, totalRow }: TableProps<T>) => {
                         {/* Fila del total que estará siempre al final */}
                         { totalRow && (
                             <tr 
-                                className="bg-slate-500 text-white">
+                                className="bg-slate-500 text-white font-bold md:text-lg">
                                 {table.getAllColumns().map((column) => {
                                     const accessorKey = column.id;
                                     const value = totalRow[accessorKey as keyof typeof totalRow] ?? '';
