@@ -13,6 +13,7 @@ import { toast } from 'react-hot-toast';
 import { LoginUserDto } from '../../model/dto/user.dto';
 //img
 import Logo from '../../../public/favicon-32x32.png';
+import imgGym from '../../../public/img_Gym_prev_ui.png';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -63,8 +64,13 @@ const Login = () => {
 
     return ( 
         <main className="w-full h-screen flex flex-col justify-center items-center lg:justify-between lg:flex-row lg:pr-48">
-            <div className="hidden w-full lg:block lg:w-1/2 h-full relative">
-                <img src="https://cdn.pixabay.com/photo/2020/08/05/15/25/gym-5465776_1280.png" alt="Logo del gym" className="w-full h-full object-fill rounded-md" />
+            <div className="hidden w-full h-full relative lg:flex lg:w-1/2 lg:justify-center lg:items-center">
+                {/* <img src="https://cdn.pixabay.com/photo/2020/08/05/15/25/gym-5465776_1280.png" alt="Logo del gym" className="w-full h-full object-fill rounded-md" /> */}
+                <img 
+                    src={imgGym} 
+                    alt="img del gym"
+                    className="w-full h-[75%]" 
+                />
             </div>
 
             <form onSubmit={onSubmit} className="w-[90%] bg-slate-300 flex flex-col justify-center items-center text-slate-600 gap-6 p-4 rounded-md md:w-[56%] md:gap-8 lg:w-[45%] xl:max-w-[30%]">
@@ -88,9 +94,7 @@ const Login = () => {
                 </label>
                 {
                     errors.email && <span className='text-red-500 text-sm'>{errors.email.message}</span>
-                }
-                
-                  
+                }                 
                 {/* Password */}
                 <label className="flex gap-3 font-semibold md:gap-5" htmlFor="password">
                     <RiLockPasswordLine className='text-2xl text-gray-950' />
