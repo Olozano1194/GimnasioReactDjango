@@ -90,6 +90,16 @@ const ListAsignarMemberShips = () => {
 
     const columnHelper = createColumnHelper<Asignacion>();
 
+    //Función para dar formato a la moneda en este caso pesos colombianos
+    const formatCurrency = (amount: number): string => {
+        return new Intl.NumberFormat("es-CO", {
+        style: "currency",
+        currency: "COP",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+        }).format(amount);
+    };
+
     //Calculamos el total de los precios
     //const total = users.reduce((acc, user) => acc + Number((user.price)), 0);
     const total = asignarMemberShips.reduce((acc, item) => {
@@ -101,11 +111,11 @@ const ListAsignarMemberShips = () => {
         id: 'total',
         name: 'Total',
         nombreCompleto: 'Total',
-        price: `$ ${total}`,
+        price: formatCurrency(total),
         //price: total       
     };
 
-    //const rowsConTotal: Asignacion[] = [...asignarMemberShips, totalRow];
+    //const rowsConTotal: Asignacion[] = [...asignarMemberShips, totalRow];    
 
     const columns = [
         columnHelper.display({
@@ -146,7 +156,7 @@ const ListAsignarMemberShips = () => {
                 // Si es la fila de total, mostrar en negrita
                 return (
                     <div className={isTotalRow ? 'font-bold text-gray-50' : ''}>
-                        $ {priceNum.toFixed(0)}
+                        {formatCurrency(priceNum)}
                     </div>
                 )          
             },

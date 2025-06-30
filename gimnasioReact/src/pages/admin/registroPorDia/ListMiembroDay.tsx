@@ -80,6 +80,16 @@ const ListMiembroDay = () => {
 
     const columnHelper = createColumnHelper<DayMember>();
 
+    //Función para dar formato a la moneda en este caso pesos colombianos
+    const formatCurrency = (amount: number): string => {
+        return new Intl.NumberFormat("es-CO", {
+        style: "currency",
+        currency: "COP",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+        }).format(amount);
+    };
+
      //Calculamos el total de los precios
      const total = users.reduce((acc, user) => {
         const price = typeof user.price === 'string' ? parseFloat(user.price) : user.price;
@@ -89,7 +99,7 @@ const ListMiembroDay = () => {
     const totalRow: MiembroTotal = {
         id: 'total',
         name: 'Total',
-        price: `$ ${total}`, 
+        price: `${formatCurrency(total)}`, 
     };
 
     const columns = [
@@ -131,7 +141,7 @@ const ListMiembroDay = () => {
                 // Si es la fila de total, mostrar en negrita
                 return (
                     <div className={isTotalRow ? 'font-bold' : ''}>
-                        $ {priceNum.toFixed(0)}
+                        {formatCurrency(priceNum)}
                     </div>
                 )              
             },
