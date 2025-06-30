@@ -131,7 +131,7 @@ const ListMiembroDay = () => {
                 // Si es la fila de total, mostrar en negrita
                 return (
                     <div className={isTotalRow ? 'font-bold' : ''}>
-                        ${priceNum.toFixed(2)}
+                        $ {priceNum.toFixed(0)}
                     </div>
                 )              
             },

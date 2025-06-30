@@ -97,29 +97,26 @@ const ListAsignarMemberShips = () => {
         return acc + price;
     }, 0);        
 
-    const totalRow: AsignacionTotal = {
+    const totalRow: AsignacionTotal & { nombreCompleto?: string } = {
         id: 'total',
         name: 'Total',
-        //price: `$ ${total}`,
-        price: total       
+        nombreCompleto: 'Total',
+        price: `$ ${total}`,
+        //price: total       
     };
 
-    const rowsConTotal: Asignacion[] = [...asignarMemberShips, totalRow];
+    //const rowsConTotal: Asignacion[] = [...asignarMemberShips, totalRow];
 
     const columns = [
         columnHelper.display({
             id: 'index',
             header: 'N°',
-            cell: info => {
-                const isTotalRow = info.row.original.id === 'total';
-                return (
-                    <div className={isTotalRow ? 'font-bold md:text-lg' : ''}>
-                        {isTotalRow ? '' : info.row.index + 1}
-                    </div>
-                );
-            },           
+            cell: info => info.row.index + 1,                      
         }),
-        columnHelper.accessor(row => row.id === 'total' ? row.name : `${row.miembro_details?.name} ${row.miembro_details?.lastname}`, {
+        columnHelper.accessor(row => {
+            if (row.id === 'total') return row.name;
+            return `${row.miembro_details?.name} ${row.miembro_details?.lastname}`;
+        }, {
             id: 'nombreCompleto',
             header: 'Nombre',
             cell: (info) => info.getValue(),            
@@ -148,8 +145,8 @@ const ListAsignarMemberShips = () => {
                 const priceNum  = typeof raw === 'string' ? parseFloat(raw) : raw;                              
                 // Si es la fila de total, mostrar en negrita
                 return (
-                    <div className={isTotalRow ? 'font-bold' : ''}>
-                        ${priceNum.toFixed(0)}
+                    <div className={isTotalRow ? 'font-bold text-gray-50' : ''}>
+                        $ {priceNum.toFixed(0)}
                     </div>
                 )          
             },
@@ -217,8 +214,9 @@ const ListAsignarMemberShips = () => {
 
                         ) : (                            
                             <Table 
-                                data={rowsConTotal} 
-                                columns={columns}                                 
+                                data={asignarMemberShips} 
+                                columns={columns}
+                                totalRow={totalRow}                                 
                             />
                         )
                     }             
