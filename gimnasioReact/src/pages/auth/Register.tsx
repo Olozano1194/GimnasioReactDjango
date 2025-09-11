@@ -77,7 +77,7 @@ const Register = () => {
                         message: 'El nombre debe tener como maximo 20 letras'
                     },
                     pattern: {
-                            value: /^[a-zA-Z]+$/,
+                            value: /^[A-Za-z]+(?:\s[A-Za-z]+)?$/,
                             message: 'Nombre invalido'
                     },
                 })} 
@@ -102,7 +102,7 @@ const Register = () => {
                         message: 'El apellido debe tener como maximo 20 letras'
                     },
                     pattern: {
-                        value: /^[a-zA-Z]+$/,
+                        value: /^[A-Za-z]+(?:\s[A-Za-z]+)?$/,
                         message: 'Apellido invalido'
                     },
                 })}
