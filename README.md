@@ -1,6 +1,62 @@
-# Proyecto de Gestión de Gimnasio
+# Gym Management System (Fullstack)
 
-Este es un proyecto web para gestionar un gimnasio, realizado con React, TypeScript, Tailwind y Django Rest Framework.
+Este proyecto nace de una necesidad real: digitalizar la gestión de membresías en gimnasios locales que aún dependen de procesos manuales o hojas de cálculo propensas a errores. Es una solución integral que permite administrar usuarios, pagos y servicios de forma eficiente.
+
+## Demo Visual
+
+**Inicio Sesión**
+
+![alt text](image.png)
+
+**Home**
+
+![alt text](image-1.png)
+
+**Miembros**
+
+- **Registro:**
+
+![alt text](image-2.png)
+
+- **Lista**
+
+![alt text](image-3.png)
+
+**Asignar Membresías**
+
+- **Registro:**
+
+![alt text](image-4.png)
+
+- **Lista**
+
+![alt text](image-5.png)
+
+**Perfil Usuario**
+
+![alt text](image-6.png)
+
+
+## Tecnologías Utilizadas
+
+**Frontend:**
+
+- React.js con TypeScript (Tipado fuerte para evitar errores).
+- Tailwind CSS (Diseño responsivo y moderno).
+- React Router para navegación.
+
+**Backend:**
+
+- Django Rest Framework (API escalable).
+- MySQL (Persistencia de datos relacionales).
+- TokenAuthentication para autenticación segura.
+
+## Características
+
+- **Gestión de Miembros:** Registro, edición, eliminación y visualización de usuarios.
+- **Control de Membresías:** Seguimiento de estados de pago y fechas de vencimiento.
+- **Interfaz Responsiva:** Optimizado para uso en tablets y computadoras de escritorio.
+- **Consumo de API:** Arquitectura desacoplada mediante peticiones asíncronas.
 
 ## Requisitos
 
@@ -8,9 +64,9 @@ Este es un proyecto web para gestionar un gimnasio, realizado con React, TypeScr
 - Tener instalado Python y pip
 - Tener instalado algun gestor de base de datos, el que ustedes deseen, para este ejemplo usaremos Mysql(Worbench).
 
-## Configuración
+## Configuración e Instalación
 
-1. **Clonar el repositorio**:
+1. **Clonar el repositorio:**
     ```bash
         git clone <url_del_repositorio>
         cd nombre_Proyecto
@@ -18,7 +74,7 @@ Este es un proyecto web para gestionar un gimnasio, realizado con React, TypeScr
 
 ### Backend (Django Rest Framework)
 
-2. **Instalar dependencias**:
+2. **Instalar dependencias:**
    - Crear un entorno virtual: Para evitar instalar las dependencias en el entorno global, es recomendable crear un entorno virtual
         ```bash
             python -m venv entorno, //entorno es el nombre que usted le quiera dar            
@@ -33,7 +89,7 @@ Este es un proyecto web para gestionar un gimnasio, realizado con React, TypeScr
             pip install -r requirements.txt
         ```
 
-3. **Configurar la base de datos**:
+3. **Configurar la base de datos:**
     - Crear una base de datos en Mysql, para este caso se crea con el nombre "gimnasioreact"
 
     - Configurar el archivo settings.py para que se conecte a la base de datos en este caso Mysql
@@ -44,7 +100,7 @@ Este es un proyecto web para gestionar un gimnasio, realizado con React, TypeScr
             python manage.py migrate
         ```
 
-4. **Ejecutamos el servidor**:
+4. **Ejecutamos el servidor:**
         ```bash
             python manage.py runserver
         ```
@@ -64,9 +120,10 @@ Este es un proyecto web para gestionar un gimnasio, realizado con React, TypeScr
 - **requirements.txt**: Contiene la lista de dependencias del proyecto.
 
 
-### Frontend (React + Tailwind)
+### Frontend (React + TypeScript + Tailwind)
 
 1. **Instalar dependencias**:
+
     - Navegar al directorio del proyecto frontend
         ```bash
             cd frontend //En este caso el nombre sería gimnasioReact
@@ -78,6 +135,7 @@ Este es un proyecto web para gestionar un gimnasio, realizado con React, TypeScr
         ```
 
 2. **Ejecutar el proyecto**:
+
     - Ejecutar el proyecto con el comando
         ```bash
             npm run dev
