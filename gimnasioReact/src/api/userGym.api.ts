@@ -3,7 +3,7 @@ import { Miembro } from '../model/member.model';
 //DTO
 import { CreateMemberDto } from '../model/dto/member.dto';
 //axios y errores
-import { gymApi } from './users.api';
+import { axiosPublic } from './axios.public';
 import { handleApiError } from './users.api';
 
 
@@ -32,7 +32,7 @@ import { handleApiError } from './users.api';
 export const createMember = async (userGym: CreateMemberDto) => {
     const token = localStorage.getItem('token');
     try {
-        const response = await gymApi.post<Miembro>('/UserGym/', userGym, {
+        const response = await axiosPublic.post<Miembro>('/UserGym/', userGym, {
             headers: {
                 'Authorization': `Token ${token}`
                 },
@@ -49,7 +49,7 @@ export const getMembers = async (search = ''): Promise<Miembro[]> => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await gymApi.get<Miembro[]>(`/UserGym/`, {
+        const response = await axiosPublic.get<Miembro[]>(`/UserGym/`, {
             headers: {
                 'Authorization': `Token ${token}`
             },
@@ -72,7 +72,7 @@ export const deleteMember = async (id: number): Promise<void> => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await gymApi.delete(`/UserGym/${id}/`, {
+        const response = await axiosPublic.delete(`/UserGym/${id}/`, {
             headers: {
                 'Authorization': `Token ${token}`
                 },
@@ -92,7 +92,7 @@ export const getMember = async (id: number): Promise<Miembro> => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await gymApi.get<Miembro>(`/UserGym/${id}/`, {
+        const response = await axiosPublic.get<Miembro>(`/UserGym/${id}/`, {
             headers: {
                 'Authorization': `Token ${token}`
                 },
@@ -109,7 +109,7 @@ export const updateMember = async (id: number, userGym: CreateMemberDto): Promis
     const token = localStorage.getItem('token');
 
     try {
-        const response = await gymApi.put<Miembro>(`/UserGym/${id}/`, userGym, {
+        const response = await axiosPublic.put<Miembro>(`/UserGym/${id}/`, userGym, {
             headers: {
                 'Authorization': `Token ${token}`
                 },

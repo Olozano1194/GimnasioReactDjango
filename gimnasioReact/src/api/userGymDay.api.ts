@@ -3,7 +3,7 @@ import { MemberDay } from '../model/memberDay.model';
 //DTO
 import { CreateMemberDayDto } from '../model/dto/memberDay.dto';
 //axios y errores
-import { gymApi } from './users.api';
+import { axiosPublic } from './axios.public';
 import { handleApiError } from './users.api';
 
 
@@ -32,7 +32,7 @@ import { handleApiError } from './users.api';
 export const createMemberDay = async (userGymDay: CreateMemberDayDto) => {
     const token = localStorage.getItem('token');
     try {
-        const response = await gymApi.post<MemberDay>('/UserGymDay/', userGymDay, {
+        const response = await axiosPublic.post<MemberDay>('/UserGymDay/', userGymDay, {
             headers: {
                 'Authorization': `Token ${token}`
             },
@@ -50,7 +50,7 @@ export const getMembersDay = async (search = ''): Promise<MemberDay[]> => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await gymApi.get<MemberDay[]>(`/UserGymDay/`, {
+        const response = await axiosPublic.get<MemberDay[]>(`/UserGymDay/`, {
             headers: {
                 'Authorization': `Token ${token}`
             },
@@ -73,7 +73,7 @@ export const deleteMember = async (id: number): Promise<void> => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await gymApi.delete(`/UserGymDay/${id}/`, {
+        const response = await axiosPublic.delete(`/UserGymDay/${id}/`, {
             headers: {
                 'Authorization': `Token ${token}`
                 },
@@ -92,7 +92,7 @@ export const getMember = async (id: number): Promise<MemberDay> => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await gymApi.get<MemberDay>(`/UserGymDay/${id}/`, {
+        const response = await axiosPublic.get<MemberDay>(`/UserGymDay/${id}/`, {
             headers: {
                 'Authorization': `Token ${token}`
                 },
@@ -109,7 +109,7 @@ export const updateMember = async (id: number, userGym: CreateMemberDayDto) => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await gymApi.put<MemberDay>(`/UserGymDay/${id}/`, userGym, {
+        const response = await axiosPublic.put<MemberDay>(`/UserGymDay/${id}/`, userGym, {
             headers: {
                 'Authorization': `Token ${token}`
                 },
@@ -125,7 +125,7 @@ export const getHome = async () => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await gymApi.get(`/home/`, {
+        const response = await axiosPublic.get(`/home/`, {
             headers: {
                 'Authorization': `Token ${token}`}
             });
