@@ -20,7 +20,7 @@ from rest_framework.decorators import api_view, permission_classes
 
 
 # Create your views here.
-#esto nos sirve para que podamos crear el crud completo de los usuarios
+# esto nos sirve para que podamos crear el crud completo de los usuarios
 class UserViewSet(viewsets.ModelViewSet): 
     serializer_class = UsuarioSerializer
     queryset = get_user_model().objects.all()
@@ -104,7 +104,7 @@ class UserViewSet(viewsets.ModelViewSet):
             print("Error inesperado:", str(e))
             return Response({"error": "Error inesperado"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-#esta es la autenticación del usuario osea me guarda el token donde debe ser
+# esta es la autenticación del usuario osea me guarda el token donde debe ser
 class CustomAuthTokenViewSet(APIView):
     def post(self, request, *args, **kwargs):
         email = request.data.get('email')
@@ -120,7 +120,7 @@ class CustomAuthTokenViewSet(APIView):
             return Response({'token': token.key}, status=status.HTTP_200_OK)
         return Response({'error': 'Credenciales invalidas'}, status=status.HTTP_400_BAD_REQUEST)
 
-#esta clase nos sirve para mostrar los datos del usuario y poder hacer el login respectivo
+# esta clase nos sirve para mostrar los datos del usuario y poder hacer el login respectivo
 class userProfileView(APIView):
     permission_classes = [IsAuthenticated]
     #parser_classes = (MultiPartParser, FormParser) #para poder subir archivos
@@ -142,21 +142,21 @@ class userProfileView(APIView):
         except Exception as e:
            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)    
         
-#clase para el crud de  miembros del gimnasio
+# clase para el crud de  miembros del gimnasio
 class UsuarioGymViewSet(viewsets.ModelViewSet):
     serializer_class = UsuarioGymSerializer
     queryset = UsuarioGym.objects.all()
     filter_backends = [DjangoFilterBackend, SearchFilter]
     search_fields = ['name', 'lastname']
 
-#clase para el crud de  miembros del gimnasio por día
+# clase para el crud de  miembros del gimnasio por día
 class UsuarioGymDayViewSet(viewsets.ModelViewSet):
     serializer_class = UsuarioGymDaySerializer
     queryset = UsuarioGymDay.objects.all()
     filter_backends = [DjangoFilterBackend, SearchFilter]
     search_fields = ['name', 'lastname']
 
-#funcion para mostrar los datos en las cards
+# funcion para mostrar los datos en las cards
 class Home(APIView):
     def get(self, request):
         UserGymList = MembresiaAsignada.objects.all().order_by('-id')
