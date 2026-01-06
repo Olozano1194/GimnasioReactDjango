@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     try {
       const token  = await loginApi(credentials);
-      console.log('loginApi response raw:', token);
+      // console.log('loginApi response raw:', token);
 
       // if (!token) throw new Error("Token no encontrado");
       
