@@ -11,4 +11,8 @@ export interface CreateUserDto {
 export interface LoginUserDto {
     email: string;
     password: string;    
+};
+
+export type LoginResponse = {
+    token: string;
 }

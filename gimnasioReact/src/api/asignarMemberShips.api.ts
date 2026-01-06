@@ -2,7 +2,7 @@
 import { CreateAsignarMemberShipsDto } from '../model/dto/asignarMemberShips.dto';
 import { AsignarMemberShips } from '../model/asignarMemberShips.model';
 //axios y errores
-import { gymApi } from './users.api';
+import { axiosPublic } from './axios.public';
 import { handleApiError } from './users.api';
 
 // const gymApi = axios.create({
@@ -31,7 +31,7 @@ import { handleApiError } from './users.api';
 export const createAsignarMemberShips = async (member: CreateAsignarMemberShipsDto) => {
     const token = localStorage.getItem('token');
     try {
-        const { data } = await gymApi.post<AsignarMemberShips>('/MemberShipsAsignada/', member, {
+        const { data } = await axiosPublic.post<AsignarMemberShips>('/MemberShipsAsignada/', member, {
             headers: {
                 'Authorization': `Token ${token}`
                 },
@@ -48,7 +48,7 @@ export const getAsignarMemberList = async (search = ''): Promise<AsignarMemberSh
     const token = localStorage.getItem('token');
 
     try {
-        const { data } = await gymApi.get<AsignarMemberShips[]>(`/MemberShipsAsignada/`, {
+        const { data } = await axiosPublic.get<AsignarMemberShips[]>(`/MemberShipsAsignada/`, {
             headers: {
                 'Authorization': `Token ${token}`
             },
@@ -70,7 +70,7 @@ export const deleteAsignarMemberShips = async (id: number): Promise<void> => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await gymApi.delete(`/MemberShipsAsignada/${id}/`, {
+        const response = await axiosPublic.delete(`/MemberShipsAsignada/${id}/`, {
             headers: {
                 'Authorization': `Token ${token}`
                 },
@@ -88,7 +88,7 @@ export const getAsignarMemberShips = async (id: number): Promise<AsignarMemberSh
     const token = localStorage.getItem('token');
 
     try {
-        const { data } = await gymApi.get<AsignarMemberShips>(`/MemberShipsAsignada/${id}/`, {
+        const { data } = await axiosPublic.get<AsignarMemberShips>(`/MemberShipsAsignada/${id}/`, {
             headers: {
                 'Authorization': `Token ${token}`
                 },
@@ -106,7 +106,7 @@ export const updateAsignarMemberShips = async (id: number, memberShips: CreateAs
     const token = localStorage.getItem('token');
 
     try {
-        const response = await gymApi.put<AsignarMemberShips>(`/MemberShipsAsignada/${id}/`, memberShips, {
+        const response = await axiosPublic.put<AsignarMemberShips>(`/MemberShipsAsignada/${id}/`, memberShips, {
             headers: {
                 'Authorization': `Token ${token}`
                 },

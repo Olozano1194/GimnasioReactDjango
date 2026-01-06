@@ -3,7 +3,7 @@ import { Membresia } from '../model/memberShips.model';
 //DTO
 import { CreateMemberShipsDTO } from '../model/dto/memberShips.dto';
 //axios y errores
-import { gymApi } from './users.api';
+import { axiosPublic } from './axios.public';
 import { handleApiError } from './users.api';
 
 // const gymApi = axios.create({
@@ -31,7 +31,7 @@ import { handleApiError } from './users.api';
 export const createMemberShips = async (member: CreateMemberShipsDTO) => {
     const token = localStorage.getItem('token');
     try {
-        const response = await gymApi.post<Membresia>('/MemberShips/', member, {
+        const response = await axiosPublic.post<Membresia>('/MemberShips/', member, {
             headers: {
                 'Authorization': `Token ${token}`
                 },
@@ -48,7 +48,7 @@ export const getMemberList = async () => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await gymApi.get<Membresia[]>(`/MemberShips/`, {
+        const response = await axiosPublic.get<Membresia[]>(`/MemberShips/`, {
             headers: {
                 'Authorization': `Token ${token}`
                 },
@@ -66,7 +66,7 @@ export const deleteMemberShips = async (id: number): Promise<void> => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await gymApi.delete(`/MemberShips/${id}/`, {
+        const response = await axiosPublic.delete(`/MemberShips/${id}/`, {
             headers: {
                 'Authorization': `Token ${token}`
                 },
@@ -84,7 +84,7 @@ export const getMemberShips = async (id: number): Promise<Membresia> => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await gymApi.get<Membresia>(`/MemberShips/${id}/`, {
+        const response = await axiosPublic.get<Membresia>(`/MemberShips/${id}/`, {
             headers: {
                 'Authorization': `Token ${token}`
                 },
@@ -101,7 +101,7 @@ export const updateMemberShips = async (id: number, memberShips: CreateMemberShi
     const token = localStorage.getItem('token');
 
     try {
-        const response = await gymApi.put<Membresia>(`/MemberShips/${id}/`, memberShips, {
+        const response = await axiosPublic.put<Membresia>(`/MemberShips/${id}/`, memberShips, {
             headers: {
                 'Authorization': `Token ${token}`
                 },

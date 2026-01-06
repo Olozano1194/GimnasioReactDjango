@@ -1,5 +1,5 @@
 import { Notification } from "../model/notifications.model"
-import { gymApi } from "./users.api";
+import { axiosPublic } from "./axios.public";
 import { handleApiError } from "./users.api";
 
 
@@ -7,7 +7,7 @@ export const getMemberNotifications = async (): Promise<Notification[]> => {
     const token = localStorage.getItem('token');
 
     try {
-        const response = await gymApi.get<Notification[]>('/membership-notifications/', {
+        const response = await axiosPublic.get<Notification[]>('/membership-notifications/', {
             headers: {
                 'Authorization': `Token ${token}`
             }

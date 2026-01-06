@@ -1,12 +1,13 @@
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useContext, useState } from 'react';
+import { AuthContext } from '../../context/AuthContext';
 //Icons
 import { CiUser } from "react-icons/ci";
 import { RiLockPasswordLine, RiLoginBoxLine } from "react-icons/ri";
 import { MdOutlineVisibility, MdOutlineVisibilityOff } from "react-icons/md";
 //Apis
-import { login } from "../../api/users.api";
+// import { login } from "../../api/users.api";
 //ui
 import { Input } from "../../components/ui/index";
 //Mensajes
@@ -17,8 +18,10 @@ import { LoginUserDto } from "../../model/dto/user.dto";
 import Logo from "../../../public/favicon-32x32.png";
 import imgGym from "../../../public/img_Gym_prev_ui.png";
 
+
 const Login = () => {
   const navigate = useNavigate();
+  const auth = useContext(AuthContext);
   const {
     register,
     handleSubmit,
@@ -26,43 +29,41 @@ const Login = () => {
   } = useForm<LoginUserDto>();
   const [showkPass, setShowPass] = useState(false);
 
+  if (!auth) return null;
+
+  const { login, loading, error } = auth;
+
   const onSubmit = handleSubmit(async (data: LoginUserDto) => {
     try {
-      const response = await login(data);
+      await login({
+        email: data.email,
+        password: data.password,
+      });
       //console.log('Login successful, result:', response);
 
-      if (response && response.token) {
-        //console.log('Login successful, token:', response.token);
+      // if (response && response.token) {
+      //   //console.log('Login successful, token:', response.token);
 
-        localStorage.setItem("token", response.token);
-
+      //   localStorage.setItem("token", response.token);
+      toast.success('Login exitoso');
         // Redirect to the dashboard
         navigate("/dashboard");
-      } else {
-        //console.error('Token not found in response');
-        toast.success("Token no encontrado", {
-          duration: 3000,
-          position: "bottom-right",
-          style: {
-            background: "#4b5563", // Fondo negro
-            color: "#fff", // Texto blanco
-            padding: "16px",
-            borderRadius: "8px",
-          },
-        });
-      }
-    } catch (error) {
-      console.error("Error logging in:", error);
-      toast.success("Error al iniciar sesión", {
-        duration: 3000,
-        position: "bottom-right",
-        style: {
-          background: "#4b5563", // Fondo negro
-          color: "#fff", // Texto blanco
-          padding: "16px",
-          borderRadius: "8px",
-        },
-      });
+      // } else {
+      //   //console.error('Token not found in response');
+      //   toast.success("Token no encontrado", {
+      //     duration: 3000,
+      //     position: "bottom-right",
+      //     style: {
+      //       background: "#4b5563", // Fondo negro
+      //       color: "#fff", // Texto blanco
+      //       padding: "16px",
+      //       borderRadius: "8px",
+      //     },
+      //   });
+      // }
+    } catch {
+      // console.error("Error logging in:", error);
+      toast.success("Error al iniciar sesión");
     }
   });
 
@@ -141,13 +142,14 @@ const Login = () => {
             </span>
           )}          
         </section>
+        {error && <span className="text-red-600 text-sm mt-6 text-center">{error}</span>}
         {/* btn login */}
           <button
             className="bg-sky-600 cursor-pointer flex gap-2 items-center rounded-lg p-2 text-slate-100 font-bold mb-2 hover:scale-105 hover:bg-sky-400 hover:text-slate-800"
             type="submit"
           >
             <RiLoginBoxLine className="text-2xl text-purple-800" />
-            Iniciar Sesión
+            {loading ? 'Ingresando...' : 'Ingresar'}
           </button>
 
         {/* registrar o recuperar contraseña */}
