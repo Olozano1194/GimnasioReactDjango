@@ -142,7 +142,7 @@ const Login = () => {
             </span>
           )}          
         </section>
-        {error && <span className="text-red-600 text-sm mt-6 text-center">{error}</span>}
+        {error && <span className="text-red-600 text-sm text-center -mt-3 md:-mt-6">{error}</span>}
         {/* btn login */}
           <button
             className="bg-sky-600 cursor-pointer flex gap-2 items-center rounded-lg p-2 text-slate-100 font-bold mb-2 hover:scale-105 hover:bg-sky-400 hover:text-slate-800"
