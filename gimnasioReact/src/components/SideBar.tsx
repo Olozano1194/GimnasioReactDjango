@@ -4,11 +4,11 @@ import { AuthContext } from "../context/AuthContext";
 // icons
 import { RiMenu3Line, RiCloseLine, RiLogoutCircleLine,  } from "react-icons/ri";
 //API
-import { getUserProfile } from '../api/users.api';
+import { getUserProfile } from "../api/action/users.api";
 //Mensajes
 import { toast } from 'react-hot-toast';
 // Components
-import SideBarAdmin from "./sideBar/SidebarAdmin";
+import SideBarAdmin from "./sideBar/SideBarAdmin";
 import SideBarUser from "./sideBar/SideBarUser";
 
 export interface SubMenuState {

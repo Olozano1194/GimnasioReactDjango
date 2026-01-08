@@ -1,10 +1,11 @@
 import axios from "axios";
 
-export const axiosPublic = axios.create({
-    //baseURL: 'http://localhost:8000/gym/api/v1/',
-    baseURL: import.meta.env.MODE === 'development' 
-    ? 'http://localhost:8000/gym/api/v1'
-    : 'https://gimnasioreactdjango.onrender.com/gym/api/v1',
+const baseURL = import.meta.env.MODE === 'development' 
+              ? import.meta.env.VITE_API_URL_DEV
+              : import.meta.env.VITE_API_URL_PROD;
+
+export const axiosPublic = axios.create({   
+    baseURL, 
     headers: {
         'Content-Type': 'application/json',
       },

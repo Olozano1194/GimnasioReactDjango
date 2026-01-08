@@ -13,7 +13,7 @@ import { toast } from "react-hot-toast";
 //ui
 import { Input, Label, Button } from '../../../components/ui/index';
 //API
-import { createMember, updateMember, getMember } from '../../../api/userGym.api';
+import { createMember, updateMember, getMember } from '../../../api/action/userGym.api';
 //Models
 import { Miembro } from "../../../model/member.model";
 //img

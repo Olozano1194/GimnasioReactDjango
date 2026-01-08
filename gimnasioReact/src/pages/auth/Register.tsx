@@ -7,7 +7,7 @@ import { toast } from 'react-hot-toast';
 //ui
 import { Input, Label, Button } from '../../components/ui/index';
 //api
-import { CreateUsers } from "../../api/users.api";
+import { CreateUsers } from '../../api/action/users.api';
 //Models
 import { User } from '../../model/user.model';
 //img

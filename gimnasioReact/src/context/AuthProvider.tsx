@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AuthContext } from './AuthContext';
-import { login as loginApi } from '../api/users.api';
+import { login as loginApi } from '../api/authUser.api';
 import { getToken, setToken, removeToken } from '../utils/tokenStorage';
 import type { LoginUserDto } from '../model/dto/user.dto';
 

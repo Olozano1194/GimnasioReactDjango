@@ -12,7 +12,7 @@ import { toast } from "react-hot-toast";
 //ui
 import { Input, Label, Button } from '../../../components/ui/index';
 //API
-import { createMemberShips, updateMemberShips, getMemberShips } from '../../../api/memberShips.api';
+import { createMemberShips, updateMemberShips, getMemberShips } from '../../../api/action/memberShips.api';
 //Models
 import { Membresia } from '../../../model/memberShips.model';
 //img

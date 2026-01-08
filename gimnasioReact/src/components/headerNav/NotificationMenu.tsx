@@ -7,7 +7,7 @@ import { Link } from "react-router-dom";
 //react-menu
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 //Notificaciones
-import { getMemberNotifications } from "../../api/notifications.api";
+import { getMemberNotifications } from "../../api/action/notifications.api";
 //Models
 import { Notification } from "../../model/notifications.model";
 
