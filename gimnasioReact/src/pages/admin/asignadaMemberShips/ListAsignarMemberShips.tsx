@@ -1,7 +1,7 @@
 //Estados
 import { useCallback, useEffect, useState } from "react";
 //API
-import { getAsignarMemberList, deleteAsignarMemberShips } from '../../../api/asignarMemberShips.api';
+import { getAsignarMemberList, deleteAsignarMemberShips } from '../../../api//action/asignarMemberShips.api';
 //models
 import { AsignarMemberShips } from '../../../model/asignarMemberShips.model';
 // Table

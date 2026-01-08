@@ -1,7 +1,7 @@
 //hooks
 import { useState, useEffect } from "react";
 //Api
-import { getUserProfile, updateUser } from "../../../../api/users.api";
+import { getUserProfile, updateUser } from "../../../../api/action/users.api";
 //icons
 import { RiEdit2Line } from "react-icons/ri";
 //models
@@ -17,12 +17,9 @@ interface FormData {
     id: string;
 };
 
-const Profile = () => {
-    
-    const [_, setUser] = useState<User>();
-    const [ editingUser, seteditingUser ] = useState(false);
-    //const [loading, setLoading] = useState(true);
-    //const { handleSubmit, setValue } = useForm();
+const Profile = () => {    
+    const [, setUser] = useState<User>();
+    const [ editingUser, seteditingUser ] = useState(false);    
     const [formData, setFormData] = useState<FormData>({
         name: '',
         lastname: '',

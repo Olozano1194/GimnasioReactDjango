@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 //API
-import { getUsers } from '../../../api/users.api';
+import { getUsers } from "../../../api/action/users.api";
 //Table
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 //Componente principal para la listas

@@ -6,7 +6,7 @@ import { Link, useNavigate } from "react-router-dom";
 //react-menu
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 //API
-import { getUserProfile } from '../../api/users.api';
+import { getUserProfile } from "../../api/action/users.api";
 //Mensajes
 import { toast } from 'react-hot-toast';
 //Component
@@ -15,7 +15,7 @@ import NotificationMenu from "../../components/headerNav/NotificationMenu"
 function NavHeader() {
     const navigate = useNavigate();
     const [user, setUser] = useState({ name: '', lastName: '', email: '', avatar: ''});
-    const [_, setLoggedOut] = useState<boolean>(false);    
+    const [, setLoggedOut] = useState<boolean>(false);    
 
     useEffect(() => {
         const axiosUserData = async () => {

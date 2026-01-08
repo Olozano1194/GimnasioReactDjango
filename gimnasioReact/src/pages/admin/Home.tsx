@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getHome } from "../../api/userGymDay.api";
+import { getHome } from "../../api/action/userGymDay.api";
 import { BsPeople } from "react-icons/bs";
 import { FaMoneyBillWave } from "react-icons/fa";
 

@@ -1,7 +1,7 @@
 //Estados
 import { useEffect, useState } from "react";
 //API
-import { getMemberList, deleteMemberShips } from '../../../api/memberShips.api';
+import { getMemberList, deleteMemberShips } from '../../../api/action/memberShips.api';
 //Table
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 //Componente principal para la listas

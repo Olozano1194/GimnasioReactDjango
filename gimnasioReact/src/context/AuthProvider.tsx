@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { AuthContext } from './AuthContext';
-import { login as loginApi } from '../api/users.api';
+import { login as loginApi } from '../api/authUser.api';
 import { getToken, setToken, removeToken } from '../utils/tokenStorage';
 import type { LoginUserDto } from '../model/dto/user.dto';
 
@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     try {
       const token  = await loginApi(credentials);
-      console.log('loginApi response raw:', token);
+      // console.log('loginApi response raw:', token);
 
       // if (!token) throw new Error("Token no encontrado");
       

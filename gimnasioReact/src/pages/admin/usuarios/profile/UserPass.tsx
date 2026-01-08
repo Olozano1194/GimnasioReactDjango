@@ -2,7 +2,7 @@
 import { RiShieldCheckLine } from "react-icons/ri";
 
 //Api
-import { getUserProfile } from "../../../../api/users.api";
+import { getUserProfile } from "../../../../api/action/users.api";
 
 //hooks
 import { useState, useEffect } from "react";

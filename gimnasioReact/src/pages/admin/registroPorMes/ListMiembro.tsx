@@ -1,7 +1,7 @@
 //Estados
 import { useCallback, useEffect, useState } from "react";
 //API
-import { getMembers, deleteMember } from '../../../api/userGym.api';
+import { getMembers, deleteMember } from '../../../api/action/userGym.api';
 //Table
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 //Componente principal para la listas

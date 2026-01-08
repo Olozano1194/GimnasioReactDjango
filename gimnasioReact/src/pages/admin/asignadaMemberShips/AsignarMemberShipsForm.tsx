@@ -14,11 +14,11 @@ import { toast } from "react-hot-toast";
 import { Input, Label, Button } from '../../../components/ui/index';
 //API
 //MemberShips
-import { getMemberList } from '../../../api/memberShips.api';
+import { getMemberList } from '../../../api/action/memberShips.api';
 //Member
-import { getMembers } from "../../../api/userGym.api";
+import { getMembers } from '../../../api/action/userGym.api';
 //Asignación Membresías
-import { createAsignarMemberShips, updateAsignarMemberShips, getAsignarMemberShips } from '../../../api/asignarMemberShips.api';
+import { createAsignarMemberShips, updateAsignarMemberShips, getAsignarMemberShips } from '../../../api/action/asignarMemberShips.api';
 //Models
 import { Membresia } from '../../../model/memberShips.model';
 import { Miembro } from '../../../model/member.model';
