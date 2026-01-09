@@ -32,10 +32,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       // if (!token) throw new Error("Token no encontrado");
       
       setToken(token);
-      setIsAuthenticated(true);
-    } catch (err: unknown) {
-      setError('Usuario o contraseña incorrectos');
-      throw err;
+      setIsAuthenticated(true);      
+    } catch {
+      setError('Usuario o contraseña incorrectos');            
     } finally {
       setLoading(false);
     }

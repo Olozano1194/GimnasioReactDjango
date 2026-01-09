@@ -2,7 +2,7 @@
 import { MemberDay } from '../../model/memberDay.model';
 //DTO
 import { CreateMemberDayDto } from '../../model/dto/memberDay.dto';
-//axios y errores
+//axios
 import { axiosPrivate } from '../axios.private';
 
 
