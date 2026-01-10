@@ -8,12 +8,10 @@ import { AsignarMemberShips } from '../../../model/asignarMemberShips.model';
 import { createColumnHelper, ColumnDef } from '@tanstack/react-table';
 //Componente principal para la listas
 import Table from '../../../components/Table';
-//Enlaces
-import { Link } from "react-router-dom";
+import ActionButtons from "../../../components/table/ActionButton";
 //Mensajes
 import { toast } from 'react-hot-toast';
-//Icons
-import { RiDeleteBinLine, RiPencilLine } from "react-icons/ri";
+
 
 interface AsignacionTotal {
     id: 'total';
@@ -74,7 +72,7 @@ const ListAsignarMemberShips = () => {
         return () => {
             if (filteredData) clearTimeout(filteredData);
         };
-    }, []);
+    }, [filteredData]);
 
     //Manejamos el evento de búsqueda
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -168,37 +166,15 @@ const ListAsignarMemberShips = () => {
                 const id = props.row.original.id;
                 // No mostrar botones si es la fila de total
                 if(typeof id !== 'number') return null;
-                return (
-                    <div className="flex justify-center items-center gap-x-4">
-                        <Link to={`/dashboard/asignar-membresia/${id}`} className="bg-green-500 text-white p-2 rounded-md hover:scale-110">
-                            <RiPencilLine />
-                        </Link>
-                        <button
-                            onClick={ async () => {
-                                if (window.confirm('¿Estás seguro de eliminar esta asignación?')) {
-                                    try {
-                                        await deleteAsignarMemberShips(id);
-                                        setAsignarMemberShips(asignarMemberShips.filter(asignarmemberShips => asignarmemberShips.id !== id));
-                                        toast.success('Membresía Eliminada', {
-                                            duration: 3000,
-                                            position: 'bottom-right',
-                                            style: {
-                                                background: '#4b5563',   // Fondo negro
-                                                color: '#fff',           // Texto blanco
-                                                padding: '16px',
-                                                borderRadius: '8px',
-                                            },
-                                        });                                
-                                    } catch (error) {
-                                        const errorMessage = error instanceof Error ? error.message : 'Error al eliminar la membresía';
-                                        toast.error(errorMessage);                                
-                                    }                               
-                                }                                
-                            }} 
-                            className="bg-red-500 text-white p-2 rounded-md hover:scale-110">
-                            <RiDeleteBinLine />                      
-                        </button>                       
-                    </div>
+                return (                    
+                    <ActionButtons
+                        id={id}
+                        editPath={`/dashboard/asignar-membresia/${id}`}
+                        onDelete={async (id) => { await deleteAsignarMemberShips(id);
+                        setAsignarMemberShips(asignarMemberShips.filter(asignarmemberShips => asignarmemberShips.id !== id)); 
+                        }}
+                        confirmMessage="¿Estas seguro de eliminar esta asignación?"
+                    />
                     );
                 },
         }),               
