@@ -13,24 +13,28 @@ import { toast } from "react-hot-toast";
 import { Input, Label, Button } from '../../../components/ui/index';
 //API
 import { createMemberShips, updateMemberShips, getMemberShips } from '../../../api/action/memberShips.api';
-//Models
-import { Membresia } from '../../../model/memberShips.model';
 //img
 import Logo from '../../../../public/favicon-32x32.png';
+
+interface MembresiaForm {
+    name: string;
+    price: string;
+    duration: string;
+};
 
 
 const MemberShipsForm = () => {
     const params = useParams<{ id?: string }>();
     const navigate = useNavigate();
-    const { register, handleSubmit, formState: {errors}, reset } = useForm<Membresia>();    
+    const { register, handleSubmit, formState: {errors}, reset } = useForm<MembresiaForm>();    
     
-    const onSubmit = handleSubmit(async (data: Membresia) => {
+    const onSubmit = handleSubmit(async (data) => {
         //console.log('Form data:', data);
         try {
             const requestData = {
                 name: data.name,
                 price: Number(data.price),
-                duration: data.duration,
+                duration: Number(data.duration),
             };
 
             if (params.id) {
@@ -78,7 +82,11 @@ const MemberShipsForm = () => {
             try {
             if (params.id) {
                 const response = await getMemberShips(parseInt(params.id));
-                reset(response);
+                reset({
+                    name: response.name,
+                    price: String(response.price),
+                    duration: String(response.duration),
+                });
             }
             }catch (error) {
                 console.error('Error al obtener la membresía',error);
@@ -115,7 +123,7 @@ const MemberShipsForm = () => {
                     })}
                 >
                     <option value="">Escoge El Plan</option>
-                    <option value="basico">Básico</option>
+                    <option value="básico">Básico</option>
                     <option value="premium">Premium</option>
                     <option value="VIP">VIP</option>
                     </select>

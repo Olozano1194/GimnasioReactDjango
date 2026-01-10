@@ -5,14 +5,12 @@ import { getMembersDay, deleteMember } from '../../../api/action/userGymDay.api'
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 //Componente principal para la listas
 import Table from '../../../components/Table';
-//Enlaces
-import { Link } from "react-router-dom";
+import ActionButtons from "../../../components/table/ActionButton";
 //Mensajes
 import { toast } from 'react-hot-toast';
 //Models
 import { MemberDay } from "../../../model/memberDay.model";
-//Icons
-import { RiDeleteBinLine, RiPencilLine } from "react-icons/ri";
+
 
 interface MiembroTotal {
     id: 'total';
@@ -155,36 +153,44 @@ const ListMiembroDay = () => {
                 if(typeof id !== 'number') return null;
 
                 return (
-                    <div className="flex justify-center items-center gap-x-4">
-                        <Link to={`/dashboard/miembro-day/${id}`} className="bg-green-500 text-white p-2 rounded-md hover:scale-110">
-                            <RiPencilLine />
-                        </Link>
-                        <button
-                            onClick={ async () => {
-                                if (window.confirm('¿Estás seguro de eliminar este miembro?')){
-                                    try {
-                                        await deleteMember(id);
-                                        setUser(users.filter(user => user.id !== id));
-                                        toast.success('Miembro Eliminado', {
-                                            duration: 3000,
-                                            position: 'bottom-right',
-                                            style: {
-                                                background: '#4b5563',   // Fondo negro
-                                                color: '#fff',           // Texto blanco
-                                                padding: '16px',
-                                                borderRadius: '8px',
-                                            },
-                                        }); 
-                                    } catch (error) {
-                                        const errorMessage = error instanceof Error ? error.message : 'Error al eliminar la membresía';
-                                        toast.error(errorMessage);                                        
-                                    }
-                                }                                
-                             }} 
-                            className="bg-red-500 text-white p-2 rounded-md hover:scale-110">
-                                <RiDeleteBinLine />
-                        </button>
-                    </div>
+                    // <div className="flex justify-center items-center gap-x-4">
+                    //     <Link to={`/dashboard/miembro-day/${id}`} className="bg-green-500 text-white p-2 rounded-md hover:scale-110">
+                    //         <RiPencilLine />
+                    //     </Link>
+                    //     <button
+                    //         onClick={ async () => {
+                    //             if (window.confirm('¿Estás seguro de eliminar este miembro?')){
+                    //                 try {
+                    //                     await deleteMember(id);
+                    //                     setUser(users.filter(user => user.id !== id));
+                    //                     toast.success('Miembro Eliminado', {
+                    //                         duration: 3000,
+                    //                         position: 'bottom-right',
+                    //                         style: {
+                    //                             background: '#4b5563',   // Fondo negro
+                    //                             color: '#fff',           // Texto blanco
+                    //                             padding: '16px',
+                    //                             borderRadius: '8px',
+                    //                         },
+                    //                     }); 
+                    //                 } catch (error) {
+                    //                     const errorMessage = error instanceof Error ? error.message : 'Error al eliminar la membresía';
+                    //                     toast.error(errorMessage);                                        
+                    //                 }
+                    //             }                                
+                    //          }} 
+                    //         className="bg-red-500 text-white p-2 rounded-md hover:scale-110">
+                    //             <RiDeleteBinLine />
+                    //     </button>
+                    // </div>
+                    <ActionButtons
+                        id={id}
+                        editPath={`/dashboard/asignar-membresia/${id}`}
+                        onDelete={async (id) => { await deleteMember(id);
+                        setUser(users.filter(user => user.id !== id)); 
+                        }}
+                        confirmMessage="¿Estas seguro de eliminar este miembro?"
+                    />
                 );
             },
         }),
