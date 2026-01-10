@@ -6,9 +6,9 @@ import { toast } from 'react-hot-toast';
 import { RiDeleteBinLine, RiPencilLine } from "react-icons/ri";
 
 interface ActionButtonsProps {
-    id: number | string;
+    id: number;
     editPath: string;
-    onDelete: (id: string | number) => Promise<void>;
+    onDelete: (id: number) => Promise<void>;
     confirmMessage: string;
 };
 

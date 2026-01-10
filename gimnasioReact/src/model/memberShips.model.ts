@@ -1,6 +1,6 @@
 export interface Membresia {
     id:        number;
-    name:      string[];
+    name:      string;
     price:     number;
     duration:  number;    
 }
