@@ -2,7 +2,7 @@ export interface CreateUserDto {
     name: string;
     lastname: string;
     email?: string;
-    roles: string[];
+    roles?: string;
     password?: string;         
     avatar?: string | File;
 };

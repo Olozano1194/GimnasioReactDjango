@@ -1,4 +1,3 @@
-import { AxiosResponse } from "axios";
 import { axiosPrivate } from "../axios.private";
 //Models
 import { User } from "../../model/user.model";
@@ -7,9 +6,17 @@ import { CreateUserDto } from "../../model/dto/user.dto";
 
 // Creamos un usuario
 export const CreateUsers = async (user: CreateUserDto) => {
-  const response: AxiosResponse<{ token: string }> = await axiosPrivate.post("/User/", user);
-  const { token } = response.data;   
-  return token;
+  const formData = new FormData();
+
+  if (user.name) formData.append("name", user.name);
+  if (user.lastname) formData.append("lastname", user.lastname);
+  if (user.email) formData.append("email", user.email);
+  if (user.password) formData.append("password", user.password);
+  if (typeof user.roles === "string") formData.append("roles", user.roles);
+  if (user.avatar) formData.append("avatar", user.avatar);  
+
+  const response = await axiosPrivate.post("/User/", formData);    
+  return response.data;
 };
 
 //function profile
@@ -33,7 +40,7 @@ export const updateUser = async (
 
   if (user.name) formData.append("name", user.name);
   if (user.lastname) formData.append("lastname", user.lastname);
-  if (typeof user.roles === "string") formData.append("roles", user.roles);
+  // if (typeof user.roles === "string") formData.append("roles", user.roles);
   //if (user.email) formData.append('email', user.email);
 
   if (user.avatar) {
