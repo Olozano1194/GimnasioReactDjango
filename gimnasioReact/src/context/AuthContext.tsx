@@ -1,7 +1,9 @@
 import { createContext } from "react";
+import { AuthUser } from "../model/dto/user.dto";
 
 
 export interface AuthContextType {
+    user: AuthUser | null;
     isAuthenticated: boolean;
     loading: boolean;
     error: string | null;
