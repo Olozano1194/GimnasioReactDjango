@@ -3,7 +3,7 @@ import { Miembro } from '../../model/member.model';
 //DTO
 import { CreateMemberDto } from '../../model/dto/member.dto';
 //axios y errores
-import { axiosPrivate } from '../axios.private';
+import { axiosPrivate } from '../axios/axios.private';
 
 
 // Crear Miembros

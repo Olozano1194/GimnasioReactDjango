@@ -1,5 +1,5 @@
 import { Notification } from "../../model/notifications.model"
-import { axiosPrivate } from "../axios.private";
+import { axiosPrivate } from "../axios/axios.private";
 
 
 export const getMemberNotifications = async (): Promise<Notification[]> => {

@@ -9,4 +9,4 @@ export const axiosPublic = axios.create({
     headers: {
         'Content-Type': 'application/json',
       },
-});
+});  

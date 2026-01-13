@@ -1,4 +1,4 @@
-import { axiosPrivate } from "../axios.private";
+import { axiosPrivate } from "../axios/axios.private";
 //Models
 import { User } from "../../model/user.model";
 //DTO

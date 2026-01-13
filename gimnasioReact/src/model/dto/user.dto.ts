@@ -16,3 +16,10 @@ export interface LoginUserDto {
 export type LoginResponse = {
     token: string;
 }
+
+export interface AuthUser {
+    name: string;
+    lastname: string;
+    email?: string;
+    avatar?: string | File;    
+};

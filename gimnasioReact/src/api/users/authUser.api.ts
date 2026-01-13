@@ -1,9 +1,9 @@
-import { axiosPublic } from "./axios.public";
+import axiosPublic
 //DTO
 import {
   LoginUserDto,
   LoginResponse,
-} from "../model/dto/user.dto";
+} from "../../model/dto/user.dto";
 
 //Inicio de sesión
 export const login = async (

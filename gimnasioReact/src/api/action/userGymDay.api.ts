@@ -3,7 +3,7 @@ import { MemberDay } from '../../model/memberDay.model';
 //DTO
 import { CreateMemberDayDto } from '../../model/dto/memberDay.dto';
 //axios
-import { axiosPrivate } from '../axios.private';
+import { axiosPrivate } from '../axios/axios.private';
 
 
 export const createMemberDay = async (userGymDay: CreateMemberDayDto) => {

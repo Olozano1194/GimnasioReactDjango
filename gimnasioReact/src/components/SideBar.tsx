@@ -4,7 +4,7 @@ import { AuthContext } from "../context/AuthContext";
 // icons
 import { RiMenu3Line, RiCloseLine, RiLogoutCircleLine,  } from "react-icons/ri";
 //API
-import { getUserProfile } from "../api/action/users.api";
+import { getUserProfile } from "../api/users/users.api";
 //Mensajes
 import { toast } from 'react-hot-toast';
 // Components

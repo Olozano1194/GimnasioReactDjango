@@ -7,7 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 //react-menu
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 //API
-import { getUserProfile } from "../../api/action/users.api";
+import { getUserProfile } from "../../api/users/users.api";
 //Mensajes
 import { toast } from 'react-hot-toast';
 //Component

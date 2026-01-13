@@ -1,7 +1,7 @@
 //hooks
 import { useState, useEffect } from "react";
 //Api
-import { getUserProfile, updateUser } from "../../../../api/action/users.api";
+import { getUserProfile, updateUser } from "../../../../api/users/users.api";
 //icons
 import { RiEdit2Line } from "react-icons/ri";
 //models

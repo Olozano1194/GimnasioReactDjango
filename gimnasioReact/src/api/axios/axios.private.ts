@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { getToken } from '../utils/tokenStorage';
+import { getToken } from '../../utils/tokenStorage';
 
 const baseURL = import.meta.env.MODE === 'development' 
               ? import.meta.env.VITE_API_URL_DEV
