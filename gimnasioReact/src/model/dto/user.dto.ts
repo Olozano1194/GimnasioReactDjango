@@ -21,5 +21,5 @@ export interface AuthUser {
     name: string;
     lastname: string;
     email?: string;
-    avatar?: string | File;    
+    avatar?: string;    
 };

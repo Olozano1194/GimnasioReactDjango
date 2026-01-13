@@ -1,4 +1,4 @@
-import axiosPublic
+import { axiosPublic } from "../axios/axios.public";
 //DTO
 import {
   LoginUserDto,
