@@ -1,17 +1,12 @@
 import { useNavigate } from "react-router-dom";
-import { useContext, useState, useEffect } from "react";
-import { AuthContext } from "../context/AuthContext";
+import { useState } from "react";
+import { useAuth } from "../context/useAuth";
 // icons
 import { RiMenu3Line, RiCloseLine, RiLogoutCircleLine,  } from "react-icons/ri";
-//API
-import { getUserProfile } from "../api/users/users.api";
-//Mensajes
-import { toast } from 'react-hot-toast';
 // Components
 import SideBarAdmin from "./sideBar/SideBarAdmin";
 import SideBarUser from "./sideBar/SideBarUser";
-// type
-// import { SubMenuKey } from "./sideBar/SideBarAdmin";
+
 
 export interface SubMenuState {
     menu1: boolean,
@@ -20,8 +15,6 @@ export interface SubMenuState {
     menu4: boolean,
     menu5: boolean,
 };
-
-// export type SubMenuState = Record<SubMenuKey, boolean>
 
 const SideBar = () => {
     const navigate = useNavigate();
@@ -33,25 +26,11 @@ const SideBar = () => {
         menu4: false,
         menu5: false,        
     });
-    const [userRole, setUserRole] = useState<string[]>([]);    
-    const auth = useContext(AuthContext);
+    const { user, logout } = useAuth();
 
     //este useEfect es para obtener el rol del usuario
-    useEffect(() => {
-        const obtenerRol = async () => {
-            try {
-                const { user } = await getUserProfile();
-                //console.log('User data received:', data);
-                const rolesArray = Array.isArray(user.roles) ? user.roles : [user.roles];
-                setUserRole(rolesArray);                                
-
-            }catch (error) {
-                const errorMessage = error instanceof Error ? error.message : 'Error al cargar los datos';
-                toast.error(errorMessage);
-            }
-        };
-        obtenerRol();
-    }, []);
+    const userRoles = user?.roles ?? [];
+    const firstRole = userRoles[0] ?? ''; 
 
     //Funcion para mostrar y ocultar los submenus
     const handleToggleSubMenu = (submenu: keyof SubMenuState) => {
@@ -60,10 +39,6 @@ const SideBar = () => {
           [submenu]: !prev[submenu],
         }));
     };
-
-    if (!auth) return null;
-    
-    const { logout } = auth;
 
     // Esta función nos sirve para cerrar la sesión    
     const handleLogOut = () => {
@@ -80,11 +55,11 @@ const SideBar = () => {
                 {/* Menu */}
                 <div>
                     <h1 className="text-center text-2xl font-black text-dark mb-10">
-                    {userRole.length > 0 ? formatRole(userRole[0]) : ''}
+                    {firstRole && formatRole(firstRole)}
                     <span className="text-primary">.</span>
                     </h1>
                     <nav>
-                        {userRole.includes('admin') ? (
+                        {userRoles.includes('admin') ? (
                             <SideBarAdmin
                                 handleToggleSubMenu={handleToggleSubMenu}
                                 showSubmenu={showSubMenu} 
