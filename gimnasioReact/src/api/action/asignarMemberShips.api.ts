@@ -2,7 +2,7 @@
 import { CreateAsignarMemberShipsDto } from '../../model/dto/asignarMemberShips.dto';
 import { AsignarMemberShips } from '../../model/asignarMemberShips.model';
 //axios y errores
-import { axiosPrivate } from '../axios.private';
+import { axiosPrivate } from '../axios/axios.private';
 
 
 

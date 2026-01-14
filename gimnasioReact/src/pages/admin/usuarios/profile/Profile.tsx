@@ -1,7 +1,7 @@
 //hooks
 import { useState, useEffect } from "react";
 //Api
-import { getUserProfile, updateUser } from "../../../../api/action/users.api";
+import { getUserProfile, updateUser } from "../../../../api/users/users.api";
 //icons
 import { RiEdit2Line } from "react-icons/ri";
 //models
@@ -12,7 +12,7 @@ import { toast } from "react-hot-toast";
 interface FormData {
     name: string;
     lastname: string;
-    roles: string[];
+    roles: string;
     avatar: string | File | undefined;
     id: string;
 };
@@ -23,7 +23,7 @@ const Profile = () => {
     const [formData, setFormData] = useState<FormData>({
         name: '',
         lastname: '',
-        roles: [],
+        roles: '',
         avatar: undefined,
         id: ''
     });
@@ -37,7 +37,7 @@ const Profile = () => {
 
                 const avatarUrl = userData.user.avatar instanceof File ? URL.createObjectURL(userData.user.avatar) : userData.user.avatar ?? '';
 
-                const rolesArray = Array.isArray(userData.user.roles) ? userData.user.roles : [userData.user.roles];
+                const roles = Array.isArray(userData.user.roles) ? userData.user.roles[0] ?? '' : userData.user.roles ?? '';
                 
                 if (userData && userData.user) {
                     setUser(userData.user);
@@ -45,7 +45,7 @@ const Profile = () => {
                     setFormData({
                         name: userData.user.name,
                         lastname: userData.user.lastname,
-                        roles: rolesArray,
+                        roles: roles,
                         avatar: avatarUrl,
                         id: userData.user.id.toString(),
                     });
@@ -89,17 +89,18 @@ const Profile = () => {
     //Función para guardar los cambios en el formulario
     const handleSave = async () => {
         try {
-            const rolesArray = Array.isArray(formData.roles) ? formData.roles : [formData.roles];
+            // const roles = Array.isArray(formData.roles) ? formData.roles : formData.roles;
             // Enviamos solo los campos necesarios
             const dataToUpdate = {
                 name: formData.name,
                 lastname: formData.lastname,
-                roles: rolesArray,
+                // roles: roles,
                 avatar: formData.avatar instanceof File ? formData.avatar : undefined,
             };
 
             //console.log('Datos a actualizar', dataToUpdate);
             const updatedProfile = await updateUser(parseInt(formData.id), dataToUpdate);
+            toast.success('Usuario Actualizado');
             
             if (updatedProfile) {
                 setUser(updatedProfile);
@@ -109,16 +110,13 @@ const Profile = () => {
                     ...prev,
                     name: updatedProfile.name,
                     lastname: updatedProfile.lastname,
-                    roles: updatedProfile.roles,
+                    // roles: updatedProfile.roles,
                     avatar: updatedProfile.avatar,
                 }));
             }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Error al actualizar el Usuario';
-            toast.error(errorMessage, {
-                    duration: 3000,
-                    position: 'bottom-right',
-            });            
+            toast.error(errorMessage);            
         }
     };
 
@@ -204,15 +202,17 @@ const Profile = () => {
                             <select 
                                 name="roles" 
                                 value={formData.roles}
-                                onChange={handleChanges}
-                                disabled={!editingUser} 
+                                // onChange={handleChanges}
+                                disabled 
                                 className="w-full py-2 px-4 outline-none rounded-lg bg-dark text-white appearance-none"                                   
                             >
                                 <option value="">Selecione el Rol</option>
                                 <option value='admin'>Administrador</option>
                                 <option value='recepcion'>Recepcionista</option>
-                            </select>                                   
-                        </div>                                                
+                            </select>
+                            <small className="w-full flex justify-center mt-1 text-gray-500">El rol es asignado por el Administrador.</small>                                   
+                        </div>
+                                                                       
                     </div>
                 </div>
                 {/* Botones de acción */}

@@ -2,7 +2,7 @@ export interface CreateUserDto {
     name: string;
     lastname: string;
     email?: string;
-    roles: string[];
+    roles?: string;
     password?: string;         
     avatar?: string | File;
 };
@@ -16,3 +16,13 @@ export interface LoginUserDto {
 export type LoginResponse = {
     token: string;
 }
+
+export type UserRole = 'admin' | 'recepcion';
+
+export interface AuthUser {
+    name: string;
+    lastname: string;
+    email?: string;
+    avatar?: string;
+    roles?: UserRole[];    
+};

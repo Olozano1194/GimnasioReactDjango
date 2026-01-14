@@ -3,7 +3,7 @@ import { Membresia } from '../../model/memberShips.model';
 //DTO
 import { CreateMemberShipsDTO } from '../../model/dto/memberShips.dto';
 //axios
-import { axiosPrivate } from '../axios.private';
+import { axiosPrivate } from '../axios/axios.private';
 
 
 //Creación de membresías

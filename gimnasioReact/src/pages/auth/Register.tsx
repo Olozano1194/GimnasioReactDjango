@@ -7,7 +7,7 @@ import { toast } from 'react-hot-toast';
 //ui
 import { Input, Label, Button } from '../../components/ui/index';
 //api
-import { CreateUsers } from '../../api/action/users.api';
+import { CreateUsers } from '../../api/users/users.api';
 //Models
 import { User } from '../../model/user.model';
 //img
@@ -31,25 +31,12 @@ const Register = () => {
             await CreateUsers(requestData);
             //console.log('Respuesta del servidor:',rest.data);            
             reset();
-            toast.success('Usuario Creado', {
-                duration: 3000,
-                position: 'bottom-right',
-                style: {
-                    background: '#4b5563',   // Fondo negro
-                    color: '#fff',           // Texto blanco
-                    padding: '16px',
-                    borderRadius: '8px',
-                },
-
-            });
+            toast.success('Usuario Creado');
             navigate('/dashboard/listUser');
             
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Error al registrar el miembro';
-            toast.error(errorMessage, {
-                duration: 3000,
-                position: 'bottom-right',
-            });            
+            toast.error(errorMessage);            
         }
         
     });
