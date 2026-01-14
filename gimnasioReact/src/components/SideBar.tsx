@@ -10,6 +10,8 @@ import { toast } from 'react-hot-toast';
 // Components
 import SideBarAdmin from "./sideBar/SideBarAdmin";
 import SideBarUser from "./sideBar/SideBarUser";
+// type
+// import { SubMenuKey } from "./sideBar/SideBarAdmin";
 
 export interface SubMenuState {
     menu1: boolean,
@@ -18,6 +20,8 @@ export interface SubMenuState {
     menu4: boolean,
     menu5: boolean,
 };
+
+// export type SubMenuState = Record<SubMenuKey, boolean>
 
 const SideBar = () => {
     const navigate = useNavigate();

@@ -1,0 +1,80 @@
+import { RiUserLine } from "react-icons/ri";
+import { FaCreditCard } from "react-icons/fa";
+
+export type UserRole = 'admin' | 'recepcion';
+
+export interface SidebarMenu {
+  key: string;
+  title: string;
+  icon: React.ReactNode;
+  items: Array<{
+    label: string;
+    to: string;
+  }>;
+  roles: UserRole[];
+}
+
+export const sidebarMenus: SidebarMenu[] = [
+  {
+    key: "menu1",
+    title: "Miembro",
+    icon: <RiUserLine />,
+    items: [
+      { label: "Registrar miembro", to: "registrar-miembro" },
+      { label: "Ver miembros", to: "miembros" },
+    ],
+    roles: ['admin', 'recepcion']
+  },
+  {
+    key: "menu2",
+    title: "Miembro Diario",
+    icon: <RiUserLine />,
+    items: [
+      { label: "Registrar miembro", to: "registrar-miembro-day" },
+      { label: "Ver miembros", to: "miembros-day" },
+    ],
+    roles: ['admin', 'recepcion']
+  },
+  {
+    key: "menu3",
+    title: "Usuario",
+    icon: <RiUserLine />,
+    items: [
+      { label: "Registrar Usuario", to: "register" },
+      { label: "Ver Usuarios", to: "listUser" },
+    ],
+    roles: ['admin']
+  },
+  {
+    key: "menu4",
+    title: "Membresía",
+    icon: <FaCreditCard />,
+    items: [
+      { label: "Registrar Membresía", to: "registrar-membresia" },
+      { label: "Ver Membresías", to: "memberships-list" },
+    ],
+    roles: ['admin']
+  },
+  {
+    key: "menu5", 
+    title: "Asignar Membresía",
+    icon: <FaCreditCard />,
+    items: [
+      { label: "Asignar Membresía", to: "asignar-membresia" },
+      { label: "Ver Asignaciones", to: "asignar-membresia-list" },
+    ],
+    roles: ['admin', 'recepcion']
+  },
+];
+
+// Función para obtener menús filtrados por rol
+export const getSidebarMenusByRole = (userRoles: UserRole[] | undefined): SidebarMenu[] => {
+    if (!userRoles || userRoles.length === 0) return [];
+
+    return sidebarMenus.filter(menu => {
+        // Verificar si el usuario tiene al menos uno de los roles requeridos
+        return menu.roles.some(requiredRole => 
+            userRoles.includes(requiredRole)
+        );
+    });
+};

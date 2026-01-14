@@ -17,9 +17,12 @@ export type LoginResponse = {
     token: string;
 }
 
+export type UserRole = 'admin' | 'recepcion';
+
 export interface AuthUser {
     name: string;
     lastname: string;
     email?: string;
-    avatar?: string;    
+    avatar?: string;
+    roles?: UserRole[];    
 };

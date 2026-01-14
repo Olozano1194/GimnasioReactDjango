@@ -3,6 +3,7 @@ import { AuthContext } from './AuthContext';
 import { login as loginApi } from '../api/users/authUser.api';
 import { getToken, setToken, removeToken } from '../utils/tokenStorage';
 import type { LoginUserDto } from '../model/dto/user.dto';
+import type { UserRole } from '../components/sideBar/components/SideBarMenus';
 import { AuthUser } from '../model/dto/user.dto';
 import { getUserProfile } from '../api/users/users.api';
 
@@ -38,13 +39,27 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const data  = await getUserProfile();
 
       const avatarUrl = data.user.avatar instanceof File ? URL.createObjectURL(data.user.avatar) : data.user.avatar ?? '';
+
+      let rolesArray: UserRole[] = [];
+
+      if (data.user.roles) {
+        const rawRoles = Array.isArray(data.user.roles) 
+          ? data.user.roles 
+          : [data.user.roles];
+        
+        // Filtrar solo roles válidos
+        rolesArray = rawRoles.filter((role): role is UserRole => 
+          role === 'admin' || role === 'recepcion'
+        );
+      }
                 
       setUser({
         name: data.user.name,
         lastname: data.user.lastname,
         email: data.user.email,
-        avatar: avatarUrl
-      });
+        avatar: avatarUrl,
+        roles: rolesArray
+      });      
       
     } catch {
       setError('Datos de usuarios no encontrados')
@@ -77,7 +92,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     removeToken();
     setIsAuthenticated(false);
   };
-
 
   return (
     <AuthContext.Provider
