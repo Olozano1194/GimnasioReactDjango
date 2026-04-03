@@ -58,7 +58,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         lastname: data.user.lastname,
         email: data.user.email,
         avatar: avatarUrl,
-        roles: rolesArray
+        roles: rolesArray,
+        gimnasio_id: data.user.gimnasio,
+        gimnasio_name: data.user.gimnasio_name
       });      
       
     } catch {

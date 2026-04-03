@@ -52,5 +52,5 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ id, editPath, onDelete, c
         </div>
 
     );
-}
-;export default ActionButtons;
+};
+export default ActionButtons;

@@ -5,6 +5,7 @@ export interface CreateUserDto {
     roles?: string;
     password?: string;         
     avatar?: string | File;
+    gimnasio?: number;  // FK a gimnasio
 };
 
 
@@ -24,5 +25,7 @@ export interface AuthUser {
     lastname: string;
     email?: string;
     avatar?: string;
-    roles?: UserRole[];    
-};
+    roles?: UserRole[];
+    gimnasio_id?: number;
+    gimnasio_name?: string;    
+}
