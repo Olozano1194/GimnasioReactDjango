@@ -1,45 +1,53 @@
 from rest_framework import serializers
-from .models import Usuario, UsuarioGym, UsuarioGymDay, Membresia, MembresiaAsignada
+from .models import Gimnasio, Usuario, UsuarioGym, UsuarioGymDay, Membresia, MembresiaAsignada
 from datetime import timedelta
 
 #token
 from rest_framework.authtoken.models import Token
 
+
+# ============================================================
+# GIMNASIO SERIALIZER
+# ============================================================
+
+class GimnasioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Gimnasio
+        fields = '__all__'
+        read_only_fields = ('id', 'created_at')
+
+
+# ============================================================
+# USUARIO SERIALIZER
+# ============================================================
+
 class UsuarioSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=False)
     avatar = serializers.ImageField(required=False, allow_null=True)
-
+    gimnasio_name = serializers.CharField(source='gimnasio.name', read_only=True, allow_null=True)
+    
     class Meta:
         model = Usuario
-        fields = '__all__'
-        read_only_fields = ('id','created_at', 'is_active',)
+        fields = ['id', 'email', 'name', 'lastname', 'roles', 'gimnasio', 'gimnasio_name',
+                  'avatar', 'is_active', 'created_at', 'password']
+        read_only_fields = ('id', 'created_at', 'is_active', 'gimnasio', 'gimnasio_name')
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # Hacemos que el email sea solo lectura si estamos actualizando un usuario
         if self.instance:
-            #self.fields['email'].read_only = True
             self.fields['email'].required = False
     
     def validate_password(self, value):
-        if len(value) < 6:
+        if value and len(value) < 6:
             raise serializers.ValidationError("La contraseña debe tener al menos 6 caracteres")
         return value
     
     def create(self, validated_data):
-        #ciframos la contraseña antes de crear el usuario
         password = validated_data.pop('password')
-        user = Usuario(**validated_data) #creamos el usuario
-        #ciframos la contraseña
+        user = Usuario(**validated_data)
         user.set_password(password)
-
-        #guardamos el usuario
         user.save()
-
-        #Generamos el token para poder loguearse
-        token = Token.objects.create(user=user)
-
         return user
     
     def get_avatar(self, obj):
@@ -50,18 +58,13 @@ class UsuarioSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         try:
-            avatar = validated_data.get('avatar')
-            print(f"Avatar recibido: {avatar}")
-            # Manejo de la contraseña
             if 'password' in validated_data:
                 password = validated_data.pop('password')
                 instance.set_password(password)
             
-            # Manejo del avatar
             if 'avatar' in validated_data:
                 instance.avatar = validated_data['avatar']
 
-            # Actualizar los demás campos
             for attr, value in validated_data.items():
                 setattr(instance, attr, value)
 
@@ -69,63 +72,57 @@ class UsuarioSerializer(serializers.ModelSerializer):
             return instance
             
         except Exception as e:
-            print("Error en el serializer update:", str(e))
             raise
 
-class UsuarioGymSerializer(serializers.ModelSerializer):
-    #Formato para mostrar las fechas
-    # dateInitial = serializers.DateField(format="%d-%m-%Y", input_formats=['%Y-%m-%d', '%d-%m-%Y'])
-    # dateFinal = serializers.DateField(format="%d-%m-%Y", input_formats=['%Y-%m-%d', '%d-%m-%Y'])
 
+# ============================================================
+# MIEMBROS DEL GIMNASIO
+# ============================================================
+
+class UsuarioGymSerializer(serializers.ModelSerializer):
+    gimnasio_name = serializers.CharField(source='gimnasio.name', read_only=True, allow_null=True)
+    
     class Meta:
         model = UsuarioGym
-        fields = '__all__'
-        read_only_fields = ('id',)
+        fields = ['id', 'name', 'lastname', 'phone', 'address', 'gimnasio', 
+                  'gimnasio_name', 'created_at']
+        read_only_fields = ('id', 'created_at')
 
-    # def to_representation(self, instance):
-    #     # Esto nos permite personalizar aún más la representación de los datos
-    #     representation = super().to_representation(instance)
-        
-    #     # Aseguramos que las fechas estén en el formato correcto
-    #     if instance.dateInitial:
-    #         representation['dateInitial'] = instance.dateInitial.strftime("%d-%m-%Y")
-    #     if instance.dateFinal:
-    #         representation['dateFinal'] = instance.dateFinal.strftime("%d-%m-%Y")
-            
-    #     return representation
 
 class UsuarioGymDaySerializer(serializers.ModelSerializer):
-    #Formato para mostrar las fechas
+    gimnasio_name = serializers.CharField(source='gimnasio.name', read_only=True, allow_null=True)
     dateInitial = serializers.DateField(format="%d-%m-%Y", input_formats=['%Y-%m-%d', '%d-%m-%Y'])
     
-
     class Meta:
         model = UsuarioGymDay
-        fields = '__all__'
-        read_only_fields = ('id',)
+        fields = ['id', 'name', 'lastname', 'phone', 'dateInitial', 'price', 
+                  'gimnasio', 'gimnasio_name', 'created_at']
+        read_only_fields = ('id', 'created_at')
 
     def to_representation(self, instance):
-        # Esto nos permite personalizar aún más la representación de los datos
         representation = super().to_representation(instance)
-        
-        # Aseguramos que las fechas estén en el formato correcto
         if instance.dateInitial:
             representation['dateInitial'] = instance.dateInitial.strftime("%d-%m-%Y")        
-            
         return representation
 
+
+# ============================================================
+# MEMBRESIAS
+# ============================================================
+
 class MembresiasSerializer(serializers.ModelSerializer):
+    gimnasio_name = serializers.CharField(source='gimnasio.name', read_only=True, allow_null=True)
     
     class Meta:
         model = Membresia
-        fields = '__all__'
+        fields = ['id', 'name', 'price', 'duration', 'gimnasio', 'gimnasio_name', 'is_active']
         read_only_fields = ('id',)
+
 
 class MembresiaAsignadaSerializer(serializers.ModelSerializer):
     miembro_details = UsuarioGymSerializer(source='miembro', read_only=True)
     membresia_details = MembresiasSerializer(source='membresia', read_only=True)
 
-    #Formato para mostrar las fechas
     dateInitial = serializers.DateField(format="%d-%m-%Y", input_formats=['%Y-%m-%d', '%d-%m-%Y'])
     dateFinal = serializers.DateField(format="%d-%m-%Y", input_formats=['%Y-%m-%d', '%d-%m-%Y'])
 
@@ -133,49 +130,44 @@ class MembresiaAsignadaSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = MembresiaAsignada
-        fields = '__all__'
-        read_only_fields = ('id','price',)
+        fields = ['id', 'miembro', 'membresia', 'miembro_details', 'membresia_details',
+                  'dateInitial', 'dateFinal', 'price']
+        read_only_fields = ('id', 'price')
 
     def validate(self, data):           
-        miembro = data['miembro']
-        inicio = data['dateInitial']
-        fin = data['dateFinal']
-
-        # Calculamos la fecha final antes de la validación
-        membresia = data['membresia']
+        miembro = data.get('miembro') or self.instance.miembro
+        inicio = data.get('dateInitial') or self.instance.dateInitial
+        membresia = data.get('membresia') or self.instance.membresia
+        
+        # Verificar que miembro y membresia sean del mismo gimnasio
+        if miembro.gimnasio != membresia.gimnasio:
+            raise serializers.ValidationError(
+                "El miembro y la membresía deben pertenecer al mismo gimnasio"
+            )
+        
+        # Verificar fechas
         expected_final = inicio + timedelta(membresia.duration)
-        if fin != expected_final:
-            raise serializers.ValidationError("La fecha final no coincide con la fecha de inicio y la duración de la membresia")
         
         suscripcion = MembresiaAsignada.objects.filter(
-            miembro=miembro, dateInitial__lte=fin, dateFinal__gte=inicio
-        )
+            miembro=miembro, 
+            dateInitial__lte=expected_final, 
+            dateFinal__gte=inicio
+        ).exclude(pk=self.instance.pk if self.instance else None)
+        
         if suscripcion.exists():
-            raise serializers.ValidationError('El miembro ya tiene una suscripción activa en este rango de fechas')
+            raise serializers.ValidationError(
+                'El miembro ya tiene una suscripción activa en este rango de fechas'
+            )
         return data        
 
     def create(self, validated_data):
-        # # extraemos datos
-        # membresia = validated_data['membresia']
-        # dateInitial = validated_data['dateInitial']
-        # # Calculamos la fecha de finalización y precio
-        # validated_data['dateFinal'] = dateInitial + timedelta(days=membresia.duration)
-        # validated_data['price'] = membresia.price
-        # # Creamos la instancia
-        # instance = super().create(validated_data)
-        # return instance
         validated_data['price'] = validated_data['membresia'].price
         return super().create(validated_data)
     
     def to_representation(self, instance):
-        # Esto nos permite personalizar aún más la representación de los datos
         representation = super().to_representation(instance)
-        
-        # Aseguramos que las fechas estén en el formato correcto
         if instance.dateInitial:
             representation['dateInitial'] = instance.dateInitial.strftime("%d-%m-%Y")
         if instance.dateFinal:
             representation['dateFinal'] = instance.dateFinal.strftime("%d-%m-%Y")
-            
-        return representation   
-    
+        return representation

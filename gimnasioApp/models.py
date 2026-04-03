@@ -4,7 +4,30 @@ from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.core.exceptions import ValidationError
 
 
-# Create your models here.
+# ============================================================
+# MODELO GIMNASIO - Para multi-tenant
+# ============================================================
+class Gimnasio(models.Model):
+    """Representa cada gimnasio/cliente en el sistema multi-tenant."""
+    name = models.CharField(max_length=100)
+    address = models.CharField(max_length=200, blank=True, default='')
+    phone = models.CharField(max_length=20, blank=True, default='')
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = 'gimnasio'
+        verbose_name = 'Gimnasio'
+        verbose_name_plural = 'Gimnasios'
+        ordering = ['name']
+    
+    def __str__(self):
+        return self.name
+
+
+# ============================================================
+# MANAGER Y MODELO USUARIO
+# ============================================================
 class UserManager(BaseUserManager): # Clase para la creación de usuarios
     def create_user(self, email, password, **extra_fields): #extra_fields es un diccionario que puede contener cualquier campo adicional que se desee agregar al modelo de usuario
         if not email:
@@ -21,6 +44,14 @@ class Usuario(AbstractBaseUser):
     #user = models.CharField(max_length=30, unique=True)
     avatar = models.ImageField(upload_to='fotos/', null=True, blank=True, default='')
     
+    # FK a Gimnasio para multi-tenant
+    gimnasio = models.ForeignKey(
+        Gimnasio,
+        on_delete=models.CASCADE,
+        related_name='usuarios',
+        null=True,
+        blank=True
+    )
         
     OPCIONES_ROL = [
         ('recepcion', 'Recepcionista'),
@@ -57,6 +88,15 @@ class UsuarioGym(models.Model):
     # user = models.OneToOneField(User, on_delete=models.CASCADE)
     address = models.CharField(max_length=50)
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    # FK a Gimnasio para multi-tenant
+    gimnasio = models.ForeignKey(
+        Gimnasio,
+        on_delete=models.CASCADE,
+        related_name='miembros',
+        null=True,
+        blank=True
+    )
 
     def __str__(self):
         return f"{self.name} {self.lastname}"
@@ -75,6 +115,15 @@ class UsuarioGymDay(models.Model):
     dateInitial = models.DateField(max_length=200)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     created_at = models.DateTimeField(auto_now_add=True)
+    
+    # FK a Gimnasio para multi-tenant
+    gimnasio = models.ForeignKey(
+        Gimnasio,
+        on_delete=models.CASCADE,
+        related_name='miembros_diarios',
+        null=True,
+        blank=True
+    )
 
     def __str__(self):
         return self.name
@@ -96,6 +145,15 @@ class Membresia(models.Model):
     duration = models.PositiveIntegerField(help_text="Duración en días (ej: 15, 30, 45)")
     is_active = models.BooleanField(default=True)
     # created_at = models.DateTimeField(auto_now_add=True)
+    
+    # FK a Gimnasio para multi-tenant
+    gimnasio = models.ForeignKey(
+        Gimnasio,
+        on_delete=models.CASCADE,
+        related_name='membresias',
+        null=True,
+        blank=True
+    )
 
 
     def __str__(self):

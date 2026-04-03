@@ -130,10 +130,9 @@ const Table = <T,> ({ data, columns, totalRow }: TableProps<T>) => {
                     >
                         Última Página
                     </button>
-
                 </div>
             </div>                      
         </main>
     );
-}
+};
 export default Table;
