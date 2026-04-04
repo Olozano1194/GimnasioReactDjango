@@ -7,4 +7,6 @@ export interface User {
     password: string;
     avatar?: string | File;
     repeatPass?: string;
+    gimnasio?: number;
+    gimnasio_name?: string;
 };
