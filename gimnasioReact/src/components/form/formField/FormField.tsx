@@ -1,21 +1,22 @@
 import { ReactNode } from "react";
 
 interface FormFieldProps {
-    label: ReactNode;
-    error?: string;
-    children: ReactNode;
+  label: string;
+  error?: string;
+  children: ReactNode;
 };
 
 const FormField = ({ label, error, children }: FormFieldProps) => {
-    return (
+  return (
     <div className="w-full flex flex-col gap-1">
-      <label className="w-full flex gap-3 font-semibold md:gap-3 md:justify-center md:p-3">
-        {label}
+      {label && <div className="block font-bold ml-1 pt-4 text-[1rem] text-secondary tracking-widest uppercase">{label}</div>}
+
+      <div className="border-b border-[rgba(195, 198, 215, 0.4)] duration-300 flex items-center relative transition-all">
         {children}
-      </label>
+      </div>
 
       {error && (
-        <span className="text-red-500 text-sm text-center md:-mt-2">
+        <span className="text-red-500 text-sm">
           {error}
         </span>
       )}
