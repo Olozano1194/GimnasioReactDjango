@@ -1,6 +1,5 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
+@import "tailwindcss";
 
 /* Style Person */
 .formRegister {
@@ -25,6 +24,19 @@
 
 /* tablas */
 tbody tr:nth-child(even) {
-    background-color: #2928287c;
-    
+    background-color: #2928287c;    
+}
+
+@theme {
+    --background-image-pulse-gradient: linear-gradient(135deg, #004ac6 0%, #2563eb 100%); 
+    --font-roboto: 'Roboto', sans-serif;
+    --color-primary: #0ea5e9;
+    --color-secondary: #434655;
+    --color-surface-container-lowest: #ffffff;
+    --color-surface-container-high: #dce9ff;
+    --color-bg: #f8f9ff;
+    --color-on-surface: #0b1c30;
+    --color-outline: #737686;
+    --color-outline-variant: #c3c6d71a;
+    --color-text-primary: #0284c7;
 }
