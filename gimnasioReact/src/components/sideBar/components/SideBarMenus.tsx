@@ -1,4 +1,4 @@
-import { RiUserLine } from "react-icons/ri";
+import { HiMiniUserGroup } from "react-icons/hi2";
 import { FaCreditCard } from "react-icons/fa";
 
 export type UserRole = 'admin' | 'recepcion';
@@ -18,7 +18,7 @@ export const sidebarMenus: SidebarMenu[] = [
   {
     key: "menu1",
     title: "Miembro",
-    icon: <RiUserLine />,
+    icon: <HiMiniUserGroup />,
     items: [
       { label: "Registrar miembro", to: "registrar-miembro" },
       { label: "Ver miembros", to: "miembros" },
@@ -28,7 +28,7 @@ export const sidebarMenus: SidebarMenu[] = [
   {
     key: "menu2",
     title: "Miembro Diario",
-    icon: <RiUserLine />,
+    icon: <HiMiniUserGroup />,
     items: [
       { label: "Registrar miembro", to: "registrar-miembro-day" },
       { label: "Ver miembros", to: "miembros-day" },
@@ -38,7 +38,7 @@ export const sidebarMenus: SidebarMenu[] = [
   {
     key: "menu3",
     title: "Usuario",
-    icon: <RiUserLine />,
+    icon: <HiMiniUserGroup />,
     items: [
       { label: "Registrar Usuario", to: "register" },
       { label: "Ver Usuarios", to: "listUser" },

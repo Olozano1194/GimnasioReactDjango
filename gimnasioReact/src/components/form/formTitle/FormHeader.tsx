@@ -21,7 +21,7 @@ const FormHeader = ({ logo, title, highlight }: FormHeaderProps) => {
           </span>
         )}
       </h1>
-      <p className="mt-1 text-sm text-secondary">Portal de Gestión de Elite</p>
+      <p className="mt-1 text-sm text-nav">Portal de Gestión de Elite</p>
     </header>
   );
 };

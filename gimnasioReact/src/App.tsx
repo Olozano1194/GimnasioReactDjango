@@ -3,7 +3,7 @@ import {Routes, Route, Navigate } from 'react-router-dom';
 import LayoutAdmin from './layouts/LayoutAdmin';
 //Pages auth
 import Login from './pages/auth/LoginPage';
-import Register from './pages/auth/Register';
+import Register from './pages/auth/RegisterPage';
 import ForgetPassword from './pages/auth/ForgetPassword';
 //Pages admin
 import Home from './pages/admin/Home';
