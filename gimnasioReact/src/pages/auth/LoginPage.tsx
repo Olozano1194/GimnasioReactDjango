@@ -132,7 +132,7 @@ const Login = () => {
       </section>
       </form>
       {/* Version */}
-      <section className="w-full bottom-8 hidden items-center justify-center gap-x-10 left-8 mt-7 md:flex">
+      <section className="w-full bottom-8 hidden items-center justify-center gap-x-10 left-8 mt-7 md:flex lg:fixed">
         <div className="flex gap-2 items-center text-secondary/60">
           <span className="text-sm"><FaShield /></span>
           <span className="font-medium text-[10px] tracking-wider uppercase">Secure Acess</span>              
