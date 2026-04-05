@@ -180,7 +180,6 @@ const Register = () => {
                 </div> */}
             </form>
         </main>
-
     );
 }
 export default Register;

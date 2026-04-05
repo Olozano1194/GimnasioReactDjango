@@ -113,8 +113,9 @@ const Login = () => {
           <div className="flex justify-end pt-2">
             <Link to='#' className="font-semibold text-xs text-primary transition-colors hover:text-primary/70">¿olvidaste tu contraseña?</Link>
           </div>
+          {error && <span className="text-red-600 text-sm text-center -mt-3 mb-100 md:-mt-6">{error}</span>}
         </section>
-        {error && <span className="text-red-600 text-sm text-center -mt-3 md:-mt-6">{error}</span>}
+        
         {/* btn login */}
         <button
           className="w-full bg-primary bg-pulse-gradient cursor-pointer flex font-bold gap-2 items-center justify-center py-4 rounded-lg shadow-lg text-white tramsition-all hover:shadow-primary/20 hover:scale-[1.01] active:scale[0.98]"

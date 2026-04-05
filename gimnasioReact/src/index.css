@@ -39,4 +39,5 @@ tbody tr:nth-child(even) {
     --color-outline: #737686;
     --color-outline-variant: #c3c6d71a;
     --color-text-primary: #0284c7;
+    --color-nav: #64748b;
 }
