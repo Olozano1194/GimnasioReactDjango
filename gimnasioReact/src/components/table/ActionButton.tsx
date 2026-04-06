@@ -45,7 +45,7 @@ const ActionButtons: React.FC<ActionButtonsProps> = ({ id, editPath, onDelete, c
             </Link>
             <button
                 onClick={handleDelete}
-                className="text-red-500 text-xl p-2 rounded-md hover:scale-110"
+                className="cursor-pointer text-red-500 text-xl p-2 rounded-md hover:scale-110"
             >
                 <RiDeleteBinLine />
             </button>
