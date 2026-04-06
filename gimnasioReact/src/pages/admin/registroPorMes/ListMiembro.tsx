@@ -7,10 +7,16 @@ import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 //Componente principal para la listas
 import Table from '../../../components/Table';
 import ActionButtons from "../../../components/table/ActionButton";
+// components Sections
+import HeaderSection from "../../../components/table/section/HeaderSection";
+import StatsOverviewSection from "../../../components/table/section/StatsOverviewSection";
 //Mensajes
 import { toast } from 'react-hot-toast';
 //Models
 import { Miembro } from "../../../model/member.model";
+// icons
+import { IoSearch } from "react-icons/io5";
+
 
 
 interface MiembroTotal {
@@ -203,14 +209,16 @@ const ListMiembro = () => {
     ] as ColumnDef<Member>[];    
 
     return (
-        <main className="cards bg-secondary w-full flex flex-col justify-center items-center gap-y-4 p-4 rounded-xl">            
-            <h1 className='text-xl font-bold pb-4 md:text-2xl md:pt-2'>Listado de Miembros</h1>
+        <main className="bg-surface-container-lowest w-full flex flex-col justify-center items-center gap-y-4 p-4 rounded-xl">
+            <HeaderSection />
+            <StatsOverviewSection />            
             {/* Busqueda */}
-            <section className="flex justify-end items-center gap-x-4 p-4 md:w-96">
+            <section className="relative w-full">
+                <span className="absolute left-3 text-lg text-nav top-1/2 -translate-y-1/2"><IoSearch /></span>
                 <input 
                     type="text"
                     placeholder="Buscar miembro..."
-                    className="bg-gray-100 rounded-md outline-slate-400 p-2 w-full md:w-1/2"
+                    className="bg-surface-container-high border-none pl-10 pr-4 py-2 rounded-lg text-sm transition-all outline-none p-2 w-full focus:ring-primary/20 focus:ring-2 md:w-1/2"
                     value={search}
                     onChange={handleSearchChange}
                 />
