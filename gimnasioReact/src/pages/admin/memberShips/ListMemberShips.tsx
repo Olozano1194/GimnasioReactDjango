@@ -7,10 +7,14 @@ import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 //Componente principal para la listas
 import Table from '../../../components/Table';
 import ActionButtons from "../../../components/table/ActionButton";
+// components Sections
+import HeaderSection from "../../../components/table/section/HeaderSection";
+import StatsOverviewSection from "../../../components/table/section/StatsOverviewSection";
 //Mensajes
 import { toast } from 'react-hot-toast';
 //Models
 import { Membresia } from "../../../model/memberShips.model";
+
 
 
 interface MembresiaTotal {
@@ -22,7 +26,7 @@ interface MembresiaTotal {
 
 type MemberShips = MembresiaTotal | Membresia;
 
-const ListMemberShips= () => {
+const ListMemberShips = () => {
     const [memberShips, setMemberShips] = useState<MemberShips[]>([]);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -32,10 +36,10 @@ const ListMemberShips= () => {
             try {
                 const data = await getMemberList();
                 setMemberShips(data);
-            }catch (error) {
+            } catch (error) {
                 const errorMessage = error instanceof Error ? error.message : 'Error al cargar los datos';
                 toast.error(errorMessage);
-            }finally {
+            } finally {
                 setIsLoading(false);
             }
         };
@@ -69,13 +73,13 @@ const ListMemberShips= () => {
             cell: info => {
                 const isTotalRow = info.row.original.id === 'total';
                 const raw = info.getValue<MemberShips['price']>();
-                const priceNum  = typeof raw === 'string' ? parseFloat(raw) : raw;              
+                const priceNum = typeof raw === 'string' ? parseFloat(raw) : raw;
                 // Si es la fila de total, mostrar en negrita
                 return (
                     <div className={isTotalRow ? 'font-bold' : ''}>
                         ${priceNum.toFixed(2)}
                     </div>
-                )              
+                )
             },
         }),
         columnHelper.display({
@@ -84,8 +88,8 @@ const ListMemberShips= () => {
             cell: props => {
                 const id = props.row.original.id;
                 //si es la fila total, no mostrar botones
-                if(typeof id !== 'number') return null;
-                
+                if (typeof id !== 'number') return null;
+
                 return (
                     // <div className="flex justify-center items-center gap-x-4">
                     //     <Link to={`/dashboard/membresia/${id}`} className="bg-green-500 text-white p-2 rounded-md hover:scale-110">
@@ -120,8 +124,9 @@ const ListMemberShips= () => {
                     <ActionButtons
                         id={id}
                         editPath={`/dashboard/membresia/${id}`}
-                        onDelete={async (id) => { await deleteMemberShips(id);
-                        setMemberShips(memberShips.filter(memberShip => memberShip.id !== id)); 
+                        onDelete={async (id) => {
+                            await deleteMemberShips(id);
+                            setMemberShips(memberShips.filter(memberShip => memberShip.id !== id));
                         }}
                         confirmMessage="¿Estas seguro de eliminar este miembro?"
                     />
@@ -146,20 +151,20 @@ const ListMemberShips= () => {
     //const dataWithTotal = [...users, { id: 'total', name: 'Total', price: total.toFixed(2) }];
 
     return (
-        <main className="cards bg-secondary w-full flex flex-col justify-center items-center gap-y-4 p-4 rounded-xl">
-            <h1 className='text-xl font-bold pb-4'>Listado de Membresías</h1>
+        <main className="bg-surface-container-lowest w-full flex flex-col justify-center items-center gap-y-4 p-4 rounded-xl">
+            <HeaderSection />
+            <StatsOverviewSection />           
             {
                 isLoading ? (
-                    <div className="text-center py-4">Cargando...</div>
-
-                ): (
-                    <Table 
-                        data={memberShips} 
-                        columns={columns} 
-                        totalRow={totalRow} 
+                    <div className="text-center py-4">Buscando...</div>
+                ) : (
+                    <Table
+                        data={memberShips}
+                        columns={columns}
+                        totalRow={totalRow}
                     />
                 )
-            }   
+            }
         </main>
     );
 }
