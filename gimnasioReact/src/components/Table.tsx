@@ -62,7 +62,7 @@ const Table = <T,>({ data, columns, totalRow }: TableProps<T>) => {
                                         headerGroup.headers.map(header => (
                                             <th key={header.id}
                                                 onClick={header.column.getToggleSortingHandler()}
-                                                className="border-b border-outline-variant/10 font-black px-6 py-4 text-[11px] text-secondary tracking-widest uppercase">
+                                                className="border-b border-outline-variant/10 font-black px-3 py-4 text-[11px] text-secondary tracking-widest uppercase">
                                                 {!header.isPlaceholder && flexRender(header.column.columnDef.header, header.getContext()
                                                 )}
                                                 {
@@ -80,7 +80,7 @@ const Table = <T,>({ data, columns, totalRow }: TableProps<T>) => {
                                 <tr key={row.id} className="group transition-colors hover:bg-nav/5">
                                     {
                                         row.getVisibleCells().map(cell => (
-                                            <td key={cell.id} className="px-6 py-5">{flexRender(cell.column.columnDef.cell, cell.getContext())
+                                            <td key={cell.id} className="px-2 py-4">{flexRender(cell.column.columnDef.cell, cell.getContext())
                                             }</td>
                                         ))
                                     }
@@ -90,13 +90,13 @@ const Table = <T,>({ data, columns, totalRow }: TableProps<T>) => {
                         {/* Fila del total que estará siempre al final */}
                         {totalRow && (
                             <tr
-                                className="bg-slate-500 text-white font-bold md:text-lg">
+                                className="bg-surface-container-high text-on-surface font-bold md:text-xl">
                                 {table.getAllColumns().map((column) => {
                                     const accessorKey = column.id;
                                     const value = totalRow[accessorKey as keyof typeof totalRow] ?? '';
 
                                     return (
-                                        <td key={column.id} className="border p-2">
+                                        <td key={column.id} className="px-6 py-2">
                                             {String(value)}
                                         </td>
                                     );

@@ -5,10 +5,15 @@ import { getUsers } from "../../../api/users/users.api";
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 //Componente principal para la listas
 import Table from '../../../components/Table';
+// components Sections
+import HeaderSection from "../../../components/table/section/HeaderSection";
+import StatsOverviewSection from "../../../components/table/section/StatsOverviewSection";
 //Mensajes
 import { toast } from 'react-hot-toast';
 //Models
 import { User } from '../../../model/user.model';
+// icons
+import { IoSearch } from "react-icons/io5";
 
 
 const ListUser = () => {
@@ -73,8 +78,9 @@ const ListUser = () => {
     ] as ColumnDef<User>[];
 
     return (
-        <main className="cards bg-secondary w-full flex flex-col justify-center items-center gap-y-4 p-4 rounded-xl">
-            <h1 className='text-xl font-bold pb-4' >Listado de Usuarios</h1>
+        <main className="bg-surface-container-lowest w-full flex flex-col justify-center items-center gap-y-4 p-4 rounded-xl">
+            <HeaderSection />
+            <StatsOverviewSection />
             {
                 isLoading ? (
                     <div className="text-center py-4">Cargando...</div>
@@ -88,6 +94,5 @@ const ListUser = () => {
             }               
         </main>
     );
-
 }
 export default ListUser;
