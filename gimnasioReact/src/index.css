@@ -12,16 +12,6 @@
     
 }
 
-/* Cards */
-.cards {
-    @media (min-width: 600px) {        
-        flex-direction: row;
-        justify-content: space-between;
-        flex-wrap: wrap;      
-
-    }
-}
-
 /* tablas */
 tbody tr:nth-child(even) {
     background-color: #2928287c;    
@@ -43,4 +33,6 @@ tbody tr:nth-child(even) {
     --color-text-primary: #0284c7;
     --color-nav: #64748b;
     --color-title: #0f172a;
+    --color-tertiary: #006242;
+    --color-text-error: #ba1a1a;
 }
