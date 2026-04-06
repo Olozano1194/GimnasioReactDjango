@@ -12,8 +12,6 @@ import StatsOverviewSection from "../../../components/table/section/StatsOvervie
 import { toast } from 'react-hot-toast';
 //Models
 import { User } from '../../../model/user.model';
-// icons
-import { IoSearch } from "react-icons/io5";
 
 
 const ListUser = () => {
