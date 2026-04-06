@@ -9,7 +9,7 @@ interface FormFieldProps {
 const FormField = ({ label, error, children }: FormFieldProps) => {
   return (
     <div className="w-full flex flex-col gap-1">
-      {label && <div className="block font-bold ml-1 pt-4 text-[1rem] text-secondary tracking-widest uppercase">{label}</div>}
+      {label && <div className="block font-bold ml-1 pt-4 text-[10px] text-secondary tracking-widest uppercase">{label}</div>}
 
       <div className="border-b border-[rgba(195, 198, 215, 0.4)] duration-300 flex items-center relative transition-all">
         {children}

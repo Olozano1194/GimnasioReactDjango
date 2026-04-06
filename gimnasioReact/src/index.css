@@ -12,16 +12,6 @@
     
 }
 
-/* Cards */
-.cards {
-    @media (min-width: 600px) {        
-        flex-direction: row;
-        justify-content: space-between;
-        flex-wrap: wrap;      
-
-    }
-}
-
 /* tablas */
 tbody tr:nth-child(even) {
     background-color: #2928287c;    
@@ -30,6 +20,8 @@ tbody tr:nth-child(even) {
 @theme {
     --background-image-pulse-gradient: linear-gradient(135deg, #004ac6 0%, #2563eb 100%); 
     --font-roboto: 'Roboto', sans-serif;
+    --glass-bg: rgba(248, 249, 255, 0.8);
+    --glass-blur: 24px;
     --color-primary: #0ea5e9;
     --color-secondary: #434655;
     --color-surface-container-lowest: #ffffff;
@@ -40,4 +32,7 @@ tbody tr:nth-child(even) {
     --color-outline-variant: #c3c6d71a;
     --color-text-primary: #0284c7;
     --color-nav: #64748b;
+    --color-title: #0f172a;
+    --color-tertiary: #006242;
+    --color-text-error: #ba1a1a;
 }

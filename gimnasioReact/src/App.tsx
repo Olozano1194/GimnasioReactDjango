@@ -6,7 +6,7 @@ import Login from './pages/auth/LoginPage';
 import Register from './pages/auth/RegisterPage';
 import ForgetPassword from './pages/auth/ForgetPassword';
 //Pages admin
-import Home from './pages/admin/Home';
+import Home from './pages/admin/HomePage';
 import ListUser from './pages/admin/usuarios/ListUser';
 import Profile from './pages/admin/usuarios/ProfileAdmin';
 // Miembros mensuales
