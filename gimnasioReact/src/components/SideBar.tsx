@@ -84,7 +84,7 @@ const SideBar = () => {
                 </div>
                 {/* Cerrar Sesión */}
                 <nav>
-                    <ul className="flex flex-col gap-4">
+                    <ul className="border-t border-nav/30 flex flex-col gap-4">
                         <li>
                             <button
                                 onClick={handleLogOut}

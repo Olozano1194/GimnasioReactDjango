@@ -29,44 +29,44 @@ function NavHeader() {
             </Menu>
             {/* aca comienza el menu desplegable del usuario */}
             <Menu>
-                <MenuButton className="flex items-center gap-x-2 hover:bg-slate-600 p-2 rounded-lg transition-colors">
+                <MenuButton className="flex items-center gap-x-2 hover:bg-gray-100 p-2 rounded-lg transition-colors">
                 <img 
                     src={user?.avatar || defaultAvatar } alt="img-user"
                     className="w-10 h-10 object-cover rounded-full"
                 />
-                <span className="text-gray-100 font-semibold">{user?.name} {user?.lastname}</span>
+                <span className="text-title font-semibold">{user?.name} {user?.lastname}</span>
                 <RiArrowDownSLine className="text-2xl" />
                 </MenuButton>
-                <MenuItems anchor='bottom' className='bg-secondary mt-1 p-4 rounded-lg'>
+                <MenuItems anchor='bottom' className='bg-surface-container-lowest mt-1 p-4 rounded-lg'>
                     <MenuItem as='div' className='p-0'>
-                            <Link to='#' className="rounded-lg transition-colors text-dark hover:bg-gray-200 flex items-center gap-x-4 py-2 px-4">
+                            <Link to='#' className="rounded-lg transition-colors text-title hover:bg-gray-100 flex items-center gap-x-4 py-2 px-4">
                                 <img 
                                     src={user?.avatar || defaultAvatar } alt="img-user"
                                     className="w-10 h-10 object-cover rounded-full"
                                 />
                                 <div className="flex flex-col gap-1 text-sm">
-                                    <span className="text-dark text-sm">{user?.name} {user?.lastname}</span>
-                                    <span className="text-dark text-xm">{user?.email}</span>
+                                    <span className="font-semibold text-title text-sm">{user?.name} {user?.lastname}</span>
+                                    <span className="text-nav text-xm">{user?.email}</span>
                                 </div>
                             </Link>
                             
                     </MenuItem>
-                    <hr className="my-4 border-gray-900/10" />
+                    <hr className="my-4 border-nav/20" />
 
                     <MenuItem as='div' className='p-0'>
-                            <Link to='/dashboard/profile' className="rounded-lg transition-colors text-dark hover:bg-gray-200 flex items-center gap-x-4 py-2 px-4 flex-1">
-                                <RiSettings3Line className="text-2xl" />
+                            <Link to='/dashboard/profile' className="rounded-lg transition-colors text-nav hover:bg-gray-100 flex items-center gap-x-4 py-2 px-4 flex-1">
+                                <RiSettings3Line className="text-2xl text-primary" />
                                 Configuración                                                
                             </Link>
                             
                     </MenuItem>
-                    <hr className="my-4 border-gray-900/10" />
+                    <hr className="my-4 border-nav/20" />
 
                     <MenuItem as='div' className='p-0'>
                         <button
                             onClick={handleLogOut}
-                            className="w-full rounded-lg transition-colors text-dark hover:bg-gray-200 flex items-centerr gap-x-4 py-2 px-4 flex-1">
-                            <RiLogoutCircleRLine />
+                            className="w-full rounded-lg transition-colors text-nav hover:bg-gray-100 flex items-centerr gap-x-4 py-2 px-4 flex-1">
+                            <RiLogoutCircleRLine className="text-xl text-primary" />
                             Cerrar Sesión                                      
                         </button>                            
                     </MenuItem>
