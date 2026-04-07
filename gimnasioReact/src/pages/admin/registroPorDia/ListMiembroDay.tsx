@@ -203,7 +203,10 @@ const ListMiembroDay = () => {
     
     return (
         <main className="bg-surface-container-lowest w-full flex flex-col justify-center items-center gap-y-4 p-4 rounded-xl">
-            <HeaderSection />
+            <HeaderSection
+                title="Listado de Miembros por"
+                highlight="Día" 
+            />
             <StatsOverviewSection />            
             {/* Busqueda */}
             <section className="relative w-full">
@@ -230,4 +233,7 @@ const ListMiembroDay = () => {
         </main>
     );
 }
-export default ListMiembroDay;
+export default ListMiembroDay; 
+/**
+ * 310 506 7238
+ */
