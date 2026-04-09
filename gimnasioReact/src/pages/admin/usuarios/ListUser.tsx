@@ -77,7 +77,10 @@ const ListUser = () => {
 
     return (
         <main className="bg-surface-container-lowest w-full flex flex-col justify-center items-center gap-y-4 p-4 rounded-xl">
-            <HeaderSection />
+            <HeaderSection
+                title="Listado de"
+                highlight="Usuarios" 
+            />
             <StatsOverviewSection />
             {
                 isLoading ? (

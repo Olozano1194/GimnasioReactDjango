@@ -157,40 +157,10 @@ const ListMiembroDay = () => {
                 //si es la fila total, no mostrar botones
                 if(typeof id !== 'number') return null;
 
-                return (
-                    // <div className="flex justify-center items-center gap-x-4">
-                    //     <Link to={`/dashboard/miembro-day/${id}`} className="bg-green-500 text-white p-2 rounded-md hover:scale-110">
-                    //         <RiPencilLine />
-                    //     </Link>
-                    //     <button
-                    //         onClick={ async () => {
-                    //             if (window.confirm('¿Estás seguro de eliminar este miembro?')){
-                    //                 try {
-                    //                     await deleteMember(id);
-                    //                     setUser(users.filter(user => user.id !== id));
-                    //                     toast.success('Miembro Eliminado', {
-                    //                         duration: 3000,
-                    //                         position: 'bottom-right',
-                    //                         style: {
-                    //                             background: '#4b5563',   // Fondo negro
-                    //                             color: '#fff',           // Texto blanco
-                    //                             padding: '16px',
-                    //                             borderRadius: '8px',
-                    //                         },
-                    //                     }); 
-                    //                 } catch (error) {
-                    //                     const errorMessage = error instanceof Error ? error.message : 'Error al eliminar la membresía';
-                    //                     toast.error(errorMessage);                                        
-                    //                 }
-                    //             }                                
-                    //          }} 
-                    //         className="bg-red-500 text-white p-2 rounded-md hover:scale-110">
-                    //             <RiDeleteBinLine />
-                    //     </button>
-                    // </div>
+                return (                    
                     <ActionButtons
                         id={id}
-                        editPath={`/dashboard/asignar-membresia/${id}`}
+                        editPath={`/dashboard/miembro-day/${id}`}
                         onDelete={async (id) => { await deleteMember(id);
                         setUser(users.filter(user => user.id !== id)); 
                         }}
@@ -203,7 +173,10 @@ const ListMiembroDay = () => {
     
     return (
         <main className="bg-surface-container-lowest w-full flex flex-col justify-center items-center gap-y-4 p-4 rounded-xl">
-            <HeaderSection />
+            <HeaderSection
+                title="Listado de Miembros por"
+                highlight="Día" 
+            />
             <StatsOverviewSection />            
             {/* Busqueda */}
             <section className="relative w-full">
@@ -230,4 +203,4 @@ const ListMiembroDay = () => {
         </main>
     );
 }
-export default ListMiembroDay;
+export default ListMiembroDay; 

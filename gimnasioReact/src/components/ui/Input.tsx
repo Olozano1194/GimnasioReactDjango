@@ -4,7 +4,7 @@ const Input = forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputEl
     return (
         <input 
         ref={ref} // Pasar el ref
-        className="w-full bg-transparent border-none body cursor-pointer outline-none py-3 pl-8 text-on-surface text-lg placeholder:text-outline/50 focus:ring-0"
+        className="floating-input border-b border-b-[rgba(195,198,215,0.4)] bg-transparent font-medium outline-none px-0 rounded-none text-on-surface w-full focus:ring-0 focus:border-text-primary"
         {...props} 
         />
     );
