@@ -6,11 +6,8 @@ import { useAuth } from "../../context/useAuth";
 import { MdEmail, MdOutlineVisibility, MdOutlineVisibilityOff, MdArrowForward } from "react-icons/md";
 import { RiLockPasswordLine } from "react-icons/ri";
 import { FaShield, FaDatabase } from "react-icons/fa6";
-//ui
-import { Input } from "../../components/ui/index";
 // Components
 import FormHeader from "../../components/form/formTitle/FormHeader";
-import FormField from "../../components/form/formField/FormField";
 //Mensajes
 import { toast } from "react-hot-toast";
 //Models
@@ -69,17 +66,15 @@ const Login = () => {
             highlight="Colombia"
           />
         </section>
-        {/* Section inputs */}
+        {/* Email */}
         <section className="space-y-1">
-          {/* <section className="w-full flex flex-col justify-center items-center gap-7"> */}
-          {/* email */}
-          <FormField
-            label='Correo Electrónico'
-            error={errors.email?.message}
-          >
+          <label htmlFor="" className="block font-bold ml-1 text-[10px] text-secondary tracking-widest uppercase">Correo Electrónico</label>
+          <div className="border-b border-[rgba(195, 198, 215, 0.4)] duration-300 flex items-center relative transition-all focus-within:border-text-primary">
             <span className="absolute left-0 text-xl text-outline"><MdEmail /></span>
-            <Input
-              type="email"
+            <input
+              type="text"
+              id="email"
+              className="body-md bg-transparent border-none pl-8 py-3 text-on-surface w-full focus:ring-0 focus:outline-none placeholder:text-outline/50"
               placeholder="Escribe el correo electrónico"
               {...register("email", {
                 required: {
@@ -87,17 +82,21 @@ const Login = () => {
                   message: "Correo electrónico requerido",
                 },
               })}
-            />
-          </FormField>
-          {/* Password */}
-          <FormField
-            label='Contraseña'
-            error={errors.password?.message}
-          >
+            />           
+          </div>
+          {
+            errors.email && <span className='text-red-500 text-sm'>{errors.email.message}</span>
+          }
+        </section>
+        {/* Password */}
+        <section className="space-y-1">
+          <label htmlFor="" className="block font-bold ml-1 text-[10px] text-secondary tracking-widest uppercase">Contraseña</label>
+          <div className="border-b border-[rgba(195, 198, 215, 0.4)] duration-300 flex items-center relative transition-all focus-within:border-text-primary">
             <span className="absolute left-0 text-xl text-outline"><RiLockPasswordLine /></span>
-            <Input
+            <input
               type={showkPass ? "text" : "password"}
               id="password"
+              className="body-md bg-transparent border-none pl-8 py-3 text-on-surface w-full focus:ring-0 focus:outline-none placeholder:text-outline/50"
               placeholder="Escribe la Contraseña"
               {...register("password", {
                 required: {
@@ -108,14 +107,16 @@ const Login = () => {
             />
             <button type="button" onClick={handlePass}>
               {showkPass ? <MdOutlineVisibility /> : <MdOutlineVisibilityOff />}
-            </button>
-          </FormField>
+            </button>           
+          </div>
+          {
+            errors.password && <span className='text-red-500 text-sm'>{errors.password.message}</span>
+          }          
           <div className="flex justify-end pt-2">
             <Link to='#' className="font-semibold text-xs text-primary transition-colors hover:text-primary/70">¿olvidaste tu contraseña?</Link>
           </div>
           {error && <span className="text-red-600 text-sm text-center -mt-3 mb-100 md:-mt-6">{error}</span>}
         </section>
-        
         {/* btn login */}
         <button
           className="w-full bg-primary bg-pulse-gradient cursor-pointer flex font-bold gap-2 items-center justify-center py-4 rounded-lg shadow-lg text-white tramsition-all hover:shadow-primary/20 hover:scale-[1.01] active:scale[0.98]"
@@ -126,23 +127,23 @@ const Login = () => {
         </button>
         {/* footer */}
         <section className="border-t border-outline-variant mt-12 pt-8">
-        <div className="flex flex-col gap-4 items-center">
-          <p className="text-sm text-secondary">¿Nuevo en ControlFit Colombia?</p>
-          <button className="bg-surface-container-high cursor-pointer font-semibold px-6 py-2 rounded-full text-on-surface text-sm transition-colors hover:bg-surface-container-high/80">Solicitar una Demo</button>
-        </div>
-      </section>
+          <div className="flex flex-col gap-4 items-center">
+            <p className="text-sm text-secondary">¿Nuevo en ControlFit Colombia?</p>
+            <button className="bg-surface-container-high cursor-pointer font-semibold px-6 py-2 rounded-full text-on-surface text-sm transition-colors hover:bg-surface-container-high/80">Solicitar una Demo</button>
+          </div>
+        </section>
       </form>
       {/* Version */}
       <section className="w-full bottom-8 hidden items-center justify-center gap-x-10 left-8 mt-7 md:flex lg:fixed">
         <div className="flex gap-2 items-center text-secondary/60">
           <span className="text-sm"><FaShield /></span>
-          <span className="font-medium text-[10px] tracking-wider uppercase">Secure Acess</span>              
+          <span className="font-medium text-[10px] tracking-wider uppercase">Secure Acess</span>
         </div>
         <div className="flex gap-2 items-center text-secondary/60">
-        <span className="text-sm"><FaDatabase /></span>
-        <span className="font-medium text-[10px] tracking-wider uppercase">v1.4.0</span>
+          <span className="text-sm"><FaDatabase /></span>
+          <span className="font-medium text-[10px] tracking-wider uppercase">v1.4.0</span>
         </div>
-      </section>      
+      </section>
     </main>
   );
 };

@@ -1,17 +1,15 @@
-import {useForm} from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { useParams, useNavigate } from "react-router-dom";
 //Estados
 import { useEffect, useState } from "react";
 //Icons
 import { RiLoginBoxLine } from "react-icons/ri";
-import { FaCreditCard } from 'react-icons/fa';
-import { BsCalendar2Date } from "react-icons/bs";
-import { CiUser } from 'react-icons/ci';
-import { PiCurrencyDollarBold } from 'react-icons/pi';
+// sections
+import BreadCrumbsSection from "../../../components/form/section/BreadCrumbsSection";
 //Mensajes
 import { toast } from "react-hot-toast";
 //ui
-import { Input, Label, Button } from '../../../components/ui/index';
+import { Input, Label, Button, Select } from '../../../components/ui/index';
 //API
 //MemberShips
 import { getMemberList } from '../../../api/action/memberShips.api';
@@ -23,8 +21,7 @@ import { createAsignarMemberShips, updateAsignarMemberShips, getAsignarMemberShi
 import { Membresia } from '../../../model/memberShips.model';
 import { Miembro } from '../../../model/member.model';
 import { CreateAsignarMemberShipsDto } from '../../../model/dto/asignarMemberShips.dto';
-//img
-import Logo from '../../../../public/favicon-32x32.png';
+
 
 interface FormData {
     miembro: string;
@@ -35,18 +32,19 @@ interface FormData {
 const MemberShipsForm = () => {
     const [miembros, setMiembros] = useState<Miembro[]>([]);
     const [membresias, setMembresias] = useState<Membresia[]>([]);
-    const [selectedPrice, setSelectedPrice] = useState<number | null>(null);
+    const [, setSelectedPrice] = useState<number | null>(null);
     const params = useParams<{ id?: string }>();
+    const isEditing = !!params.id;
     const navigate = useNavigate();
-    const { register, handleSubmit, formState: {errors}, reset } = useForm<FormData>();       
-    
+    const { register, handleSubmit, formState: { errors }, reset } = useForm<FormData>();
+
     const onSubmit = handleSubmit(async (data: FormData) => {
         //console.log('Form data:', data);        
         try {
             const miembroId = parseInt(data.miembro);
             const membresiaId = parseInt(data.membresia);
-                
-            if(isNaN(miembroId) || isNaN(membresiaId)){
+
+            if (isNaN(miembroId) || isNaN(membresiaId)) {
                 toast.error('Por favor, selecciona un miembro y una membresía válidos');
                 return;
             }
@@ -69,13 +67,13 @@ const MemberShipsForm = () => {
 
             //Para la creación/actualización solo enviamos los Ids y las fechas
             const requestData: CreateAsignarMemberShipsDto = {
-                miembro: miembroId, 
-                membresia: membresiaId, 
+                miembro: miembroId,
+                membresia: membresiaId,
                 dateInitial: dateInitial,
                 dateFinal: dateFinal
             };
             //console.log('Datos que serán enviados:', requestData);
-            
+
             if (params.id) {
                 await updateAsignarMemberShips(parseInt(params.id), requestData);
                 //console.log('Actualizando miembro:', params.id);
@@ -88,8 +86,8 @@ const MemberShipsForm = () => {
                         padding: '16px',
                         borderRadius: '8px',
                     },
-                });                 
-            }else {
+                });
+            } else {
                 await createAsignarMemberShips(requestData);
                 //console.log('Respuesta del servidor:',rest.data);            
                 toast.success('Asignación de Membresía Creada', {
@@ -102,16 +100,16 @@ const MemberShipsForm = () => {
                         borderRadius: '8px',
                     },
                 });
-                reset();                
+                reset();
             }
             navigate('/dashboard/asignar-membresia-list');
-                    
+
         } catch (error) {
             if (error instanceof Error) {
                 console.error('Error detallado:', error);
                 toast.error(`Error: ${error.message}`);
-                
-            }else {
+
+            } else {
                 console.error('Error desconocido:', error);
                 toast.error('Error desconocido al procesar la solicitud');
             }
@@ -120,9 +118,9 @@ const MemberShipsForm = () => {
             //         duration: 3000,
             //         position: 'bottom-right',
             //     });                    
-        }            
+        }
     });
-    
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -132,8 +130,8 @@ const MemberShipsForm = () => {
 
                 setMembresias(responseMemberShips);
                 setMiembros(responseMembers);
-                
-    
+
+
                 // Si params.id está presente, cargar los datos específicos para actualizar
                 if (params.id) {
                     const responseAsignacion = await getAsignarMemberShips(parseInt(params.id)); // Función para obtener una asignación específica
@@ -142,9 +140,9 @@ const MemberShipsForm = () => {
                     //formateamos la fecha antes de pasarla al formulario
                     if (responseAsignacion.dateInitial && responseAsignacion.dateFinal) {
                         responseAsignacion.dateInitial = formatDate(responseAsignacion.dateInitial);
-                        responseAsignacion.dateFinal = formatDate(responseAsignacion.dateFinal);                        
+                        responseAsignacion.dateFinal = formatDate(responseAsignacion.dateFinal);
                     }
-    
+
                     // Prellenar los campos del formulario con los datos existentes
                     reset({
                         miembro: responseAsignacion.miembro.toString(),
@@ -158,7 +156,7 @@ const MemberShipsForm = () => {
                 toast.error(errorMessage);
             }
         };
-    
+
         fetchData();
     }, [params.id, reset]);
 
@@ -179,109 +177,110 @@ const MemberShipsForm = () => {
 
         if (selectedMembresia) {
             setSelectedPrice(selectedMembresia.price);
-        }else {
+        } else {
             setSelectedPrice(null);
         }
     };
-        
-    
+
+
     return (
-        <main className="w-full min-h-screen flex flex-col justify-center items-center">
-            <form onSubmit={onSubmit} className="formRegister w-full bg-slate-300 flex flex-col justify-center items-center text-slate-600 gap-6 p-3 rounded-md m-7 md:w-[55%] md:gap-8 lg:w-[47%] lg:px-8 xl:max-w-[43%]">
-                <div className='w-full flex justify-center'>
-                    <h1 className="text-2xl font-bold flex justify-center items-center pb-2 md:pt-3 md:text-3xl"><img className='w-9 h-7 rounded-lg mr-1' src={Logo} alt="" />{ 
-                        params.id ? (
-                            <>
-                            Actualizar 
-                            <span className='text-sky-600 pl-2'>Asignación</span>
-                            </>) 
-                            : (
-                            <>
-                            Asignar
-                            <span className='text-sky-600 pl-2'>Membresía</span>
-                            </>
-                        )}
-                    </h1>
+        <main className="max-w-7xl mx-auto p-6 lg:p-10">
+            <BreadCrumbsSection
+                isEditing={isEditing}
+                title="Asignar Membresías"
+                description="Asocie membresías a los atletas registrados en el sistema"
+                entityName="esta asignación"
+            />
+            <section className="gap-8 grid grid-cols-1 lg:grid-cols-12">
+                <div className="space-y-8 lg:col-span-6">
+                    <section className="bg-surface-container-lowest overflow-hidden p-8 relative rounded-2xl shadow-[0_4px_20px_rgba(0,0,0,0.02)]">
+                        <div className="absolute p-4 right-0 top-0">
+                            <span className="font-black select-none text-[60px] text-slate-50">
+                                Identificación
+                            </span>
+                        </div>
+                        <h4 className="font-bold flex gap-2 items-center mb-10 relative text-xl">Asignar Membresía</h4>
+                        <form onSubmit={onSubmit} className="relative space-y-10 z-10">
+                            <section className='gap-y-10 gap-x-8 grid grid-cols-1 md:grid-cols-2'>
+                                {/* Miembro */}
+                                <div className="relative pt-5">
+                                    <Select
+                                        {...register('miembro', {
+                                            required: {
+                                                value: true,
+                                                message: 'Nombre requerido'
+                                            },
+                                        })}
+                                    >
+                                        <option value="">Seleccione un Miembro</option>
+                                        {miembros.map((miembro) => (
+                                            <option key={miembro.id} value={miembro.id?.toString()}>{miembro.name} {miembro.lastname}</option>
+                                        ))}
+                                    </Select>
+                                    <Label>
+                                        Miembro
+                                    </Label>
+                                    {
+                                        errors.miembro && <span className='text-red-500 text-sm'>{errors.miembro.message}</span>
+                                    }
+                                </div>
+                                {/* MemberShips */}
+                                <div className="relative pt-5">
+                                    <Select
+                                        {...register('membresia', {
+                                            required: {
+                                                value: true,
+                                                message: 'Membresia requerido'
+                                            },
+                                        })}
+                                        onChange={(e) => {
+                                            register('membresia').onChange(e);
+                                            handleMemberShipsChange(e);
+                                        }}
+                                    >
+                                        <option value="">Seleccione una Membresía</option>
+                                        {membresias.map((membresia) => (
+                                            <option key={membresia.id} value={membresia.id?.toString()}>{membresia.name} - ${membresia.price}</option>
+                                        ))}
+                                    </Select>
+                                    <Label>
+                                        Membresía
+                                    </Label>
+                                    {
+                                        errors.membresia && <span className='text-red-500 text-sm'>{errors.membresia.message}</span>
+                                    }
+                                </div>
+                                {/* Date Initial */}
+                                <div className="relative pt-5">
+                                    <Input
+                                        type="date"
+                                        placeholder=""
+                                        {...register('dateInitial', {
+                                            required: {
+                                                value: true,
+                                                message: 'Fecha requerido'
+                                            },
+                                        })}
+                                    />
+                                    <Label>
+                                        Fecha Inicial
+                                    </Label>
+                                    {
+                                        errors.dateInitial && <span className='text-red-500 text-sm'>{errors.dateInitial.message}</span>
+                                    }
+                                </div>                                
+                            </section>
+                            {/* btn Register */}
+                            <div className="w-full flex items-center justify-center">
+                                <Button type="submit">
+                                    {params.id ? 'Actualizar' : 'Registrar'} <RiLoginBoxLine className='text-surface-container-lowest' />
+                                </Button>
+
+                            </div>
+                        </form>
+                    </section>
                 </div>
-                {/* Miembro */}
-                <Label htmlFor="Miembro"><span className='flex gap-2 items-center'><CiUser className='lg:text-2xl xl:text-xl' />Miembro</span><select className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500'
-                {...register('miembro',{
-                    required: {
-                        value: true,
-                        message: 'Nombre requerido'
-                    },                   
-                })}
-                >
-                    <option value="">Seleccione un Miembro</option>
-                    {miembros.map((miembro) => (
-                        <option key={miembro.id} value={miembro.id?.toString()}>{miembro.name} {miembro.lastname}</option>
-                    ))}
-                    </select>
-                </Label>
-                {
-                    errors.miembro && typeof errors.miembro.message === 'string' && <span className='text-red-500 text-sm'>{errors.miembro.message}</span>                }
-                
-                {/* Membreship */}
-                <Label htmlFor="Membresia"><span className='flex gap-2 items-center'><FaCreditCard className='lg:text-2xl' />Membresía</span><select className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 cursor-pointer outline-none text-dark text-lg placeholder:text-gray-500'
-                {...register('membresia',{
-                    required: {
-                        value: true,
-                        message: 'Membresia requerido'
-                    },                    
-                })}
-                onChange={(e) => {
-                    register('membresia').onChange(e);
-                    handleMemberShipsChange(e);
-                }} 
-                >
-                    <option value="">Seleccione una Membresía</option>
-                    {membresias.map((membresia) => (
-                        <option key={membresia.id} value={membresia.id?.toString()}>{membresia.name} - ${membresia.price}</option>
-                    ))}
-                    
-                </select>
-                </Label>
-                {
-                    errors.membresia && typeof errors.membresia.message === 'string' && <span className='text-red-500 text-sm'>{errors.membresia.message}</span>
-                }
-                { selectedPrice !== null && (                    
-                    <Label htmlFor="">
-                        <span className='flex gap-1 justify-center items-center font-semibold text-xl text-slate-600'><PiCurrencyDollarBold className='lg:text-2xl xl:text-xl'/>Precio</span>
-                        <div className='w-64 bg-slate-300 border-solid border-b-2 border-slate-100 outline-none text-gray-500 text-lg placeholder:text-gray-500'>$ {selectedPrice}</div>
-                    </Label>
-                )}
-                {/* Date Initial */}
-                <Label htmlFor="DateInitial"><span className='flex gap-2 items-center'><BsCalendar2Date className='lg:text-2xl' />Fecha Inicial</span><Input type="date"
-                {...register('dateInitial',{
-                    required: {
-                        value: true,
-                        message: 'Fecha requerido'
-                    },                    
-                })} 
-                />
-                </Label>
-                {
-                    errors.dateInitial && typeof errors.dateInitial.message === 'string' && <span className='text-red-500 text-center text-sm'>{errors.dateInitial.message}</span>
-                }
-                {/* Date final */}
-                {/* <Label htmlFor="DateFinal"><span className='flex gap-2 items-center'><BsCalendar2Date className='lg:text-2xl' />Fecha Final</span><Input type="date"
-                {...register('dateFinal',{
-                    required: {
-                        value: true,
-                        message: 'Fecha requerido'
-                    },                    
-                })} 
-                />
-                </Label>
-                {
-                    errors.dateFinal && typeof errors.dateFinal.message === 'string' && <span className='text-red-500 text-center text-sm'>{errors.dateFinal.message}</span>
-                } */}
-                {/* btn Register */}
-                <Button type="submit">
-                    <RiLoginBoxLine className='text-purple-800' />{ params.id ? 'Actualizar' : 'Asignar' }
-                    
-                </Button>                
-            </form>
+            </section>
         </main>
     );
 };
