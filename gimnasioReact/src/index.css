@@ -2,20 +2,23 @@
 @import "tailwindcss";
 
 /* Style Person */
-.formRegister {
-    @media (min-width: 600px) {
-        width: 70%;
-    }
-    @media (min-width: 700px) {
-        width: 65%;
-    }
-    
+/* Floating Label Animation */
+.floating-label {
+  top: 1rem;
+  font-size: 0.875rem;
+  transition: top 0.2s ease, font-size 0.2s ease, color 0.2s ease;
 }
 
-/* tablas */
-/* tbody tr:nth-child(even) {
-    background-color: #f9fafb;    
-} */
+.floating-input:focus ~ .floating-label,
+.floating-input:not(:placeholder-shown) ~ .floating-label {
+  top: 0;
+  font-size: 0.75rem;
+  color: #3b82f6;
+}
+
+.floating-input:not(:focus):not(:placeholder-shown) ~ .floating-label {
+  color: inherit; 
+}
 
 @theme {
     --background-image-pulse-gradient: linear-gradient(135deg, #004ac6 0%, #2563eb 100%); 
