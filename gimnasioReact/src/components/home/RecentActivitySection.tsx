@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { MdOutlineCheckCircle, MdOutlinePersonAddAlt, MdOutlineLogin, MdWarning } from "react-icons/md";
-import { getActivities, Activity } from '../../../api/action/activities.api';
+import { getActivities } from '../../../src/api/action/activities.api';
+// Dto
+import { Activity } from '../../model/dto/Activity';
 import { toast } from "react-hot-toast";
 
 const colorStyles: Record<string, { bg: string; text: string; icon: any }> = {
@@ -31,7 +33,7 @@ const RecentActivitySection = () => {
 
     if (loading) {
         return (
-            <section className="bg-surface-container-lowest border border-outline-variant/10 flex flex-col p-8 rounded-2xl shadow-sm min-h-[400px]">
+            <section className="bg-surface-container-lowest border border-outline-variant/10 flex flex-col p-8 rounded-2xl shadow-sm min-h-100">
                 <h3 className="font-bold mb-6 text-xl text-on-surface tracking-tight">Actividades Recientes</h3>
                 <div className="flex-1 flex items-center justify-center">
                     <p className="text-on-surface/50">Cargando actividades...</p>
@@ -72,6 +74,11 @@ const RecentActivitySection = () => {
                             <div>
                                 <p className="font-bold text-sm text-on-surface">{activity.title}</p>
                                 <p className="leading-relaxed text-xs text-secondary">{activity.description}</p>
+                                {activity.amount && (
+                                    <p className="text-xs font-bold text-green-500">
+                                        ${activity.amount.toLocaleString()}
+                                    </p>
+                                )}
                                 <p className="font-bold mt-1 text-[10px] text-nav uppercase">{activity.time_ago}</p>
                             </div>
                         </article>
@@ -84,5 +91,4 @@ const RecentActivitySection = () => {
         </section>
     );
 };
-
 export default RecentActivitySection;

@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useState } from "react";
 import { MdOutlineFileDownload, MdAdd } from "react-icons/md";
-import { axiosPrivate } from '../../../api/axios/axios.private';
+import { axiosPrivate } from "../../../src/api/axios/axios.private";
 import { toast } from "react-hot-toast";
 
 const WelcomeSection = () => {
@@ -9,24 +9,37 @@ const WelcomeSection = () => {
     const handleExportReport = async () => {
         setExporting(true);
         try {
-            const response = await axiosPrivate.get('/export-report/', {
-                responseType: 'blob',
+            const response = await axiosPrivate.get("/export-report/", {
+                responseType: "blob",
             });
 
-            const url = window.URL.createObjectURL(new Blob([response.data]));
-            const link = document.createElement('a');
+            const blob = new Blob([response.data], {
+                type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            });
+
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement("a");
             link.href = url;
-            link.setAttribute('download', 'reporte_gimnasio.csv');
+
+            const contentDisposition = response.headers["content-disposition"];
+            let fileName = "reporte_gimnasio.xlsx";
+
+            if (contentDisposition) {
+                const match = contentDisposition.match(/filename="(.+)"/);
+                if (match?.[1]) fileName = match[1];
+            }
+
+            link.setAttribute("download", fileName);
             document.body.appendChild(link);
             link.click();
-            
+
             link.parentNode?.removeChild(link);
             window.URL.revokeObjectURL(url);
-            
-            toast.success('Reporte descargado correctamente');
+
+            toast.success("Reporte descargado correctamente");
         } catch (error) {
-            console.error('Error al exportar:', error);
-            toast.error('Error al generar el reporte');
+            console.error("Error al exportar:", error);
+            toast.error("Error al generar el reporte");
         } finally {
             setExporting(false);
         }
@@ -35,11 +48,17 @@ const WelcomeSection = () => {
     return (
         <section className="flex flex-col gap-4 justify-between md:items-end md:flex-row">
             <div>
-                <h2 className="font-extrabold mb-1 text-3xl text-on-surface tracking-tight">ControlFit Gallery</h2>
-                <p className="font-medium text-on-surface/70">Tu ecosistema fitness está rindiendo <span className="font-bold text-tertiary">+12</span> por encima del objetivo este mes.</p>
+                <h2 className="font-extrabold mb-1 text-3xl text-on-surface tracking-tight">
+                    ControlFit Gallery
+                </h2>
+                <p className="font-medium text-on-surface/70">
+                    Tu ecosistema fitness está rindiendo{" "}
+                    <span className="font-bold text-tertiary">+12</span> por encima del
+                    objetivo este mes.
+                </p>
             </div>
             <div className="flex gap-3">
-                <button 
+                <button
                     onClick={handleExportReport}
                     disabled={exporting}
                     className="bg-surface-container-high cursor-pointer font-bold flex gap-2 items-center px-5 py-2.5 rounded-lg text-on-surface text-sm transition-colors hover:bg-surface-container-high/80 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -47,15 +66,16 @@ const WelcomeSection = () => {
                     <span className="text-sm">
                         <MdOutlineFileDownload />
                     </span>
-                    {exporting ? 'Exportando...' : 'Exportar Reporte'}
+                    {exporting ? "Exportando..." : "Exportar Reporte"}
                 </button>
                 <button className="bg-pulse-gradient cursor-pointer font-bold flex gap-2 items-center px-5 py-2.5 rounded-lg shadow-lg shadow-primary/25 text-white text-sm transition-opacity hover:opacity-90 hover:bg-surface-dim">
-                    <span className="text-sm"><MdAdd /></span>
+                    <span className="text-sm">
+                        <MdAdd />
+                    </span>
                     Nuevo Miembro
                 </button>
-            </div>                        
+            </div>
         </section>
     );
 };
-
 export default WelcomeSection;
