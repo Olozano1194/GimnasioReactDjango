@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework import routers
-from .views import UserViewSet, CustomAuthTokenViewSet, userProfileView, UsuarioGymViewSet, UsuarioGymDayViewSet, Home, MembresiaViewSet, MembresiaAsignadaViewSet, membership_notifications
+from .views import UserViewSet, CustomAuthTokenViewSet, userProfileView, UsuarioGymViewSet, UsuarioGymDayViewSet, Home, MembresiaViewSet, MembresiaAsignadaViewSet, membership_notifications, ActivitiesView, ExportReportView
 
 #api versioning
 router = routers.DefaultRouter()
@@ -17,5 +17,7 @@ urlpatterns = [
     path('gym/api/v1/me/', userProfileView.as_view(), name='user-profile'),
     path('gym/api/v1/list/', userProfileView.as_view(), name='user-list'),
     path('gym/api/v1/home/', Home.as_view(), name='home'),
-    path('gym/api/v1/membership-notifications/', membership_notifications, name='membership-notifications'),    
+    path('gym/api/v1/membership-notifications/', membership_notifications, name='membership-notifications'),
+    path('gym/api/v1/activities/', ActivitiesView.as_view(), name='activities'),
+    path('gym/api/v1/export-report/', ExportReportView.as_view(), name='export-report'),
 ]

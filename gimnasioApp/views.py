@@ -8,15 +8,17 @@ from django.contrib.auth import get_user_model
 from .serializers import UsuarioSerializer, UsuarioGymSerializer, UsuarioGymDaySerializer, MembresiasSerializer, MembresiaAsignadaSerializer
 from .models import Usuario, UsuarioGym, UsuarioGymDay, Membresia, MembresiaAsignada, Gimnasio
 from django.utils import timezone
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 #para la imagen
 from rest_framework.parsers import MultiPartParser, FormParser
 #Para las filtraciones en la base de datos
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 #Para las notificaciones
-from datetime import datetime, timedelta
+from datetime import datetime, date, timedelta
 from rest_framework.decorators import api_view, permission_classes
+from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 
 # Importar permisos personalizados
 from .permissions import IsAdminUser, IsRecepcionUser
@@ -276,6 +278,254 @@ class MembresiaAsignadaViewSet(viewsets.ModelViewSet):
 # ============================================================
 # NOTIFICATIONS
 # ============================================================
+
+# ============================================================
+# ACTIVIDADES RECIENTES
+# ============================================================
+
+class ActivitiesView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        gimnasio = get_user_gimnasio(request)
+        
+        activities = []
+        
+        if gimnasio:
+            membresias_recientes = MembresiaAsignada.objects.filter(
+                miembro__gimnasio=gimnasio
+            ).select_related('miembro', 'membresia').order_by('-dateInitial')[:5]
+
+            ingresos = UsuarioGymDay.objects.filter(
+                gimnasio=gimnasio
+            ).order_by('-dateInitial')[:5]
+            
+            for membresia in membresias_recientes:
+                dt = self.ensure_datetime(membresia.dateInitial)
+
+                activities.append({
+                    'id': f'm-{membresia.id}',
+                    'type': 'new_member',
+                    'icon': 'person_add',
+                    'color': 'primary',
+                    'title': 'Nuevo miembro registrado',
+                    'description': f'{membresia.miembro.name} {membresia.miembro.lastname} - {membresia.membresia.name}',                    
+                    'created_at': dt.isoformat(),
+                    # 'date': membresia.dateInitial.strftime('%d/%m/%Y'),
+                    'time_ago': self.get_time_ago(dt),
+                })
+            
+            # ingresos_recientes = UsuarioGymDay.objects.filter(
+            #     gimnasio=gimnasio
+            # ).order_by('-id')[:5]
+            
+            for ingreso in ingresos:
+                dt = self.ensure_datetime(ingreso.dateInitial)
+
+                activities.append({
+                    'id': f'i-{ingreso.id}',
+                    'type': 'entry',
+                    'icon': 'login',
+                    'color': 'info',
+                    'title': 'Ingreso registrado',
+                    'description': f'{ingreso.name} {ingreso.lastname}',
+                    'created_at': dt.isoformat(),
+                    'amount': float(ingreso.price),
+                    # 'date': ingreso.dateInitial.strftime('%d/%m/%Y'),
+                    'time_ago': self.get_time_ago(dt)
+                })
+        
+        activities.sort(key=lambda x: x['created_at'], reverse=True)
+        
+        return Response(activities[:10])
+    
+     # ==========================================================
+    # HELPERS
+    # ==========================================================
+
+    def ensure_datetime(self, date_obj):
+        """Convierte date → datetime seguro"""
+        if isinstance(date_obj, date) and not isinstance(date_obj, datetime):
+            date_obj = datetime.combine(date_obj, datetime.min.time())
+
+        if timezone.is_naive(date_obj):
+            date_obj = timezone.make_aware(date_obj)
+
+        return date_obj
+    
+    def get_time_ago(self, date_obj):
+        now = timezone.now()
+        diff = now - date_obj
+
+        if diff.days > 0:
+            return f'{diff.days} día{"s" if diff.days != 1 else ""}'
+        elif diff.seconds >= 3600:
+            hours = diff.seconds // 3600
+            return f'{hours} hora{"s" if hours != 1 else ""}'
+        elif diff.seconds >= 60:
+            minutes = diff.seconds // 60
+            return f'{minutes} minuto{"s" if minutes != 1 else ""}'
+        else:
+            return 'Ahora mismo'
+        
+# ============================================================
+# EXPORTAR REPORTE
+# ============================================================
+
+class ExportReportView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        gimnasio = get_user_gimnasio(request)
+
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Reporte"
+
+        # 🎨 ESTILOS
+        header_fill = PatternFill(start_color="4F46E5", end_color="4F46E5", fill_type="solid")
+        header_font = Font(color="FFFFFF", bold=True)
+        bold_font = Font(bold=True)
+        center = Alignment(horizontal="center")
+
+        border = Border(
+            left=Side(style='thin'),
+            right=Side(style='thin'),
+            top=Side(style='thin'),
+            bottom=Side(style='thin')
+        )
+
+        # 🔥 TÍTULO
+        ws.merge_cells('A1:F1')
+        ws['A1'] = 'REPORTE DEL GIMNASIO'
+        ws['A1'].font = Font(size=18, bold=True)
+        ws['A1'].alignment = center
+
+        ws.append([])
+        ws.append([f'Generado: {timezone.now().strftime("%d/%m/%Y %H:%M")}'])
+        ws.append([])
+
+        # 🔥 DATOS
+        if gimnasio:
+            miembros = MembresiaAsignada.objects.filter(miembro__gimnasio=gimnasio)
+            diarios = UsuarioGymDay.objects.filter(gimnasio=gimnasio)
+        else:
+            miembros = []
+            diarios = []
+
+        total_membresias = sum(m.price for m in miembros)
+        total_diarios = sum(d.price for d in diarios)
+        total = total_membresias + total_diarios
+
+        # ==========================================================
+        # 📊 ESTADÍSTICAS
+        # ==========================================================
+        ws.append(['ESTADÍSTICAS DEL MES'])
+
+        headers = ['Total miembros', 'Ingresos membresías', 'Ingresos diarios', 'Total']
+        ws.append(headers)
+
+        for col_num, _ in enumerate(headers, 1):
+            cell = ws.cell(row=ws.max_row, column=col_num)
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = center
+            cell.border = border
+
+        ws.append([
+            len(miembros),
+            total_membresias,
+            total_diarios,
+            total
+        ])
+
+        # 💰 formato dinero
+        for col in range(2, 5):
+            ws.cell(row=ws.max_row, column=col).number_format = '$#,##0'
+
+        ws.append([])
+
+        # ==========================================================
+        # 👤 MIEMBROS
+        # ==========================================================
+        ws.append(['MIEMBROS'])
+        headers = ['Nombre', 'Apellido', 'Membresía', 'Fecha Inicio', 'Precio']
+        ws.append(headers)
+
+        for col_num, _ in enumerate(headers, 1):
+            cell = ws.cell(row=ws.max_row, column=col_num)
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.border = border
+
+        for m in miembros[:50]:
+            ws.append([
+                m.miembro.name,
+                m.miembro.lastname,
+                m.membresia.name,
+                m.dateInitial.strftime('%d/%m/%Y'),
+                m.price
+            ])
+
+            row = ws.max_row
+            ws.cell(row=row, column=5).number_format = '$#,##0'
+
+        ws.append([])
+
+        # ==========================================================
+        # 💰 INGRESOS DIARIOS
+        # ==========================================================
+        ws.append(['INGRESOS DIARIOS'])
+        headers = ['Nombre', 'Apellido', 'Fecha', 'Monto']
+        ws.append(headers)
+
+        for col_num, _ in enumerate(headers, 1):
+            cell = ws.cell(row=ws.max_row, column=col_num)
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.border = border
+
+        for d in diarios[:50]:
+            ws.append([
+                d.name,
+                d.lastname,
+                d.dateInitial.strftime('%d/%m/%Y'),
+                d.price
+            ])
+
+            row = ws.max_row
+            ws.cell(row=row, column=4).number_format = '$#,##0'
+
+        # ==========================================================
+        # 📐 AUTO AJUSTE COLUMNAS
+        # ==========================================================
+        from openpyxl.utils import get_column_letter
+        
+        for col in ws.columns:
+            max_length = 0
+            col_letter = get_column_letter(col[0].column)
+
+            for cell in col:
+                try:
+                    # Ignorar celdas combinadas (MergedCell)
+                    if cell.value and not isinstance(cell, type(ws.merged_cells)):
+                        max_length = max(max_length, len(str(cell.value)))
+                except:
+                    pass
+
+            ws.column_dimensions[col_letter].width = max_length + 3 if max_length > 0 else 15
+
+        # ==========================================================
+        # 📥 DESCARGA
+        # ==========================================================
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename="reporte_gimnasio.xlsx"'
+
+        wb.save(response)
+        return response
+    
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
