@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from .serializers import UsuarioSerializer, UsuarioGymSerializer, UsuarioGymDaySerializer, MembresiasSerializer, MembresiaAsignadaSerializer
 from .models import Usuario, UsuarioGym, UsuarioGymDay, Membresia, MembresiaAsignada, Gimnasio
 from django.utils import timezone
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 #para la imagen
 from rest_framework.parsers import MultiPartParser, FormParser
 #Para las filtraciones en la base de datos
@@ -17,6 +17,7 @@ from rest_framework.filters import SearchFilter
 #Para las notificaciones
 from datetime import datetime, timedelta
 from rest_framework.decorators import api_view, permission_classes
+import csv
 
 # Importar permisos personalizados
 from .permissions import IsAdminUser, IsRecepcionUser
@@ -276,6 +277,163 @@ class MembresiaAsignadaViewSet(viewsets.ModelViewSet):
 # ============================================================
 # NOTIFICATIONS
 # ============================================================
+
+# ============================================================
+# ACTIVIDADES RECIENTES
+# ============================================================
+
+class ActivitiesView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        gimnasio = get_user_gimnasio(request)
+        
+        activities = []
+        
+        if gimnasio:
+            membresias_recientes = MembresiaAsignada.objects.filter(
+                miembro__gimnasio=gimnasio
+            ).select_related('miembro', 'membresia').order_by('-id')[:5]
+            
+            for membresia in membresias_recientes:
+                activities.append({
+                    'id': membresia.id,
+                    'type': 'new_member',
+                    'icon': 'person_add',
+                    'color': 'primary',
+                    'title': 'Nuevo miembro registrado',
+                    'description': f'{membresia.miembro.name} {membresia.miembro.lastname} - {membresia.membresia.name}',
+                    'date': membresia.dateInitial.strftime('%d/%m/%Y'),
+                    'time_ago': self.get_time_ago(membresia.dateInitial)
+                })
+            
+            ingresos_recientes = UsuarioGymDay.objects.filter(
+                gimnasio=gimnasio
+            ).order_by('-id')[:5]
+            
+            for ingreso in ingresos_recientes:
+                activities.append({
+                    'id': ingreso.id,
+                    'type': 'entry',
+                    'icon': 'login',
+                    'color': 'info',
+                    'title': 'Ingreso registrado',
+                    'description': f'{ingreso.name} {ingreso.lastname}',
+                    'date': ingreso.dateInitial.strftime('%d/%m/%Y'),
+                    'time_ago': self.get_time_ago(ingreso.dateInitial)
+                })
+        
+        activities.sort(key=lambda x: x['id'], reverse=True)
+        
+        return Response(activities[:10])
+    
+    def get_time_ago(self, date_obj):
+        """Calcula hace cuánto tiempo."""
+        now = timezone.now()
+        if timezone.is_naive(date_obj):
+            date_obj = timezone.make_aware(date_obj)
+        
+        diff = now - date_obj
+        
+        if diff.days > 0:
+            return f'{diff.days} día{"s" if diff.days != 1 else ""}'
+        elif diff.seconds >= 3600:
+            hours = diff.seconds // 3600
+            return f'{hours} hora{"s" if hours != 1 else ""}'
+        elif diff.seconds >= 60:
+            minutes = diff.seconds // 60
+            return f'{minutes} minuto{"s" if minutes != 1 else ""}'
+        else:
+            return 'Ahora mismo'
+
+
+# ============================================================
+# EXPORTAR REPORTE
+# ============================================================
+
+class ExportReportView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        gimnasio = get_user_gimnasio(request)
+        
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="reporte_gimnasio.csv"'
+        
+        writer = csv.writer(response)
+        
+        writer.writerow(['REPORTE DEL GIMNASIO'])
+        writer.writerow([f'Fecha de generación: {timezone.now().strftime("%d/%m/%Y %H:%M")}'])
+        writer.writerow([])
+        
+        if gimnasio:
+            UserGymList = MembresiaAsignada.objects.filter(miembro__gimnasio=gimnasio)
+            UserDayList = UsuarioGymDay.objects.filter(gimnasio=gimnasio)
+        else:
+            UserGymList = MembresiaAsignada.objects.none()
+            UserDayList = UsuarioGymDay.objects.none()
+        
+        now = timezone.now()
+        month = now.month
+        year = now.year
+        
+        num_miembros = UserGymList.count()
+        miembros_mes = UserGymList.filter(dateInitial__month=month, dateInitial__year=year)
+        total_gym_mes = sum(user.price for user in miembros_mes)
+        
+        miembrosDay_mes = UserDayList.filter(dateInitial__month=month, dateInitial__year=year)
+        total_day_mes = sum(user.price for user in miembrosDay_mes)
+        
+        total_month = total_gym_mes + total_day_mes
+        total = sum(user.price for user in UserGymList) + sum(user.price for user in UserDayList)
+        
+        writer.writerow(['ESTADÍSTICAS DEL MES'])
+        writer.writerow(['Total miembros registrados', num_miembros])
+        writer.writerow(['Miembros registrados este mes', miembros_mes.count()])
+        writer.writerow(['Ingresos membresías este mes', f'${total_gym_mes:,.2f}'])
+        writer.writerow(['Ingresos diarios este mes', f'${total_day_mes:,.2f}'])
+        writer.writerow(['Total ingresos mes', f'${total_month:,.2f}'])
+        writer.writerow(['Total general', f'${total:,.2f}'])
+        writer.writerow([])
+        
+        writer.writerow(['MIEMBROS CON MEMBRESÍA'])
+        writer.writerow(['Nombre', 'Apellido', 'Membresía', 'Fecha Inicio', 'Fecha Fin', 'Precio'])
+        
+        if gimnasio:
+            miembros = MembresiaAsignada.objects.filter(
+                miembro__gimnasio=gimnasio
+            ).select_related('miembro', 'membresia').order_by('-dateInitial')[:50]
+            
+            for m in miembros:
+                writer.writerow([
+                    m.miembro.name,
+                    m.miembro.lastname,
+                    m.membresia.name,
+                    m.dateInitial.strftime('%d/%m/%Y'),
+                    m.dateFinal.strftime('%d/%m/%Y'),
+                    f'${m.price:,.2f}'
+                ])
+        
+        writer.writerow([])
+        
+        writer.writerow(['INGRESOS DIARIOS RECIENTES'])
+        writer.writerow(['Nombre', 'Apellido', 'Fecha', 'Monto'])
+        
+        if gimnasio:
+            diarios = UsuarioGymDay.objects.filter(
+                gimnasio=gimnasio
+            ).order_by('-dateInitial')[:50]
+            
+            for d in diarios:
+                writer.writerow([
+                    d.name,
+                    d.lastname,
+                    d.dateInitial.strftime('%d/%m/%Y'),
+                    f'${d.price:,.2f}'
+                ])
+        
+        return response
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
