@@ -15,9 +15,10 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter
 #Para las notificaciones
-from datetime import datetime, timedelta
+from datetime import datetime, date, timedelta
 from rest_framework.decorators import api_view, permission_classes
-import csv
+from openpyxl import Workbook
+from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 
 # Importar permisos personalizados
 from .permissions import IsAdminUser, IsRecepcionUser
@@ -293,48 +294,69 @@ class ActivitiesView(APIView):
         if gimnasio:
             membresias_recientes = MembresiaAsignada.objects.filter(
                 miembro__gimnasio=gimnasio
-            ).select_related('miembro', 'membresia').order_by('-id')[:5]
+            ).select_related('miembro', 'membresia').order_by('-dateInitial')[:5]
+
+            ingresos = UsuarioGymDay.objects.filter(
+                gimnasio=gimnasio
+            ).order_by('-dateInitial')[:5]
             
             for membresia in membresias_recientes:
+                dt = self.ensure_datetime(membresia.dateInitial)
+
                 activities.append({
-                    'id': membresia.id,
+                    'id': f'm-{membresia.id}',
                     'type': 'new_member',
                     'icon': 'person_add',
                     'color': 'primary',
                     'title': 'Nuevo miembro registrado',
-                    'description': f'{membresia.miembro.name} {membresia.miembro.lastname} - {membresia.membresia.name}',
-                    'date': membresia.dateInitial.strftime('%d/%m/%Y'),
-                    'time_ago': self.get_time_ago(membresia.dateInitial)
+                    'description': f'{membresia.miembro.name} {membresia.miembro.lastname} - {membresia.membresia.name}',                    
+                    'created_at': dt.isoformat(),
+                    # 'date': membresia.dateInitial.strftime('%d/%m/%Y'),
+                    'time_ago': self.get_time_ago(dt),
                 })
             
-            ingresos_recientes = UsuarioGymDay.objects.filter(
-                gimnasio=gimnasio
-            ).order_by('-id')[:5]
+            # ingresos_recientes = UsuarioGymDay.objects.filter(
+            #     gimnasio=gimnasio
+            # ).order_by('-id')[:5]
             
-            for ingreso in ingresos_recientes:
+            for ingreso in ingresos:
+                dt = self.ensure_datetime(ingreso.dateInitial)
+
                 activities.append({
-                    'id': ingreso.id,
+                    'id': f'i-{ingreso.id}',
                     'type': 'entry',
                     'icon': 'login',
                     'color': 'info',
                     'title': 'Ingreso registrado',
                     'description': f'{ingreso.name} {ingreso.lastname}',
-                    'date': ingreso.dateInitial.strftime('%d/%m/%Y'),
-                    'time_ago': self.get_time_ago(ingreso.dateInitial)
+                    'created_at': dt.isoformat(),
+                    'amount': float(ingreso.price),
+                    # 'date': ingreso.dateInitial.strftime('%d/%m/%Y'),
+                    'time_ago': self.get_time_ago(dt)
                 })
         
-        activities.sort(key=lambda x: x['id'], reverse=True)
+        activities.sort(key=lambda x: x['created_at'], reverse=True)
         
         return Response(activities[:10])
     
-    def get_time_ago(self, date_obj):
-        """Calcula hace cuánto tiempo."""
-        now = timezone.now()
+     # ==========================================================
+    # HELPERS
+    # ==========================================================
+
+    def ensure_datetime(self, date_obj):
+        """Convierte date → datetime seguro"""
+        if isinstance(date_obj, date) and not isinstance(date_obj, datetime):
+            date_obj = datetime.combine(date_obj, datetime.min.time())
+
         if timezone.is_naive(date_obj):
             date_obj = timezone.make_aware(date_obj)
-        
+
+        return date_obj
+    
+    def get_time_ago(self, date_obj):
+        now = timezone.now()
         diff = now - date_obj
-        
+
         if diff.days > 0:
             return f'{diff.days} día{"s" if diff.days != 1 else ""}'
         elif diff.seconds >= 3600:
@@ -345,95 +367,165 @@ class ActivitiesView(APIView):
             return f'{minutes} minuto{"s" if minutes != 1 else ""}'
         else:
             return 'Ahora mismo'
-
-
+        
 # ============================================================
 # EXPORTAR REPORTE
 # ============================================================
 
 class ExportReportView(APIView):
     permission_classes = [IsAuthenticated]
-    
+
     def get(self, request):
         gimnasio = get_user_gimnasio(request)
-        
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="reporte_gimnasio.csv"'
-        
-        writer = csv.writer(response)
-        
-        writer.writerow(['REPORTE DEL GIMNASIO'])
-        writer.writerow([f'Fecha de generación: {timezone.now().strftime("%d/%m/%Y %H:%M")}'])
-        writer.writerow([])
-        
-        if gimnasio:
-            UserGymList = MembresiaAsignada.objects.filter(miembro__gimnasio=gimnasio)
-            UserDayList = UsuarioGymDay.objects.filter(gimnasio=gimnasio)
-        else:
-            UserGymList = MembresiaAsignada.objects.none()
-            UserDayList = UsuarioGymDay.objects.none()
-        
-        now = timezone.now()
-        month = now.month
-        year = now.year
-        
-        num_miembros = UserGymList.count()
-        miembros_mes = UserGymList.filter(dateInitial__month=month, dateInitial__year=year)
-        total_gym_mes = sum(user.price for user in miembros_mes)
-        
-        miembrosDay_mes = UserDayList.filter(dateInitial__month=month, dateInitial__year=year)
-        total_day_mes = sum(user.price for user in miembrosDay_mes)
-        
-        total_month = total_gym_mes + total_day_mes
-        total = sum(user.price for user in UserGymList) + sum(user.price for user in UserDayList)
-        
-        writer.writerow(['ESTADÍSTICAS DEL MES'])
-        writer.writerow(['Total miembros registrados', num_miembros])
-        writer.writerow(['Miembros registrados este mes', miembros_mes.count()])
-        writer.writerow(['Ingresos membresías este mes', f'${total_gym_mes:,.2f}'])
-        writer.writerow(['Ingresos diarios este mes', f'${total_day_mes:,.2f}'])
-        writer.writerow(['Total ingresos mes', f'${total_month:,.2f}'])
-        writer.writerow(['Total general', f'${total:,.2f}'])
-        writer.writerow([])
-        
-        writer.writerow(['MIEMBROS CON MEMBRESÍA'])
-        writer.writerow(['Nombre', 'Apellido', 'Membresía', 'Fecha Inicio', 'Fecha Fin', 'Precio'])
-        
-        if gimnasio:
-            miembros = MembresiaAsignada.objects.filter(
-                miembro__gimnasio=gimnasio
-            ).select_related('miembro', 'membresia').order_by('-dateInitial')[:50]
-            
-            for m in miembros:
-                writer.writerow([
-                    m.miembro.name,
-                    m.miembro.lastname,
-                    m.membresia.name,
-                    m.dateInitial.strftime('%d/%m/%Y'),
-                    m.dateFinal.strftime('%d/%m/%Y'),
-                    f'${m.price:,.2f}'
-                ])
-        
-        writer.writerow([])
-        
-        writer.writerow(['INGRESOS DIARIOS RECIENTES'])
-        writer.writerow(['Nombre', 'Apellido', 'Fecha', 'Monto'])
-        
-        if gimnasio:
-            diarios = UsuarioGymDay.objects.filter(
-                gimnasio=gimnasio
-            ).order_by('-dateInitial')[:50]
-            
-            for d in diarios:
-                writer.writerow([
-                    d.name,
-                    d.lastname,
-                    d.dateInitial.strftime('%d/%m/%Y'),
-                    f'${d.price:,.2f}'
-                ])
-        
-        return response
 
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Reporte"
+
+        # 🎨 ESTILOS
+        header_fill = PatternFill(start_color="4F46E5", end_color="4F46E5", fill_type="solid")
+        header_font = Font(color="FFFFFF", bold=True)
+        bold_font = Font(bold=True)
+        center = Alignment(horizontal="center")
+
+        border = Border(
+            left=Side(style='thin'),
+            right=Side(style='thin'),
+            top=Side(style='thin'),
+            bottom=Side(style='thin')
+        )
+
+        # 🔥 TÍTULO
+        ws.merge_cells('A1:F1')
+        ws['A1'] = 'REPORTE DEL GIMNASIO'
+        ws['A1'].font = Font(size=18, bold=True)
+        ws['A1'].alignment = center
+
+        ws.append([])
+        ws.append([f'Generado: {timezone.now().strftime("%d/%m/%Y %H:%M")}'])
+        ws.append([])
+
+        # 🔥 DATOS
+        if gimnasio:
+            miembros = MembresiaAsignada.objects.filter(miembro__gimnasio=gimnasio)
+            diarios = UsuarioGymDay.objects.filter(gimnasio=gimnasio)
+        else:
+            miembros = []
+            diarios = []
+
+        total_membresias = sum(m.price for m in miembros)
+        total_diarios = sum(d.price for d in diarios)
+        total = total_membresias + total_diarios
+
+        # ==========================================================
+        # 📊 ESTADÍSTICAS
+        # ==========================================================
+        ws.append(['ESTADÍSTICAS DEL MES'])
+
+        headers = ['Total miembros', 'Ingresos membresías', 'Ingresos diarios', 'Total']
+        ws.append(headers)
+
+        for col_num, _ in enumerate(headers, 1):
+            cell = ws.cell(row=ws.max_row, column=col_num)
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = center
+            cell.border = border
+
+        ws.append([
+            len(miembros),
+            total_membresias,
+            total_diarios,
+            total
+        ])
+
+        # 💰 formato dinero
+        for col in range(2, 5):
+            ws.cell(row=ws.max_row, column=col).number_format = '$#,##0'
+
+        ws.append([])
+
+        # ==========================================================
+        # 👤 MIEMBROS
+        # ==========================================================
+        ws.append(['MIEMBROS'])
+        headers = ['Nombre', 'Apellido', 'Membresía', 'Fecha Inicio', 'Precio']
+        ws.append(headers)
+
+        for col_num, _ in enumerate(headers, 1):
+            cell = ws.cell(row=ws.max_row, column=col_num)
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.border = border
+
+        for m in miembros[:50]:
+            ws.append([
+                m.miembro.name,
+                m.miembro.lastname,
+                m.membresia.name,
+                m.dateInitial.strftime('%d/%m/%Y'),
+                m.price
+            ])
+
+            row = ws.max_row
+            ws.cell(row=row, column=5).number_format = '$#,##0'
+
+        ws.append([])
+
+        # ==========================================================
+        # 💰 INGRESOS DIARIOS
+        # ==========================================================
+        ws.append(['INGRESOS DIARIOS'])
+        headers = ['Nombre', 'Apellido', 'Fecha', 'Monto']
+        ws.append(headers)
+
+        for col_num, _ in enumerate(headers, 1):
+            cell = ws.cell(row=ws.max_row, column=col_num)
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.border = border
+
+        for d in diarios[:50]:
+            ws.append([
+                d.name,
+                d.lastname,
+                d.dateInitial.strftime('%d/%m/%Y'),
+                d.price
+            ])
+
+            row = ws.max_row
+            ws.cell(row=row, column=4).number_format = '$#,##0'
+
+        # ==========================================================
+        # 📐 AUTO AJUSTE COLUMNAS
+        # ==========================================================
+        from openpyxl.utils import get_column_letter
+        
+        for col in ws.columns:
+            max_length = 0
+            col_letter = get_column_letter(col[0].column)
+
+            for cell in col:
+                try:
+                    # Ignorar celdas combinadas (MergedCell)
+                    if cell.value and not isinstance(cell, type(ws.merged_cells)):
+                        max_length = max(max_length, len(str(cell.value)))
+                except:
+                    pass
+
+            ws.column_dimensions[col_letter].width = max_length + 3 if max_length > 0 else 15
+
+        # ==========================================================
+        # 📥 DESCARGA
+        # ==========================================================
+        response = HttpResponse(
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename="reporte_gimnasio.xlsx"'
+
+        wb.save(response)
+        return response
+    
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
