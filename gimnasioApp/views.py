@@ -120,6 +120,51 @@ class CustomAuthTokenViewSet(APIView):
         return Response({'error': 'Credenciales invalidas'}, status=status.HTTP_400_BAD_REQUEST)
 
 
+# Registro público para crear usuario inicial
+class RegisterViewSet(APIView):
+    permission_classes = [AllowAny]
+    
+    def post(self, request, *args, **kwargs):
+        email = request.data.get('email')
+        password = request.data.get('password')
+        name = request.data.get('name')
+        lastname = request.data.get('lastname')
+        
+        if not email or not password or not name or not lastname:
+            return Response({
+                'error': 'Todos los campos son requeridos',
+                'required': ['email', 'password', 'name', 'lastname']
+            }, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Verificar si el usuario ya existe
+        if get_user_model().objects.filter(email=email).exists():
+            return Response({'error': 'El correo ya está registrado'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Crear gimnasio automáticamente
+        email_prefix = email.split('@')[0].replace('.', ' ').title()
+        gimnasio = Gimnasio.objects.create(name=f"Gimnasio {email_prefix}")
+        
+        # Crear usuario con gimnasio
+        user = get_user_model()(
+            email=email,
+            name=name,
+            lastname=lastname,
+            roles='admin',  # Primer usuario es admin
+            gimnasio=gimnasio
+        )
+        user.set_password(password)
+        user.save()
+        
+        # Generar token
+        token, created = Token.objects.get_or_create(user=user)
+        
+        return Response({
+            'message': 'Usuario creado exitosamente',
+            'user': UsuarioSerializer(user, context={'request': request}).data,
+            'token': token.key
+        }, status=status.HTTP_201_CREATED)
+
+
 class userProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
