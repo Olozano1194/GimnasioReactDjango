@@ -14,13 +14,11 @@ class GimnasioappConfig(AppConfig):
         Al iniciar la aplicación, crea un usuario admin de demostración
         si no existe ninguno y las variables de entorno están configuradas.
         
-        NOTA: Eliminar este método antes de pasar a producción real.
+        TEMPORALMENTE DESHABILITADO para evitar query antes de migrate.
         """
-        # Solo ejecutar en producción (cuando DEBUG=False)
-        if os.environ.get('DEBUG', 'True') == 'True':
-            return
-            
-        self._create_demo_admin()
+        # DESHABILITADO: ejecutar solo cuando migrate ya esté aplicado
+        # Re-habilitar después de que funcione el deploy
+        pass
 
     def _create_demo_admin(self):
         """
