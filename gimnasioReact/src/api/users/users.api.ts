@@ -1,10 +1,16 @@
-import { axiosPrivate } from "../axios/axios.private";
+import { axiosPrivate, axiosPublic } from "../axios/axios.private";
 //Models
 import { User } from "../../model/user.model";
 //DTO
 import { CreateUserDto } from "../../model/dto/user.dto";
 
-// Creamos un usuario
+// Registro público (sin token) - crea usuario Y gimnasio automáticamente
+export const registerUser = async (user: CreateUserDto) => {
+  const response = await axiosPublic.post("/register/", user);
+  return response.data;
+};
+
+// Creamos un usuario (requiere estar logueado)
 export const CreateUsers = async (user: CreateUserDto) => {
   const formData = new FormData();
 
