@@ -28,12 +28,27 @@ class Gimnasio(models.Model):
 # ============================================================
 # MANAGER Y MODELO USUARIO
 # ============================================================
-class UserManager(BaseUserManager): # Clase para la creación de usuarios
-    def create_user(self, email, password, **extra_fields): #extra_fields es un diccionario que puede contener cualquier campo adicional que se desee agregar al modelo de usuario
+class UserManager(BaseUserManager):
+    def create_user(self, email, password, **extra_fields):
+        """
+        Crea un usuario. Si no se pasa un gimnasio, lo crea automáticamente.
+        """
         if not email:
             raise ValueError('Los usuarios deben tener un correo electrónico')
-        user = self.model(email=self.normalize_email(email), **extra_fields) # Normaliza la dirección de correo electrónico convirtiendo todos los caracteres en minúsculas y eliminando cualquier espacio en blanco al principio o al final        
-        user.set_password(password) # Establece la contraseña del usuario encriptada 
+        
+        # Extraer gimnasio de los extra_fields o crear uno automáticamente
+        gimnasio = extra_fields.pop('gimnasio', None)
+        
+        # Si NO se pasó gimnasio, crearlo automáticamente
+        if gimnasio is None:
+            # Crear nombre del gimnasio basado en el email (parte antes del @)
+            email_prefix = email.split('@')[0] if '@' in email else email
+            gimnasio = Gimnasio.objects.create(
+                name=f"Gimnasio {email_prefix}"  # O el nombre que vos quieras
+            )
+        
+        user = self.model(email=self.normalize_email(email), gimnasio=gimnasio, **extra_fields)
+        user.set_password(password)
         user.save()
         return user
 
