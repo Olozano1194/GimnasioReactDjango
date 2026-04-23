@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { MdOutlineFileDownload, MdAdd } from "react-icons/md";
 import { axiosPrivate } from "../../../src/api/axios/axios.private";
 import { toast } from "react-hot-toast";
@@ -68,12 +69,12 @@ const WelcomeSection = () => {
                     </span>
                     {exporting ? "Exportando..." : "Exportar Reporte"}
                 </button>
-                <button className="bg-pulse-gradient cursor-pointer font-bold flex gap-2 items-center px-5 py-2.5 rounded-lg shadow-lg shadow-primary/25 text-white text-sm transition-opacity hover:opacity-90 hover:bg-surface-dim">
+                <Link to='/dashboard/registrar-miembro' className="bg-pulse-gradient cursor-pointer font-bold flex gap-2 items-center px-5 py-2.5 rounded-lg shadow-lg shadow-primary/25 text-white text-sm transition-opacity hover:opacity-90 hover:bg-surface-dim">
                     <span className="text-sm">
                         <MdAdd />
                     </span>
                     Nuevo Miembro
-                </button>
+                </Link>
             </div>
         </section>
     );
