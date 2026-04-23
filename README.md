@@ -1,161 +1,349 @@
-# Gym Management System (Fullstack)
+# Gym Control — Sistema de Gestión de Gimnasios
 
-Este proyecto nace de una necesidad real: digitalizar la gestión de membresías en gimnasios locales que aún dependen de procesos manuales o hojas de cálculo propensas a errores. Es una solución integral que permite administrar usuarios, pagos y servicios de forma eficiente.
+**ControlFit Colombia** es un sistema fullstack para la gestión integral de membresías en gimnasios. Permite administrar usuarios, membresías, pagos y servicios de forma eficiente, eliminando la necesidad de procesos manuales o hojas de cálculo.
 
-## Demo Visual
+---
 
-**Inicio Sesión**
+## 🚀 Demo Visual
 
-![alt text](image.png)
+| Módulo | Vista |
+|--------|-------|
+| **Login** | ![Login](image.png) |
+| **Dashboard** | ![Home](image-1.png) |
+| **Registro de Miembros** | ![Registro](image-2.png) |
+| **Lista de Miembros** | ![Lista](image-3.png) |
+| **Asignar Membresías** | ![Asignar](image-4.png) |
+| **Lista de Membresías** | ![ListaMembresias](image-5.png) |
+| **Perfil de Usuario** | ![Perfil](image-6.png) |
 
-**Home**
+---
 
-![alt text](image-1.png)
+## 🛠️ Tecnologías
 
-**Miembros**
+### Frontend
+| Tecnología | Propósito |
+|-------------|-----------|
+| React 18 | UI interactiva |
+| TypeScript | Tipado estático |
+| Vite | Build tool rápida |
+| Tailwind CSS | Estilos responsivos |
+| Axios | HTTP client con interceptors |
+| React Router v7 | Navegación |
+| React Hook Form | Formularios |
 
-- **Registro:**
+### Backend
+| Tecnología | Propósito |
+|-------------|-----------|
+| Django 5 | Framework Python |
+| Django Rest Framework | API REST |
+| PostgreSQL / SQLite | Base de datos |
+| SimpleJWT | Autenticación JWT |
+| CORS Headers | Cross-origin config |
 
-![alt text](image-2.png)
+---
 
-- **Lista**
+## 🔐 Sistema de Autenticación (JWT)
 
-![alt text](image-3.png)
+El proyecto implementa un sistema de autenticación robusto con **JWT** diseñado para uso en producción.
 
-**Asignar Membresías**
+### Flujo de Autenticación
 
-- **Registro:**
+```
+┌─────────────────────────────────────────────────────────────────────────────────┐
+│  LOGIN                                                             │
+│  ┌──────────┐    POST /token/     ┌─────────────────────┐         │
+│  │ Frontend │ ──────────────────► │ Backend (Django)    │         │
+│  └──────────┘    {email,pass}    │ - Valida credenciales│         │
+│        ◄──────────────────────── │ - Genera JWTs        │         │
+│        {access} + cookie         │ - Access: 30 min     │         │
+│        (HttpOnly)               │ - Refresh: 7 días     │         │
+│                               └─────────────────────┘                  │
+└─────────────────────────────────────────────────────────────────────────────────┘
 
-![alt text](image-4.png)
+┌─────────────────────────────────────────────────────────────────┐
+│  REQUEST AUTORIZADA                                                │
+│  ┌──────────┐   GET /api/v1/me/     ┌─────────────────────┐        │
+│  │ Frontend │ ──────────────────► │ Authorization:      │        │
+│  └──────────┐   Bearer {access}  │ Bearer {jwt}        │        │
+│        ◄──────────────────────── │ Validado ✓          │        │
+│        {user data}              └─────────────────────┘        │
+└─────────��────────────────────────────────────────────────────┘
 
-- **Lista**
+┌─────────────────────────────────────────────────────────────────┐
+│  AUTO-REFRESH (cuando token expira)                        │
+│  ┌──────────┐    401 ( unauthorized)                │
+│  │ Frontend │ ◄────────────────────────              │
+│  └──────────┘                                        │
+│        │                                              │
+│        ▼                                              │
+│  ┌──────────┐   POST /token/refresh/                 │
+│  │ Frontend │ ─────────────────────────────────►        │
+│  └──────────┘   (cookie automática)                │
+│        │                                              │
+│        ▼                                              │
+│  ┌──────────┐   {new access token}                 │
+│  │ Frontend │ ◄─────────────────────────────────     │
+│  └──────────┘   + reintenta request original         │
+└─────────────────────────────────────────────────────┘
 
-![alt text](image-5.png)
+┌─────────────────────────────────────────────────────────────────┐
+│  LOGOUT                                                      │
+│  ┌──────────┐   POST /token/blacklist/                  │
+│  │ Frontend │ ──────────────────────────────────     │
+│  └──────────┘   {refresh token}                        │
+│        │                                              │
+│        ▼                                              │
+│  ┌──────────┐   Limpia:                            │
+│  │ Frontend │ - Access token (memoria JS)         │
+│  └──────────┘ - Refresh token (cookie)         │
+│               - isAuthenticated = false          │
+└─────────────────────────────────────────────────────┘
+```
 
-**Perfil Usuario**
+### Endpoints de Autenticación
 
-![alt text](image-6.png)
+| Método | Endpoint | Descripción |
+|--------|----------|------------|
+| POST | `/gym/api/v1/token/` | Login (retorna access + cookie) |
+| POST | `/gym/api/v1/token/refresh/` | Renovar access token |
+| POST | `/gym/api/v1/token/blacklist/` | Invalidar refresh token |
+| POST | `/gym/api/v1/register/` | Registro público (auto-crea gimnasio) |
 
+### Seguridad
 
-## Tecnologías Utilizadas
+| Característica | Implementación |
+|----------------|---------------|
+| Access Token | Memoria JavaScript (no localStorage) |
+| Refresh Token | Cookie HttpOnly (protegido contra XSS) |
+| Expiración | Access: 30 min, Refresh: 7 días |
+| Logout | Blacklist de refresh token |
+| Auto-refresh | Interceptor axios 401 → refresh → retry |
 
-**Frontend:**
+---
 
-- React.js con TypeScript (Tipado fuerte para evitar errores).
-- Tailwind CSS (Diseño responsivo y moderno).
-- React Router para navegación.
+## 📋 Características
 
-**Backend:**
+- **Gestión de Miembros**: Registro, edición, eliminación y visualización
+- **Control de Membresías**: Seguimiento de estados de pago y vencimiento
+- **Multi-tenant**: Cada usuario tiene su propio gimnasio
+- **Registro Público**: Usuarios nuevos pueden registrarse sin admin
+- **Interfaz Responsiva**: Optimizado para tablets y escritorio
+- **Exportación**: Reportes en Excel
 
-- Django Rest Framework (API escalable).
-- MySQL (Persistencia de datos relacionales).
-- TokenAuthentication para autenticación segura.
+---
 
-## Características
+## ⚙️ Configuración e Instalación
 
-- **Gestión de Miembros:** Registro, edición, eliminación y visualización de usuarios.
-- **Control de Membresías:** Seguimiento de estados de pago y fechas de vencimiento.
-- **Interfaz Responsiva:** Optimizado para uso en tablets y computadoras de escritorio.
-- **Consumo de API:** Arquitectura desacoplada mediante peticiones asíncronas.
+### 1. Clonar el repositorio
 
-## Requisitos
+```bash
+git clone <url_del_repositorio>
+cd GimnasioReactDjango
+```
 
-- Tener instalado Node.js y npm
-- Tener instalado Python y pip
-- Tener instalado algun gestor de base de datos, el que ustedes deseen, para este ejemplo usaremos Mysql(Worbench).
+### 2. Backend (Django)
 
-## Configuración e Instalación
+#### Crear entorno virtual
 
-1. **Clonar el repositorio:**
-    ```bash
-        git clone <url_del_repositorio>
-        cd nombre_Proyecto
-    ```
+```bash
+python -m venv venv
+```
 
-### Backend (Django Rest Framework)
+#### Activar entorno virtual
 
-2. **Instalar dependencias:**
-   - Crear un entorno virtual: Para evitar instalar las dependencias en el entorno global, es recomendable crear un entorno virtual
-        ```bash
-            python -m venv entorno, //entorno es el nombre que usted le quiera dar            
-        ```
-    - Activar el entorno virtual: 
-        ```bash
-            .\entorno\Scripts\activate            
-        ```
-    
-    - Instalar dependencias: Usamos el archivo requirements.txt para instalar las dependencias del proyecto
-        ```bash
-            pip install -r requirements.txt
-        ```
+```bash
+# Windows
+venv\Scripts\activate
 
-3. **Configurar la base de datos:**
-    - Crear una base de datos en Mysql, para este caso se crea con el nombre "gimnasioreact"
+# Linux/Mac
+source venv/bin/activate
+```
 
-    - Configurar el archivo settings.py para que se conecte a la base de datos en este caso Mysql
+#### Instalar dependencias
 
-    - Ejecutar las migraciones para crear las tablas en la base de datos
-        ```bash
-            python manage.py makemigrations
-            python manage.py migrate
-        ```
+```bash
+pip install -r requirements.txt
+```
 
-4. **Ejecutamos el servidor:**
-        ```bash
-            python manage.py runserver
-        ```
+#### Configurar variables de entorno
 
-## Estructura del proyecto
+```bash
+# Copiar .env.example a .env y configurar
+cp .env.example .env
+```
 
-- **models.py**: Contiene la definición de las entidades del modelo de datos.
+#### Ejecutar migraciones
 
-- **serializers.py**: Contiene la definición de los serializadores para serializar y deserializar los datos.
+```bash
+python manage.py makemigrations
+python manage.py migrate
+```
 
-- **views.py**: Contiene la definición de las vistas para manejar las solicitudes HTTP.
+#### Crear superusuario (opcional)
 
-- **urls.py**: Contiene la definición de las rutas para manejar las solicitudes.
+```bash
+python manage.py createsuperuser
+```
 
-- **settings.py**: Contiene la configuración del proyecto, incluyendo la base de datos.
+#### Iniciar servidor
 
-- **requirements.txt**: Contiene la lista de dependencias del proyecto.
+```bash
+python manage.py runserver
+# Servidor disponible en http://localhost:8000
+```
 
+### 3. Frontend (React + Vite)
 
-### Frontend (React + TypeScript + Tailwind)
+#### Instalar dependencias
 
-1. **Instalar dependencias**:
+```bash
+cd gimnasioReact
+npm install
+```
 
-    - Navegar al directorio del proyecto frontend
-        ```bash
-            cd frontend //En este caso el nombre sería gimnasioReact
-        ```
+#### Configurar variables de entorno
 
-    - Instalar dependencias:
-        ```bash
-            npm install
-        ```
+```bash
+# Verificar .env tiene las URLs correctas
+VITE_API_URL_DEV=http://localhost:8000/gym/api/v1
+```
 
-2. **Ejecutar el proyecto**:
+#### Iniciar desarrollo
 
-    - Ejecutar el proyecto con el comando
-        ```bash
-            npm run dev
-        ```
+```bash
+npm run dev
+# App disponible en http://localhost:5173
+```
 
-### Estructura del proyecto
+#### Build para producción
 
-- `src/components/ui/`: Carpeta en donde estan los Componentes reutilizables (botones,inputs,label), para los formularios.
+```bash
+npm run build
+```
 
-- `src/components/Header/`: Componente para el header, que se mostrará al momento que el usuario este en la página principal.
+---
 
-- `src/components/Sidebar/`: Componente para el menu, que se mostrará en la parte izquierda de la página principal.
+## 📁 Estructura del Proyecto
 
-- `src/components/Table/`: Componente para mostrar la tabla principal en los diferentes modulos donde se requiera.
+```
+GimnasioReactDjango/
+├── gimnasio/                    # Proyecto Django
+│   ├── settings.py             # Configuración principal
+│   ├── urls.py                  # Rutas principales
+│   └── ...
+├── gimnasioApp/                 # App principal Django
+│   ├── models.py                # Modelos de datos
+│   ├── views.py                 # Vistas/API
+│   ├── serializers.py           # Serializadores DRF
+│   ├── urls.py                  # Rutas API
+│   └── ...
+├── gimnasioReact/               # Frontend React
+│   ├── src/
+│   │   ├── api/
+│   │   │   ├── axios/         # axios instances
+│   │   │   │   ├── axios.private.ts   # Con token
+│   │   │   │   └── axios.public.ts    # Sin token
+│   │   │   └── users/         # API calls
+│   │   ├── components/        # Componentes React
+│   │   ├── context/           # AuthContext
+│   │   ├── layouts/          # Layouts
+│   │   ├── model/
+│   │   │   └── dto/          # TypeScript DTOs
+│   │   ├── pages/            # Vistas/Páginas
+│   │   ├── routes/          # Ruteo
+│   │   ├── utils/           # Utilidades
+│   │   │   └── authStorage.ts        # JWT storage
+│   │   ├── App.tsx
+│   │   └── main.tsx
+│   ├── .env                  # Variables de entorno
+│   └── package.json
+├── .env.example
+├── requirements.txt
+└── README.md
+```
 
-- `src/layouts/Admin/`: Componente en el cual se renderiza el header, el sidebar y el contenido principal.
+### Estructura Frontend Detallada
 
-- `src/pages/admin/`: Carpeta en donde se encuentran todos los componentes que se estan usando para los modulos (miembros, usuarios, etc...).
+| Carpeta | Contenido |
+|---------|-----------|
+| `src/api/axios/` | Instancias axios (public/private) |
+| `src/api/users/` | Funciones API para usuarios |
+| `src/model/dto/` | TypeScript interfaces |
+| `src/context/` | AuthContext y Provider |
+| `src/pages/auth/` | Login, Register, ForgetPassword |
+| `src/pages/admin/` | Dashboard, membros, membresías |
+| `src/routes/` | Ruteo y rutas protegidas |
+| `src/utils/` | authStorage, helpers |
 
-- `src/pages/auth/`: Carpeta en donde se encuentran todos los componentes que se estan usando para los modulos de autenticación (login, register, etc...).
+---
 
-- `src/api/`: Carpeta en donde se encuentran los archivos que se estan usando para hacer las peticiones a la API.
+## 🔧 Variables de Entorno
 
+### Backend (.env)
+
+```env
+SECRET_KEY=your-secret-key
+DEBUG=True
+DATABASE_URL=postgres://user:password@localhost:5432/gimnasio
+ALLOWED_HOSTS=localhost,127.0.0.1
+```
+
+### Frontend (.env)
+
+```env
+VITE_API_URL_DEV=http://localhost:8000/gym/api/v1
+VITE_API_URL_PROD=https://tu-dominio.render.com/gym/api/v1
+```
+
+---
+
+## 🧪 API Endpoints
+
+### Autenticación
+
+| Método | Endpoint | Público | Descripción |
+|--------|----------|---------|-------------|
+| POST | `/gym/api/v1/token/` | ✅ | Login |
+| POST | `/gym/api/v1/token/refresh/` | ✅ | Refresh token |
+| POST | `/gym/api/v1/token/blacklist/` | ❌ | Logout |
+| POST | `/gym/api/v1/register/` | ✅ | Registro nuevo |
+
+### Usuarios
+
+| Método | Endpoint | Público | Descripción |
+|--------|----------|---------|-------------|
+| GET | `/gym/api/v1/me/` | ❌ | Perfil actual |
+| GET | `/gym/api/v1/User/` | ❌ | Listar usuarios |
+| POST | `/gym/api/v1/User/` | ❌ | Crear usuario |
+| GET | `/gym/api/v1/User/{id}/` | ❌ | Ver usuario |
+| PUT | `/gym/api/v1/User/{id}/` | ❌ | Actualizar usuario |
+| DELETE | `/gym/api/v1/User/{id}/` | ❌ | Eliminar usuario |
+
+### Miembros
+
+| Método | Endpoint | Público | Descripción |
+|--------|----------|---------|-------------|
+| GET | `/gym/api/v1/UserGym/` | ❌ | Lista miembros |
+| POST | `/gym/api/v1/UserGym/` | ❌ | Registrar miembro |
+| GET | `/gym/api/v1/UserGymDay/` | ❌ | Miembros por día |
+
+### Membresías
+
+| Método | Endpoint | Público | Descripción |
+|--------|----------|---------|-------------|
+| GET | `/gym/api/v1/MemberShips/` | ❌ | Lista membresías |
+| POST | `/gym/api/v1/MemberShips/` | ❌ | Crear membresía |
+| GET | `/gym/api/v1/MemberShipsAsignada/` | ❌ | Membresías asignadas |
+| POST | `/gym/api/v1/MemberShipsAsignada/` | ❌ | Asignar membresía |
+
+---
+
+## 📄 Licencia
+
+MIT License —自由 para usar y modificar.
+
+---
+
+## 👤 Autor
+
+Oscar Manuel Vélez — [GitHub](https://github.com/OscarVelez)
