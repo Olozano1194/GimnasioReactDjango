@@ -1,12 +1,12 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { AuthContext } from './AuthContext';
 import { login as loginApi } from '../api/users/authUser.api';
-import { getToken, setToken, removeToken } from '../utils/tokenStorage';
+import { getAccessToken, setAccessToken, clearAccessToken, getRefreshTokenFromCookie, clearRefreshCookie } from '../utils/authStorage';
+import { axiosPrivate } from '../api/axios/axios.private';
 import type { LoginUserDto } from '../model/dto/user.dto';
 import type { UserRole } from '../components/sideBar/components/SideBarMenus';
 import { AuthUser } from '../model/dto/user.dto';
 import { getUserProfile } from '../api/users/users.api';
-
 
 interface AuthProviderProps {
   children: React.ReactNode;
@@ -20,11 +20,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   useEffect(() => {
     const initAuth = async () => {
-      const token = getToken();
-      if (!token) {
+      const token = getAccessToken();
+      const refreshToken = getRefreshTokenFromCookie();
+      
+      if (!token && !refreshToken) {
         setLoading(false);
         return;        
       }
+      
+      if (!token && refreshToken) {
+        setIsAuthenticated(true);
+        await loadUser(); 
+        return;
+      }
+      
       setIsAuthenticated(true);
       await loadUser(); 
     };
@@ -36,7 +45,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setError(null);
 
     try {
-      const data  = await getUserProfile();
+      const data = await getUserProfile();
 
       const avatarUrl = data.user.avatar instanceof File ? URL.createObjectURL(data.user.avatar) : data.user.avatar ?? '';
 
@@ -47,7 +56,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           ? data.user.roles 
           : [data.user.roles];
         
-        // Filtrar solo roles válidos
         rolesArray = rawRoles.filter((role): role is UserRole => 
           role === 'admin' || role === 'recepcion'
         );
@@ -64,23 +72,36 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       });      
       
     } catch {
-      setError('Datos de usuarios no encontrados')
+      setError('Datos de usuarios no encontrados');
     } finally {
       setLoading(false);
     }
   };
+
+  const performLogout = useCallback(async () => {
+    const refreshToken = getRefreshTokenFromCookie();
+    
+    if (refreshToken) {
+      try {
+        await axiosPrivate.post('/token/blacklist/', { refresh: refreshToken });
+      } catch {
+        // Ignorar errores de blacklist, continuar con logout local
+      }
+    }
+    
+    clearAccessToken();
+    clearRefreshCookie();
+    setUser(null);
+    setIsAuthenticated(false);
+  }, []);
 
   const login = async (credentials: LoginUserDto) => {
     setLoading(true);
     setError(null);
 
     try {
-      const token  = await loginApi(credentials);
-      // console.log('loginApi response raw:', token);
-
-      // if (!token) throw new Error("Token no encontrado");
-      
-      setToken(token);
+      const accessToken = await loginApi(credentials);
+      setAccessToken(accessToken);
       setIsAuthenticated(true);
       await loadUser();      
     } catch {
@@ -91,8 +112,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   const logout = () => {
-    removeToken();
-    setIsAuthenticated(false);
+    performLogout();
   };
 
   return (
@@ -103,4 +123,3 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     </AuthContext.Provider>
   );
 };
-
