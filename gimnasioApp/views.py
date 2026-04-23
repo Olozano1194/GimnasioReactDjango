@@ -18,6 +18,7 @@ from datetime import datetime, date, timedelta
 from rest_framework.decorators import api_view, permission_classes
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+from django.conf import settings
 
 # Importar permisos personalizados
 from .permissions import IsAdminUser, IsRecepcionUser
@@ -152,7 +153,7 @@ class RegisterViewSet(APIView):
             value=str(refresh),
             max_age=604800,  # 7 days
             httponly=True,
-            secure=not DEBUG,
+            secure=not settings.DEBUG,
             samesite='Lax',
             path='/gym/api/v1/token/refresh/',
         )
@@ -334,14 +335,14 @@ class ActivitiesView(APIView):
         if gimnasio:
             membresias_recientes = MembresiaAsignada.objects.filter(
                 miembro__gimnasio=gimnasio
-            ).select_related('miembro', 'membresia').order_by('-dateInitial')[:5]
+            ).select_related('miembro', 'membresia').order_by('-created_at')[:5]
 
             ingresos = UsuarioGymDay.objects.filter(
                 gimnasio=gimnasio
-            ).order_by('-dateInitial')[:5]
+            ).order_by('-created_at')[:5]
             
             for membresia in membresias_recientes:
-                dt = self.ensure_datetime(membresia.dateInitial)
+                # dt = self.ensure_datetime(membresia.dateInitial)
 
                 activities.append({
                     'id': f'm-{membresia.id}',
@@ -350,9 +351,9 @@ class ActivitiesView(APIView):
                     'color': 'primary',
                     'title': 'Nuevo miembro registrado',
                     'description': f'{membresia.miembro.name} {membresia.miembro.lastname} - {membresia.membresia.name}',                    
-                    'created_at': dt.isoformat(),
+                    'created_at': membresia.created_at.isoformat(),
                     # 'date': membresia.dateInitial.strftime('%d/%m/%Y'),
-                    'time_ago': self.get_time_ago(dt),
+                    'time_ago': self.get_time_ago(membresia.created_at),
                 })
             
             # ingresos_recientes = UsuarioGymDay.objects.filter(
