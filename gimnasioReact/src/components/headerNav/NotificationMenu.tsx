@@ -3,6 +3,7 @@ import React from "react";
 //icons
 import { RiCloseLine, RiInformationLine, RiCheckLine, RiInboxLine } from 'react-icons/ri';
 import { IoMdNotifications } from "react-icons/io";
+import { FaWhatsapp } from "react-icons/fa6";
 //Enlaces
 import { Link } from "react-router-dom";
 //react-menu
@@ -60,7 +61,7 @@ const NotificationMenu = () => {
                     </span>
                 )}
             </MenuButton>
-            <MenuItems anchor='bottom end' className='bg-surface-container-lowest mt-1 p-4 rounded-lg max-h-[70vh] overflow-y-auto w-80'>
+            <MenuItems anchor='bottom end' className='bg-surface-container-lowest mt-1 p-4 rounded-lg max-h-[70vh] overflow-y-auto w-96'>
                 <div className="flex justify-between items-center mb-2">
                     <h1 className="text-title font-medium">Notificaciones</h1>
                     {count > 0 && (
@@ -82,19 +83,34 @@ const NotificationMenu = () => {
                     notifications.map((notification, index) => (
                         <React.Fragment key={index}>
                             <MenuItem as='div' className='p-0 hover:bg-slate-100'>
-                                <Link
-                                    to={notification.link}
-                                    className="flex flex-1 items-start gap-x-3 py-2 px-4 hover:bg-slate-100 transition-colors rounded-lg text-dark"
-                                >
-                                    {getNotificationIcon(notification.type)}
-                                    <div className="text-sm flex-1">
-                                        <div className="flex items-start justify-between gap-2">
-                                            <span className="font-medium">{notification.title}</span>
-                                            <span className="text-xs text-nav">{notification.date}</span>
+                                <div className="flex flex-col">
+                                    <Link
+                                        to={notification.link}
+                                        className="flex flex-1 items-start gap-x-3 py-2 px-4 hover:bg-slate-100 transition-colors rounded-lg text-dark"
+                                    >
+                                        {getNotificationIcon(notification.type)}
+                                        <div className="text-sm flex-1">
+                                            <div className="flex items-start justify-between gap-2">
+                                                <span className="font-medium">{notification.title}</span>
+                                                <span className="text-xs text-nav">{notification.date}</span>
+                                            </div>
+                                            <p className="text-dark mt-1">{notification.message}</p>
                                         </div>
-                                        <p className="text-dark mt-1">{notification.message}</p>
-                                    </div>
-                                </Link>
+                                    </Link>
+                                    
+                                    {/* Botón de WhatsApp */}
+                                    {notification.whatsapp_link && (
+                                        <a
+                                            href={notification.whatsapp_link}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex items-center gap-2 mx-4 mb-2 py-2 px-4 bg-green-500 hover:bg-green-600 text-white rounded-lg text-sm font-medium transition-colors"
+                                        >
+                                            <FaWhatsapp className="text-lg" />
+                                            Enviar mensaje por WhatsApp
+                                        </a>
+                                    )}
+                                </div>
                             </MenuItem>
                             {index < notifications.length - 1 && <hr className="my-3 border-nav" />}
                         </React.Fragment>

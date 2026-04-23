@@ -214,3 +214,7 @@ CORS_ALLOWED_ORIGINS = [
     "https://gimnasio-react-django.vercel.app",
 ]
 CORS_EXPOSE_HEADERS = ['Content-Type', 'Authorization']
+
+# WhatsApp Configuration
+# Número de WhatsApp del gimnasio para notificaciones (formato: 57XXXXXXXXX)
+WHATSAPP_NUMBER = os.environ.get('WHATSAPP_NUMBER', '573001234567')

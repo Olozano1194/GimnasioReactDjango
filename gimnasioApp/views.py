@@ -571,7 +571,10 @@ class ExportReportView(APIView):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def membership_notifications(request):
+    from django.conf import settings
+    
     gimnasio = get_user_gimnasio(request)
+    numero_gimnasio = getattr(settings, 'WHATSAPP_NUMBER', '573001234567')  # Default si no está configurado
     
     today = datetime.now().date()
     three_day_later = today + timedelta(days=3)
@@ -596,21 +599,57 @@ def membership_notifications(request):
 
     for membership in expiring_memberships:
         days_left = (membership.dateFinal - today).days
+        member_name = f"{membership.miembro.name} {membership.miembro.lastname}"
+        membership_name = membership.membresia.name
+        exp_date = membership.dateFinal.strftime('%d/%m/%Y')
+        
+        # Generar mensaje para WhatsApp
+        wa_message = f"Hola%20{member_name},%20tu%20membresía%20({membership_name})%20expira%20el%20{exp_date}%20en%20{days_left}%20días.%20¿Deseas%20renovar%20ahora%20y%20seguir%20entrenando%20con%20nosotros%3F"
+        
+        # Limpiar teléfono (solo números)
+        phone = membership.miembro.phone or ''
+        phone_clean = ''.join(filter(str.isdigit, phone))
+        
+        # Agregar código de país si no lo tiene
+        if phone_clean and not phone_clean.startswith('57'):
+            phone_clean = '57' + phone_clean
+        
+        wa_link = f"https://wa.me/{phone_clean}?text={wa_message}" if phone_clean else None
+        
         notifications.append({
             'type': 'warning',
             'title': 'Membresía próxima a expirar',
-            'message': f'La membresía de {membership.miembro.name} {membership.miembro.lastname} - {membership.membresia.name} expirará en {days_left} días.',
-            'date': membership.dateFinal.strftime('%d/%m/%Y'),
-            'link': f'/dashboard/membresia/{membership.id}/'
+            'message': f'La membresía de {member_name} - {membership_name} expirará en {days_left} días.',
+            'date': exp_date,
+            'link': f'/dashboard/asignar-membresia/{membership.id}/',
+            'whatsapp_link': wa_link
         })
     
     for membership in expired_memberships:
+        member_name = f"{membership.miembro.name} {membership.miembro.lastname}"
+        membership_name = membership.membresia.name
+        exp_date = membership.dateFinal.strftime('%d/%m/%Y')
+        
+        # Generar mensaje para WhatsApp
+        wa_message = f"Hola%20{member_name},%20tu%20membresía%20({membership_name})%20venció%20el%20{exp_date}.%20¡Te%20esperamos%20de%20vuelta%20para%20que%20renueves%20y%20continúes%20entrenando%21"
+        
+        # Limpiar teléfono (solo números)
+        phone = membership.miembro.phone or ''
+        phone_clean = ''.join(filter(str.isdigit, phone))
+        
+        # Agregar código de país si no lo tiene
+        if phone_clean and not phone_clean.startswith('57'):
+            phone_clean = '57' + phone_clean
+        
+        wa_link = f"https://wa.me/{phone_clean}?text={wa_message}" if phone_clean else None
+        
         notifications.append({
             'type': 'danger',
             'title': 'Membresía vencida',
-            'message': f'La membresía de {membership.miembro.name} {membership.miembro.lastname} - {membership.membresia.name} ya venció.',
-            'date': membership.dateFinal.strftime('%d/%m/%Y'),
-            'link': f'/dashboard/membresia/{membership.id}/'
+            'message': f'La membresía de {member_name} - {membership_name} ya venció.',
+            'date': exp_date,
+            'link': f'/dashboard/asignar-membresia/{membership.id}/',
+            'whatsapp_link': wa_link
         })
     
     return Response(notifications)

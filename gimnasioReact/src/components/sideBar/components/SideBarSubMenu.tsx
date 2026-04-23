@@ -44,7 +44,7 @@ export const SidebarSubMenu = ({
             className="py-2 px-4 border-l border-nav/30 block ml-6 text-nav font-semibold relative
             before:w-3 before:h-3 before:absolute before:bg-primary before:rounded-full
             before:-left-[6.5px] before:top-1/2 before:-translate-y-1/2
-            before:border-4 before:border-nav hover:text-white transition-colors"
+            before:border-4 before:border-nav hover:text-nav/70 transition-colors"
           >
             {item.label}
           </Link>
