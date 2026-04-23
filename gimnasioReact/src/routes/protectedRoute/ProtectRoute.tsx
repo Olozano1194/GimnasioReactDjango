@@ -1,11 +1,21 @@
 import { Navigate, Outlet } from "react-router-dom";
-//import { useAuth } from "../../../context/authContext"; //Importamos el contexto de autenticación
+import { useAuth } from "../../context/useAuth";
 
 const ProtectRoute = () => {
-    //const { token } = useAuth(); //Obtenemos el token del contexto de autenticación
-    const isAuthebticated = !!localStorage.getItem('token'); //Verificamos si el token existe
+    const { isAuthenticated, loading } = useAuth();
 
-    return isAuthebticated ? <Outlet /> : <Navigate to="/" replace />;
+    // Mientras carga, mostrar nada o un loader
+    if (loading) {
+        return null;
+    }
+
+    // Si no está autenticado, redirigir al login
+    if (!isAuthenticated) {
+        return <Navigate to="/" replace />;
+    }
+
+    // Si está autenticado, mostrar el contenido protegido
+    return <Outlet />;
 }
 
 export default ProtectRoute;
