@@ -8,13 +8,13 @@
 
 | Módulo | Vista |
 |--------|-------|
-| **Login** | ![Login](./media/imgReadme/login.png) |
-| **Dashboard** | ![Home](./media/imgReadme/dashboard.png) |
-| **Registro de Miembros** | ![Registro](./media/imgReadme/resgisterMember.png) |
-| **Lista de Miembros** | ![Lista](./media/imgReadme/listMember.png) |
-| **Asignar Membresías** | ![Asignar](./media/imgReadme/asignarmembresia.png) |
-| **Lista de Asignar Membresías** | ![ListaMembresias](./media/imgReadme/listAsignarMembresia.png) |
-| **Perfil de Usuario** | ![Perfil](./media/imgReadme/perfil.png) |
+| **Login** | ![Login](./imgReadme/login.png) |
+| **Dashboard** | ![Home](./imgReadme/dashboard.png) |
+| **Registro de Miembros** | ![Registro](./imgReadme/resgisterMember.png) |
+| **Lista de Miembros** | ![Lista](./imgReadme/listMember.png) |
+| **Asignar Membresías** | ![Asignar](./imgReadme/asignarmembresia.png) |
+| **Lista de Asignar Membresías** | ![ListaMembresias](./imgReadme/listAsignarMembresia.png) |
+| **Perfil de Usuario** | ![Perfil](./imgReadme/perfil.png) |
 
 ---
 
