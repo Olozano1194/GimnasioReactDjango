@@ -104,8 +104,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setAccessToken(accessToken);
       setIsAuthenticated(true);
       await loadUser();      
-    } catch {
-      setError('Usuario o contraseña incorrectos');            
+    } catch (error) {
+      setError('Usuario o contraseña incorrectos');
+      throw error;            
     } finally {
       setLoading(false);
     }
