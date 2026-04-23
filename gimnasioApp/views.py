@@ -3,7 +3,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import authenticate
-from rest_framework.authtoken.models import Token
 from django.contrib.auth import get_user_model
 from .serializers import UsuarioSerializer, UsuarioGymSerializer, UsuarioGymDaySerializer, MembresiasSerializer, MembresiaAsignadaSerializer
 from .models import Usuario, UsuarioGym, UsuarioGymDay, Membresia, MembresiaAsignada, Gimnasio
@@ -65,11 +64,9 @@ class UserViewSet(viewsets.ModelViewSet):
                 "details": serializer.errors
             }, status=status.HTTP_400_BAD_REQUEST)
         user_data = serializer.save()
-        token, created = Token.objects.get_or_create(user=user_data)
 
         return Response({
             "user": UsuarioSerializer(user_data, context={'request': request}).data,
-            "token": token.key
         }, status=status.HTTP_201_CREATED)
     
     def update(self, request, *args, **kwargs):
@@ -102,29 +99,14 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response({"error": "Error inesperado"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-# Login NO requiere autenticación (AllowAny)
-class CustomAuthTokenViewSet(APIView):
-    permission_classes = [AllowAny]  # Login es público
-    
-    def post(self, request, *args, **kwargs):
-        email = request.data.get('email')
-        password = request.data.get('password')
-
-        if not email or not password:
-            return Response({'error': 'Correo y contraseña son requeridos'}, status=status.HTTP_400_BAD_REQUEST)
-        
-        user = authenticate(request, email=email, password=password)
-        if user:
-            token, created = Token.objects.get_or_create(user=user)
-            return Response({'token': token.key}, status=status.HTTP_200_OK)
-        return Response({'error': 'Credenciales invalidas'}, status=status.HTTP_400_BAD_REQUEST)
-
-
 # Registro público para crear usuario inicial
+# El login se maneja con SimpleJWT en /token/ (TokenObtainPairView)
 class RegisterViewSet(APIView):
     permission_classes = [AllowAny]
     
     def post(self, request, *args, **kwargs):
+        from rest_framework_simplejwt.tokens import RefreshToken
+        
         email = request.data.get('email')
         password = request.data.get('password')
         name = request.data.get('name')
@@ -155,14 +137,27 @@ class RegisterViewSet(APIView):
         user.set_password(password)
         user.save()
         
-        # Generar token
-        token, created = Token.objects.get_or_create(user=user)
+        # Generar tokens JWT
+        refresh = RefreshToken.for_user(user)
         
-        return Response({
+        response = Response({
             'message': 'Usuario creado exitosamente',
             'user': UsuarioSerializer(user, context={'request': request}).data,
-            'token': token.key
+            'access': str(refresh.access_token),
         }, status=status.HTTP_201_CREATED)
+        
+        # Establecer refresh token como cookie HttpOnly
+        response.set_cookie(
+            key='refresh_token',
+            value=str(refresh),
+            max_age=604800,  # 7 days
+            httponly=True,
+            secure=not DEBUG,
+            samesite='Lax',
+            path='/gym/api/v1/token/refresh/',
+        )
+        
+        return response
 
 
 class userProfileView(APIView):

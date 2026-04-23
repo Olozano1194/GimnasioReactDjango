@@ -1,6 +1,11 @@
 from django.urls import path, include
 from rest_framework import routers
-from .views import UserViewSet, CustomAuthTokenViewSet, userProfileView, UsuarioGymViewSet, UsuarioGymDayViewSet, Home, MembresiaViewSet, MembresiaAsignadaViewSet, membership_notifications, ActivitiesView, ExportReportView, RegisterViewSet
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+    TokenBlacklistView,
+)
+from .views import UserViewSet, userProfileView, UsuarioGymViewSet, UsuarioGymDayViewSet, Home, MembresiaViewSet, MembresiaAsignadaViewSet, membership_notifications, ActivitiesView, ExportReportView, RegisterViewSet
 
 #api versioning
 router = routers.DefaultRouter()
@@ -13,7 +18,6 @@ router.register(r'MemberShipsAsignada', MembresiaAsignadaViewSet, basename='Memb
 urlpatterns = [
     path('gym/api/v1/', include(router.urls)),      
     
-    path('gym/api/v1/login/', CustomAuthTokenViewSet.as_view(), name='login'),
     path('gym/api/v1/register/', RegisterViewSet.as_view(), name='register'),
     path('gym/api/v1/me/', userProfileView.as_view(), name='user-profile'),
     path('gym/api/v1/list/', userProfileView.as_view(), name='user-list'),
@@ -21,4 +25,9 @@ urlpatterns = [
     path('gym/api/v1/membership-notifications/', membership_notifications, name='membership-notifications'),
     path('gym/api/v1/activities/', ActivitiesView.as_view(), name='activities'),
     path('gym/api/v1/export-report/', ExportReportView.as_view(), name='export-report'),
+    
+    # SimpleJWT endpoints
+    path('gym/api/v1/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('gym/api/v1/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('gym/api/v1/token/blacklist/', TokenBlacklistView.as_view(), name='token_blacklist'),
 ]

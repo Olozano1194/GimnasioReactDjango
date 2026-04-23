@@ -51,6 +51,8 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'django_filters', 
     'corsheaders',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     'gimnasioApp',
 ]
 
@@ -168,7 +170,7 @@ AUTH_USER_MODEL = 'gimnasioApp.Usuario'
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',  # CAMBIADO: Seguridad primero
@@ -176,3 +178,39 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
       
 }
+
+# ============================================================
+# SIMPLE JWT CONFIGURATION
+# ============================================================
+from datetime import timedelta
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_LOGIN': True,
+    
+    'ALGORITHM': 'HS256',
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'AUTH_HEADER_NAME': 'HTTP_AUTHORIZATION',
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+    
+    # Cookie settings para refresh token
+    'AUTH_COOKIE': 'refresh_token',           # Nombre de la cookie
+    'AUTH_COOKIE_DOMAIN': None,                # Usar el mismo dominio por defecto
+    'AUTH_COOKIE_SECURE': not DEBUG,           # True en producción (HTTPS)
+    'AUTH_COOKIE_HTTP_ONLY': True,             # No accesible por JS
+    'AUTH_COOKIE_PATH': '/gym/api/v1/token/refresh/',
+    'AUTH_COOKIE_SAMESITE': 'Lax',            # Balance entre seguridad y usabilidad
+}
+
+# CORS Configuration actualizada para cookies
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+    "https://gimnasio-react-django.vercel.app",
+]
+CORS_EXPOSE_HEADERS = ['Content-Type', 'Authorization']
