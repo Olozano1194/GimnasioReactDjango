@@ -36,7 +36,7 @@
 |-------------|-----------|
 | Django 5 | Framework Python |
 | Django Rest Framework | API REST |
-| PostgreSQL / SQLite | Base de datos |
+| PostgreSQL / MySql | Base de datos |
 | SimpleJWT | Autenticación JWT |
 | CORS Headers | Cross-origin config |
 
@@ -346,4 +346,4 @@ MIT License —自由 para usar y modificar.
 
 ## 👤 Autor
 
-Oscar Manuel Vélez — [GitHub](https://github.com/OscarVelez)
+Oscar Eduardo Lozano Bocanegra — [GitHub](https://github.com/Olozano1194)
