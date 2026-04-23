@@ -15,7 +15,15 @@ export interface LoginUserDto {
 };
 
 export type LoginResponse = {
-    token: string;
+    access: string;
+}
+
+export type RefreshResponse = {
+    access: string;
+}
+
+export type BlacklistRequest = {
+    refresh: string;
 }
 
 export type UserRole = 'admin' | 'recepcion';
