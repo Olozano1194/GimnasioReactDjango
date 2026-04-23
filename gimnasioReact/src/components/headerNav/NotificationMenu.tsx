@@ -55,7 +55,7 @@ const NotificationMenu = () => {
             <MenuButton className="border-r border-nav/30 cursor-pointer text-nav relative hover:text-title p-2 transition-colors">
                 <IoMdNotifications className="text-2xl" />
                 {count > 0 && (
-                    <span className="absolute -top-0.5 right-0 bg-primary py-0.5 px-1.25 box-content text-nav rounded-full text-[8px] font-bold">
+                    <span className="absolute -top-0.5 right-0 bg-primary py-0.5 px-1.25 box-content text-surface-container-high rounded-full text-[8px] font-bold">
                         {count}
                     </span>
                 )}
