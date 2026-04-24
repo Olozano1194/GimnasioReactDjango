@@ -2,7 +2,7 @@ import { useState, useEffect, ElementType } from 'react';
 import { MdOutlineCheckCircle, MdOutlinePersonAddAlt, MdOutlineLogin, MdWarning } from "react-icons/md";
 import { getActivities } from '../../../src/api/action/activities.api';
 // Dto
-import { Activity } from '../../model/dto/activity';
+import { Activity } from '../../model/dto/Activity';
 import { toast } from "react-hot-toast";
 
 const colorStyles: Record<string, { bg: string; text: string; icon: ElementType }> = {
