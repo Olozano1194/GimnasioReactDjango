@@ -1,11 +1,17 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { MdOutlineFileDownload, MdAdd } from "react-icons/md";
 import { axiosPrivate } from "../../../src/api/axios/axios.private";
 import { toast } from "react-hot-toast";
+// models
+// dtos
+import { HomeStats } from "../../model/dto/home.dto";
+// api
+import { getHome } from "../../api/action/userGymDay.api";
 
 const WelcomeSection = () => {
     const [exporting, setExporting] = useState(false);
+    const [stats, setStats] = useState<HomeStats | null>(null);
 
     const handleExportReport = async () => {
         setExporting(true);
@@ -46,6 +52,23 @@ const WelcomeSection = () => {
         }
     };
 
+    useEffect(() => {
+        getHome().then(setStats).catch(console.error);
+    }, []);
+
+    // Helper para formatear el diff
+    const formatDiff = (diff: number) => {
+        if (diff > 0) return `+${diff}`;
+        if (diff < 0) return `${diff}`;
+        return '=';
+    };
+
+    const diffColor = (diff: number) => {
+        if (diff > 0) return 'text-tertiary';   // verde
+        if (diff < 0) return 'text-red-500';
+        return 'text-on-surface/50';
+    };
+
     return (
         <section className="flex flex-col gap-4 justify-between md:items-end md:flex-row">
             <div>
@@ -54,8 +77,13 @@ const WelcomeSection = () => {
                 </h2>
                 <p className="font-medium text-on-surface/70">
                     Tu ecosistema fitness está rindiendo{" "}
-                    <span className="font-bold text-tertiary">+12</span> por encima del
-                    objetivo este mes.
+                    <span className={`font-bold ${diffColor(stats?.diff_miembros ?? 0)}`}>
+                        {formatDiff(stats?.diff_miembros ?? 0)} miembros
+                    </span>{" "}
+                    {(stats?.diff_miembros ?? 0) >= 0
+                        ? "por encima"
+                        : "por debajo"}{" "}
+                    del mes anterior.
                 </p>
             </div>
             <div className="flex gap-3">
