@@ -20,6 +20,7 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 from django.conf import settings
 
+
 # Importar permisos personalizados
 from .permissions import IsAdminUser, IsRecepcionUser
 
@@ -228,6 +229,89 @@ class UsuarioGymDayViewSet(viewsets.ModelViewSet):
 
 
 # ============================================================
+# ESTADÍSTICAS DEL DASHBOARD (Miembros Activos, Nuevos, Retention)
+# ============================================================
+
+class DashboardStatsView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        from django.db.models import Count, Q
+        from datetime import date, timedelta
+        
+        gimnasio = get_user_gimnasio(request)
+        
+        if not gimnasio:
+            return Response({
+                'active_members': 0,
+                'new_today': 0,
+                'retention_rate': 0
+            })
+        
+        today = date.today()
+        
+        # 1. Miembros activos (membresías vigentes)
+        active_memberships = MembresiaAsignada.objects.filter(
+            miembro__gimnasio=gimnasio,
+            dateInitial__lte=today,
+            dateFinal__gte=today
+        )
+        active_count = active_memberships.count()
+        
+        # 2. Nuevos hoy (miembros que se registraronHOY)
+        new_today = active_memberships.filter(
+            dateInitial=today
+        ).count()
+        
+        # 3. Retention Rate
+        # Mes anterior
+        if today.month == 1:
+            prev_month = 12
+            prev_year = today.year - 1
+        else:
+            prev_month = today.month - 1
+            prev_year = today.year
+        
+        # Primer día del mes anterior
+        prev_month_start = date(prev_year, prev_month, 1)
+        
+        # Último día del mes anterior
+        if prev_month == 12:
+            prev_month_end = date(prev_year + 1, 1, 1) - timedelta(days=1)
+        else:
+            prev_month_end = date(prev_year, prev_month + 1, 1) - timedelta(days=1)
+        
+        # Miembros que tenían membresía activa el mes anterior
+        prev_active = MembresiaAsignada.objects.filter(
+            miembro__gimnasio=gimnasio,
+            dateInitial__lte=prev_month_end,
+            dateFinal__gte=prev_month_start
+        ).count()
+        
+        # Miembros que estavam activos el mes anterior Y aún siguen activos
+        from django.db.models import Q
+        still_active = MembresiaAsignada.objects.filter(
+            miembro__gimnasio=gimnasio,
+            dateInitial__lte=prev_month_end,
+            dateFinal__gte=prev_month_start
+        ).filter(
+            dateFinal__gte=today
+        ).count()
+        
+        # Calcular retention
+        if prev_active > 0:
+            retention = round((still_active / prev_active) * 100, 1)
+        else:
+            retention = 100.0  # Si no hay miembros anteriores, 100%
+        
+        return Response({
+            'active_members': active_count,
+            'new_today': new_today,
+            'retention_rate': retention
+        })
+
+
+# ============================================================
 # HOME / DASHBOARD
 # ============================================================
 
@@ -237,7 +321,6 @@ class Home(APIView):
     def get(self, request):
         gimnasio = get_user_gimnasio(request)
         
-        # Base querysets filtradas por gimnasio
         if gimnasio:
             UserGymList = MembresiaAsignada.objects.filter(miembro__gimnasio=gimnasio).order_by('-id')
             UserDayList = UsuarioGymDay.objects.filter(gimnasio=gimnasio).order_by('-id')
@@ -249,9 +332,14 @@ class Home(APIView):
         month = now.month
         year = now.year
 
+        # Mes anterior
+        if month == 1:
+            prev_month, prev_year = 12, year - 1
+        else:
+            prev_month, prev_year = month - 1, year
+
         num_miembros = UserGymList.count()
 
-        #Filtramos los miembros del gimnasio registrados en el mes
         miembros_mes = UserGymList.filter(dateInitial__month=month, dateInitial__year=year)
         total_gym_mes = sum(user.price for user in miembros_mes)
 
@@ -261,17 +349,28 @@ class Home(APIView):
         total_month = total_gym_mes + total_day_mes
         miembros_mes_count = miembros_mes.count()
 
+        # Miembros del mes anterior
+        miembros_mes_anterior = UserGymList.filter(
+            dateInitial__month=prev_month,
+            dateInitial__year=prev_year
+        ).count()
+
+        # Diferencia vs mes anterior
+        diff_miembros = miembros_mes_count - miembros_mes_anterior
+
         total_gym = sum(user.price for user in UserGymList)
         total_day = sum(user.price for user in UserDayList)
-        total = total_gym + total_day                                                    
+        total = total_gym + total_day
 
         return JsonResponse({ 
             'num_miembros': num_miembros, 
             'total_month': float(total_month), 
             'miembros_mes': miembros_mes_count,
-            'total': float(total)
+            'total': float(total),
+            'miembros_mes_anterior': miembros_mes_anterior,   
+            'diff_miembros': diff_miembros,                   
         })
-
+    
 
 # ============================================================
 # MEMBRESIAS
@@ -566,7 +665,7 @@ class ExportReportView(APIView):
 
         wb.save(response)
         return response
-    
+
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
