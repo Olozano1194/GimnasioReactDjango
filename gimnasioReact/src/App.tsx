@@ -21,6 +21,8 @@ import MemberShipsForm from './pages/admin/memberShips/MemberShipsForm';
 //Asignación membresías
 import AsignarMemberShipsForm from './pages/admin/asignadaMemberShips/AsignarMemberShipsForm';
 import ListAsignarMemberShips from './pages/admin/asignadaMemberShips/ListAsignarMemberShips';
+//Notificaciones
+import NotificationsPage from './pages/admin/notifications/NotificationsPage';
 //Ruta protegida
 import ProtectRoute from './routes/protectedRoute/ProtectRoute';
 
@@ -56,6 +58,8 @@ function App() {
           <Route path="asignar-membresia" element={<AsignarMemberShipsForm /> } />
           <Route path="asignar-membresia-list" element={<ListAsignarMemberShips /> } />
           <Route path="asignar-membresia/:id" element={<AsignarMemberShipsForm />} />
+          {/* Notificaciones */}
+          <Route path="notifications" element={<NotificationsPage />} />
         </Route> 
       </Route>       
       <Route path="*" element={<Error404 />} />
