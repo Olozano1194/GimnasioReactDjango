@@ -9,7 +9,7 @@ import { Link } from "react-router-dom";
 //react-menu
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 //Notificaciones
-import { getMemberNotifications } from "../../api/action/notifications.api";
+import { getMemberNotifications, markNotificationsAsRead } from "../../api/action/notifications.api";
 //Models
 import { Notification } from "../../model/notifications.model";
 
@@ -32,9 +32,15 @@ const NotificationMenu = () => {
         return () => clearInterval(intervalId);
     }, []);
 
-    //Marcar todas como leídas
-    const markAllAsRead = () => {
-        setCount(0);
+    //Marcar todas como leídas (llama al backend para persistir)
+    const markAllAsRead = async () => {
+        try {
+            await markNotificationsAsRead();
+            setNotifications([]);
+            setCount(0);
+        } catch (error) {
+            console.error('Error al marcar como leídas:', error);
+        }
     };
 
     //Obtener icono según el tipo de notificación
@@ -119,7 +125,7 @@ const NotificationMenu = () => {
                 <hr className="my-3 border-nav/30" />
                 <MenuItem as='div' className='p-0 hover:bg-slate-100 flex justify-center cursor-default rounded-xl'>
                     <Link
-                        to="/notifications"
+                        to="/dashboard/notifications"
                         className="text-title text-sm hover:text-nav/80 transition-colors font-medium"
                     >
                         Ver todas las notificaciones

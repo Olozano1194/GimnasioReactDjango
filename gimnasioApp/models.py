@@ -176,6 +176,7 @@ class MembresiaAsignada(models.Model):
     dateFinal = models.DateField(editable=False, null=True, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, editable=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    notified_at = models.DateTimeField(null=True, blank=True, help_text="Fecha en que se marcó como notificada/leída")
 
     class Meta:
         verbose_name = 'MembresiaAsignada'

@@ -5,4 +5,5 @@ export interface Notification {
     date: string;
     link: string;
     whatsapp_link?: string | null;
+    membership_id?: number;
 }
