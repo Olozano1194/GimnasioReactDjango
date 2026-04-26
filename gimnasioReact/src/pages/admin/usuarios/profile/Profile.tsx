@@ -1,6 +1,8 @@
 //hooks
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
+//Context
+import { AuthContext } from "../../../../context/AuthContext";
 //Api
 import { getUserProfile, updateUser } from "../../../../api/users/users.api";
 //icons
@@ -24,6 +26,7 @@ interface FormData {
 };
 
 const Profile = () => {
+    const { updateUserData } = useContext(AuthContext);
     const params = useParams<{ id?: string }>();
     const isEditing = !!params.id;
     const [, setUser] = useState<User>();
@@ -121,6 +124,17 @@ const Profile = () => {
                     // roles: updatedProfile.roles,
                     avatar: updatedProfile.avatar,
                 }));
+
+                // Actualizar el contexto de autenticación (Header se actualiza en tiempo real)
+                const avatarUrl = updatedProfile.avatar instanceof File
+                    ? URL.createObjectURL(updatedProfile.avatar)
+                    : updatedProfile.avatar ?? '';
+
+                updateUserData({
+                    name: updatedProfile.name,
+                    lastname: updatedProfile.lastname,
+                    avatar: avatarUrl,
+                });
             }
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Error al actualizar el Usuario';

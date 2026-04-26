@@ -5,7 +5,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenBlacklistView,
 )
-from .views import UserViewSet, userProfileView, UsuarioGymViewSet, UsuarioGymDayViewSet, Home, MembresiaViewSet, MembresiaAsignadaViewSet, membership_notifications, ActivitiesView, ExportReportView, RegisterViewSet, DashboardStatsView
+from .views import UserViewSet, userProfileView, UsuarioGymViewSet, UsuarioGymDayViewSet, Home, MembresiaViewSet, MembresiaAsignadaViewSet, membership_notifications, mark_notifications_read, ActivitiesView, ExportReportView, RegisterViewSet, DashboardStatsView
 
 #api versioning
 router = routers.DefaultRouter()
@@ -24,6 +24,7 @@ urlpatterns = [
     path('gym/api/v1/home/', Home.as_view(), name='home'),
     path('gym/api/v1/dashboard-stats/', DashboardStatsView.as_view(), name='dashboard-stats'),
     path('gym/api/v1/membership-notifications/', membership_notifications, name='membership-notifications'),
+    path('gym/api/v1/membership-notifications/read/', mark_notifications_read, name='mark-notifications-read'),
     path('gym/api/v1/activities/', ActivitiesView.as_view(), name='activities'),
     path('gym/api/v1/export-report/', ExportReportView.as_view(), name='export-report'),
     

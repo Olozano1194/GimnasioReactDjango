@@ -680,15 +680,19 @@ def membership_notifications(request):
     
     # Base queryset filtrada por gimnasio
     if gimnasio:
+        # Membresías próximas a vencer: solo las que NO han sido marcadas como leídas
         expiring_memberships = MembresiaAsignada.objects.filter(
             miembro__gimnasio=gimnasio,
-            dateFinal__gte=today,
-            dateFinal__lte=three_day_later
+            dateFinal__gt=today,  # Solo mayores a hoy (no 0 ni negativos)
+            dateFinal__lte=three_day_later,
+            notified_at__isnull=True  # No marcadas como leídas
         ).select_related('miembro', 'membresia', 'miembro__gimnasio')
         
+        # Membresías vencidas: solo las NO leídas
         expired_memberships = MembresiaAsignada.objects.filter(
             miembro__gimnasio=gimnasio,
-            dateFinal__lte=today
+            dateFinal__lte=today,
+            notified_at__isnull=True  # No marcadas como leídas
         ).select_related('miembro', 'membresia', 'miembro__gimnasio')
     else:
         expiring_memberships = MembresiaAsignada.objects.none()
@@ -721,7 +725,8 @@ def membership_notifications(request):
             'message': f'La membresía de {member_name} - {membership_name} expirará en {days_left} días.',
             'date': exp_date,
             'link': f'/dashboard/asignar-membresia/{membership.id}/',
-            'whatsapp_link': wa_link
+            'whatsapp_link': wa_link,
+            'membership_id': membership.id
         })
     
     for membership in expired_memberships:
@@ -748,7 +753,37 @@ def membership_notifications(request):
             'message': f'La membresía de {member_name} - {membership_name} ya venció.',
             'date': exp_date,
             'link': f'/dashboard/asignar-membresia/{membership.id}/',
-            'whatsapp_link': wa_link
+            'whatsapp_link': wa_link,
+            'membership_id': membership.id
         })
     
     return Response(notifications)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def mark_notifications_read(request):
+    """Marca todas las notificaciones como leídas para el gimnasio del usuario."""
+    gimnasio = get_user_gimnasio(request)
+    
+    if not gimnasio:
+        return Response({'status': 'no gimnasio'}, status=status.HTTP_400_BAD_REQUEST)
+    
+    now = timezone.now()
+    
+    # Marcar membresías próximas a vencer (próximos 3 días)
+    MembresiaAsignada.objects.filter(
+        miembro__gimnasio=gimnasio,
+        dateFinal__gt=datetime.now().date(),
+        dateFinal__lte=datetime.now().date() + timedelta(days=3),
+        notified_at__isnull=True
+    ).update(notified_at=now)
+    
+    # Marcar membresías vencidas
+    MembresiaAsignada.objects.filter(
+        miembro__gimnasio=gimnasio,
+        dateFinal__lte=datetime.now().date(),
+        notified_at__isnull=True
+    ).update(notified_at=now)
+    
+    return Response({'status': 'ok', 'marked_at': now.isoformat()})
