@@ -116,9 +116,14 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     performLogout();
   };
 
+  // Actualizar datos del usuario en el contexto (para reflejar cambios en el Header)
+  const updateUserData = useCallback((data: Partial<AuthUser>) => {
+    setUser(prev => prev ? { ...prev, ...data } : null);
+  }, []);
+
   return (
     <AuthContext.Provider
-      value={{ user, isAuthenticated, loading, error, login, logout }}
+      value={{ user, isAuthenticated, loading, error, login, logout, updateUserData }}
     >
       {children}
     </AuthContext.Provider>
