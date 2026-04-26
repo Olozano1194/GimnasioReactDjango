@@ -1,8 +1,8 @@
 //hooks
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 //Context
-import { AuthContext } from "../../../../context/AuthContext";
+import { useAuth } from "../../../../context/useAuth";
 //Api
 import { getUserProfile, updateUser } from "../../../../api/users/users.api";
 //icons
@@ -26,7 +26,7 @@ interface FormData {
 };
 
 const Profile = () => {
-    const { updateUserData } = useContext(AuthContext);
+    const { updateUserData } = useAuth();
     const params = useParams<{ id?: string }>();
     const isEditing = !!params.id;
     const [, setUser] = useState<User>();
