@@ -96,7 +96,7 @@ const NotificationsPage = () => {
                                     className="flex gap-4"
                                 >
                                     {/* Icon */}
-                                    <div className="flex-shrink-0 mt-1">
+                                    <div className="shrink-0 mt-1">
                                         {getNotificationIcon(notification.type)}
                                     </div>
 
