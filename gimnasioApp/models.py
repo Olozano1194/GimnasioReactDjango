@@ -53,8 +53,8 @@ class Usuario(AbstractBaseUser):
         Gimnasio,
         on_delete=models.CASCADE,
         related_name='usuarios',
-        null=True,
-        blank=True
+        null=False,
+        blank=False
     )
         
     OPCIONES_ROL = [
@@ -98,8 +98,8 @@ class UsuarioGym(models.Model):
         Gimnasio,
         on_delete=models.CASCADE,
         related_name='miembros',
-        null=True,
-        blank=True
+        null=False,
+        blank=False
     )
 
     def __str__(self):
@@ -125,8 +125,8 @@ class UsuarioGymDay(models.Model):
         Gimnasio,
         on_delete=models.CASCADE,
         related_name='miembros_diarios',
-        null=True,
-        blank=True
+        null=False,
+        blank=False
     )
 
     def __str__(self):
@@ -155,8 +155,8 @@ class Membresia(models.Model):
         Gimnasio,
         on_delete=models.CASCADE,
         related_name='membresias',
-        null=True,
-        blank=True
+        null=False,
+        blank=False
     )
 
 
@@ -170,6 +170,7 @@ class Membresia(models.Model):
         # ordering = ['-created_at']
 
 class MembresiaAsignada(models.Model):
+    gimnasio = models.ForeignKey(Gimnasio, on_delete=models.CASCADE, related_name='membresias_asignadas', null=False, blank=False)
     miembro = models.ForeignKey(UsuarioGym, on_delete=models.CASCADE, related_name='miembro')
     membresia = models.ForeignKey(Membresia, on_delete=models.CASCADE)
     dateInitial = models.DateField()
@@ -185,6 +186,8 @@ class MembresiaAsignada(models.Model):
         ordering = ['-dateInitial']
     
     def save(self, *args, **kwargs):
+        if not self.gimnasio_id and self.miembro_id:
+            self.gimnasio = self.miembro.gimnasio
         # Se calcula la fecha final de la membresia + precio al guardarlo
         self.dateFinal = self.dateInitial + timedelta(days=self.membresia.duration)
         self.price = self.membresia.price
