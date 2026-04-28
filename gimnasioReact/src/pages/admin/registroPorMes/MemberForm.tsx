@@ -17,6 +17,15 @@ import { getMemberList } from '../../../api/action/memberShips.api';
 import { Miembro } from "../../../model/member.model";
 import { Membresia } from "../../../model/memberShips.model";
 
+type MemberRequest = {
+  name: string;
+  lastname: string;
+  phone: string;
+  address: string;
+  initial_membership_id?: number;
+  dateInitial?: string;
+};
+
 
 
 const RegisterMiembro = () => {
@@ -27,11 +36,13 @@ const RegisterMiembro = () => {
     const [memberships, setMemberships] = useState<Membresia[]>([]);
     const [selectedMembershipId, setSelectedMembershipId] = useState<number | undefined>();
     const [initialDate, setInitialDate] = useState<string>('');
+
+
     const onSubmit = handleSubmit(async (data: Miembro) => {
         //console.log('Form data:', data);
         try {
             //preparamos datos para el back
-            const requestData: any = {
+            const requestData: MemberRequest = {
                 name: data.name,
                 lastname: data.lastname,
                 phone: data.phone,
