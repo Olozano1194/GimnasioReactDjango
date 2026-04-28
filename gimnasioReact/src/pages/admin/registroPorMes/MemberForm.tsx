@@ -1,5 +1,5 @@
 //Estados
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from 'react-hook-form';
 import { useParams, useNavigate } from "react-router-dom";
 //Icons
@@ -12,8 +12,10 @@ import { toast } from "react-hot-toast";
 import { Input, Label, Button } from '../../../components/ui/index';
 //API
 import { createMember, updateMember, getMember } from '../../../api/action/userGym.api';
+import { getMemberList } from '../../../api/action/memberShips.api';
 //Models
 import { Miembro } from "../../../model/member.model";
+import { Membresia } from "../../../model/memberShips.model";
 
 
 
@@ -22,18 +24,25 @@ const RegisterMiembro = () => {
     const navigate = useNavigate();
     const { register, handleSubmit, formState: { errors }, reset } = useForm<Miembro>();
     const isEditing = !!params.id;
+    const [memberships, setMemberships] = useState<Membresia[]>([]);
+    const [selectedMembershipId, setSelectedMembershipId] = useState<number | undefined>();
+    const [initialDate, setInitialDate] = useState<string>('');
     const onSubmit = handleSubmit(async (data: Miembro) => {
         //console.log('Form data:', data);
         try {
             //preparamos datos para el back
-            const requestData = {
+            const requestData: any = {
                 name: data.name,
                 lastname: data.lastname,
                 phone: data.phone,
                 address: data.address,
-                // dateInitial: data.dateInitial,
-                // dateFinal: data.dateFinal,
-                // price: Number(data.price)
+            }
+
+            if (selectedMembershipId) {
+                requestData.initial_membership_id = selectedMembershipId;
+            }
+            if (initialDate) {
+                requestData.dateInitial = initialDate;
             }
 
             if (params.id) {
@@ -52,8 +61,10 @@ const RegisterMiembro = () => {
                 });
             } else {
                 await createMember(requestData);
-                //console.log('Respuesta del servidor:',rest.data);            
+                //console.log('Respuesta del servidor:',rest.data);
                 reset();
+                setSelectedMembershipId(undefined);
+                setInitialDate('');
                 toast.success('Miembro Creado', {
                     duration: 3000,
                     position: 'bottom-right',
@@ -69,7 +80,7 @@ const RegisterMiembro = () => {
             //Se retrasa la navegación para que se muestre la notificación
             //setTimeout(() => {
             navigate('/dashboard/miembros');
-            //}, 1000);           
+            //}, 1000);
 
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Error al registrar el miembro';
@@ -85,14 +96,23 @@ const RegisterMiembro = () => {
         const fetchUserData = async () => {
             try {
                 if (params.id) {
-                    const response = await getMember(parseInt(params.id)); 
+                    const response = await getMember(parseInt(params.id));
                     reset(response);
                 }
             } catch (error) {
                 console.error('Error al obtener el miembro', error);
             }
         }
+        const fetchMemberships = async () => {
+            try {
+                const data = await getMemberList();
+                setMemberships(data);
+            } catch (error) {
+                console.error('Error al obtener membresías', error);
+            }
+        }
         fetchUserData();
+        fetchMemberships();
     }, [params.id, reset]);
    
 
@@ -230,6 +250,32 @@ const RegisterMiembro = () => {
                                     {
                                         errors.address && <span className='text-red-500 text-sm'>{errors.address.message}</span>
                                     }
+                                </div>
+                            </section>
+                            {/* Membership Selector */}
+                            <section className='gap-y-10 gap-x-8 grid grid-cols-1 md:grid-cols-2'>
+                                <div className="relative pt-5">
+                                    <select
+                                        value={selectedMembershipId || ''}
+                                        onChange={(e) => setSelectedMembershipId(e.target.value ? Number(e.target.value) : undefined)}
+                                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-transparent"
+                                    >
+                                        <option value="">Sin membresía inicial</option>
+                                        {memberships.map(m => (
+                                            <option key={m.id} value={m.id}>
+                                                {m.name} - ${m.price}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <Label>Membresía Inicial</Label>
+                                </div>
+                                <div className="relative pt-5">
+                                    <Input
+                                        type="date"
+                                        value={initialDate}
+                                        onChange={(e) => setInitialDate(e.target.value)}
+                                    />
+                                    <Label>Fecha Inicial</Label>
                                 </div>
                             </section>
                             {/* btn Register */}

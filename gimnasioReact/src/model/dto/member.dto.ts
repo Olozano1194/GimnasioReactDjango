@@ -3,5 +3,7 @@ export interface CreateMemberDto{
     name:        string;
     lastname:    string;
     phone:       string;
-    address:     string;    
+    address:     string;
+    initial_membership_id?: number;
+    dateInitial?: string;
 };

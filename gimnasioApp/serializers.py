@@ -1,6 +1,7 @@
 from rest_framework import serializers
+from django.db import transaction
 from .models import Gimnasio, Usuario, UsuarioGym, UsuarioGymDay, Membresia, MembresiaAsignada
-from datetime import timedelta
+from datetime import timedelta, date
 
 #token
 from rest_framework.authtoken.models import Token
@@ -97,12 +98,37 @@ class UsuarioSerializer(serializers.ModelSerializer):
 
 class UsuarioGymSerializer(serializers.ModelSerializer):
     gimnasio_name = serializers.CharField(source='gimnasio.name', read_only=True, allow_null=True)
-    
+    initial_membership_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
+    dateInitial = serializers.DateField(write_only=True, required=False, allow_null=True)
+
     class Meta:
         model = UsuarioGym
-        fields = ['id', 'name', 'lastname', 'phone', 'address', 'gimnasio', 
-                  'gimnasio_name', 'created_at']
-        read_only_fields = ('id', 'created_at')
+        fields = ['id', 'name', 'lastname', 'phone', 'address', 'gimnasio',
+                  'gimnasio_name', 'created_at', 'initial_membership_id', 'dateInitial']
+        read_only_fields = ('id', 'created_at', 'gimnasio')
+
+    def create(self, validated_data):
+        initial_membership_id = validated_data.pop('initial_membership_id', None)
+        date_initial = validated_data.pop('dateInitial', None)
+
+        with transaction.atomic():
+            miembro = UsuarioGym.objects.create(**validated_data)
+
+            if initial_membership_id:
+                try:
+                    membresia = Membresia.objects.get(
+                        id=initial_membership_id,
+                        gimnasio=miembro.gimnasio
+                    )
+                    MembresiaAsignada.objects.create(
+                        miembro=miembro,
+                        membresia=membresia,
+                        dateInitial=date_initial or date.today()
+                    )
+                except Membresia.DoesNotExist:
+                    raise serializers.ValidationError({"initial_membership_id": "Membresía no encontrada en tu gimnasio"})
+
+            return miembro
 
 
 class UsuarioGymDaySerializer(serializers.ModelSerializer):
