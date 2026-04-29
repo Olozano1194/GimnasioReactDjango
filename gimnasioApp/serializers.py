@@ -46,22 +46,23 @@ class UsuarioSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         """
-        Crea usuario. Si no viene gimnasio, lo crea automáticamente.
+        Crea usuario. Usa request.gimnasio si está disponible, si no (registro), crea gimnasio automáticamente.
         """
         password = validated_data.pop('password')
-        
-        # Si viene gimnasio en los datos, usarlo (ya viene asignado por perform_create del viewset)
-        # Si NO viene, crear uno nuevo automáticamente (para auto-registro de usuarios nuevos)
-        gimnasio = validated_data.get('gimnasio')
-        
+        # Remover gimnasio de validated_data si viene de perform_create
+        validated_data.pop('gimnasio', None)
+
+        request = self.context.get('request')
+        gimnasio = getattr(request, 'gimnasio', None)
+
         if gimnasio is None:
-            # Obtener email para generar nombre del gimnasio
+            # Flujo de registro: crear gimnasio automáticamente
             email = validated_data.get('email', '')
             email_prefix = email.split('@')[0].replace('.', ' ').title() if '@' in email else email
             gimnasio = Gimnasio.objects.create(
                 name=f"Gimnasio {email_prefix}"
             )
-        
+
         user = Usuario(gimnasio=gimnasio, **validated_data)
         user.set_password(password)
         user.save()
@@ -111,6 +112,18 @@ class UsuarioGymSerializer(serializers.ModelSerializer):
         initial_membership_id = validated_data.pop('initial_membership_id', None)
         date_initial = validated_data.pop('dateInitial', None)
 
+        # Remover cualquier gimnasio de los datos validados (usar el del middleware)
+        validated_data.pop('gimnasio', None)
+
+        # Obtener gimnasio del request (seteado por el middleware)
+        request = self.context.get('request')
+        gimnasio = getattr(request, 'gimnasio', None)
+
+        if gimnasio is None:
+            raise serializers.ValidationError("No se pudo determinar el gimnasio del request")
+
+        validated_data['gimnasio'] = gimnasio
+
         with transaction.atomic():
             miembro = UsuarioGym.objects.create(**validated_data)
 
@@ -118,7 +131,7 @@ class UsuarioGymSerializer(serializers.ModelSerializer):
                 try:
                     membresia = Membresia.objects.get(
                         id=initial_membership_id,
-                        gimnasio=miembro.gimnasio
+                        gimnasio=gimnasio
                     )
                     MembresiaAsignada.objects.create(
                         miembro=miembro,
@@ -137,15 +150,29 @@ class UsuarioGymDaySerializer(serializers.ModelSerializer):
     
     class Meta:
         model = UsuarioGymDay
-        fields = ['id', 'name', 'lastname', 'phone', 'dateInitial', 'price', 
+        fields = ['id', 'name', 'lastname', 'phone', 'dateInitial', 'price',
                   'gimnasio', 'gimnasio_name', 'created_at']
-        read_only_fields = ('id', 'created_at')
+        read_only_fields = ('id', 'created_at', 'gimnasio')
 
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         if instance.dateInitial:
             representation['dateInitial'] = instance.dateInitial.strftime("%d-%m-%Y")        
         return representation
+
+    def create(self, validated_data):
+        # Remover cualquier gimnasio de los datos validados
+        validated_data.pop('gimnasio', None)
+        
+        # Obtener gimnasio del request
+        request = self.context.get('request')
+        gimnasio = getattr(request, 'gimnasio', None)
+        
+        if gimnasio is None:
+            raise serializers.ValidationError("No se pudo determinar el gimnasio del request")
+        
+        validated_data['gimnasio'] = gimnasio
+        return super().create(validated_data)
 
 
 # ============================================================
@@ -158,7 +185,21 @@ class MembresiasSerializer(serializers.ModelSerializer):
     class Meta:
         model = Membresia
         fields = ['id', 'name', 'price', 'duration', 'gimnasio', 'gimnasio_name', 'is_active']
-        read_only_fields = ('id',)
+        read_only_fields = ('id', 'gimnasio',)
+
+    def create(self, validated_data):
+        # Remover cualquier gimnasio de los datos validados
+        validated_data.pop('gimnasio', None)
+        
+        # Obtener gimnasio del request
+        request = self.context.get('request')
+        gimnasio = getattr(request, 'gimnasio', None)
+        
+        if gimnasio is None:
+            raise serializers.ValidationError("No se pudo determinar el gimnasio del request")
+        
+        validated_data['gimnasio'] = gimnasio
+        return super().create(validated_data)
 
 
 class MembresiaAsignadaSerializer(serializers.ModelSerializer):
@@ -177,14 +218,25 @@ class MembresiaAsignadaSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'price')
 
     def validate(self, data):           
-        miembro = data.get('miembro') or self.instance.miembro
-        inicio = data.get('dateInitial') or self.instance.dateInitial
-        membresia = data.get('membresia') or self.instance.membresia
+        miembro = data.get('miembro') or (self.instance.miembro if self.instance else None)
+        inicio = data.get('dateInitial') or (self.instance.dateInitial if self.instance else None)
+        membresia = data.get('membresia') or (self.instance.membresia if self.instance else None)
+        
+        if not miembro or not membresia:
+            raise serializers.ValidationError("Miembro y membresía son requeridos")
         
         # Verificar que miembro y membresia sean del mismo gimnasio
         if miembro.gimnasio != membresia.gimnasio:
             raise serializers.ValidationError(
                 "El miembro y la membresía deben pertenecer al mismo gimnasio"
+            )
+        
+        # Verificar que ambos pertenezcan al gimnasio del request
+        request = self.context.get('request')
+        gimnasio = getattr(request, 'gimnasio', None)
+        if gimnasio and miembro.gimnasio != gimnasio:
+            raise serializers.ValidationError(
+                "El miembro no pertenece a tu gimnasio"
             )
         
         # Verificar fechas

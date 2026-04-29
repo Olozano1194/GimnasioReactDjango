@@ -14,12 +14,7 @@ class GimnasioappConfig(AppConfig):
         # Avoid running during management commands
         if len(sys.argv) >= 2 and sys.argv[1] in ['migrate', 'makemigrations', 'collectstatic', 'test']:
             return
-        
-        from django.conf import settings
-        # Run only in production (DEBUG=False)
-        if settings.DEBUG:
-            return  # Or optionally allow in dev too
-        
+
         self._create_demo_admin()
 
     def _create_demo_admin(self):
@@ -37,7 +32,7 @@ class GimnasioappConfig(AppConfig):
         try:
             # FIRST: Create or get Gimnasio (tenant)
             gimnasio, created = Gimnasio.objects.get_or_create(
-                name="Demo Gimnasio",
+                name=os.environ.get('DEMO_GIMNASIO_NAME', 'Gimnasio Principal'),
                 defaults={
                     'address': 'Dirección Demo',
                     'phone': '123456789',
@@ -47,15 +42,11 @@ class GimnasioappConfig(AppConfig):
             if created:
                 logger.info(f"✅ Created demo gimnasio: {gimnasio.name}")
             
-            # Get credentials from environment variables
-            admin_email = os.environ.get('DEMO_ADMIN_EMAIL')
-            admin_password = os.environ.get('DEMO_ADMIN_PASSWORD')
+            # Get credentials from environment variables (use defaults if not set)
+            admin_email = os.environ.get('DEMO_ADMIN_EMAIL', 'admin@gimnasio.com')
+            admin_password = os.environ.get('DEMO_ADMIN_PASSWORD', 'admin123')
             admin_name = os.environ.get('DEMO_ADMIN_NAME', 'Admin')
             admin_lastname = os.environ.get('DEMO_ADMIN_LASTNAME', 'Demo')
-            
-            if not admin_email or not admin_password:
-                logger.warning("⚠️ DEMO_ADMIN_EMAIL or DEMO_ADMIN_PASSWORD not set in environment variables!")
-                return
             
             # Create admin user ASSOCIATED with the gimnasio
             Usuario.objects.create_user(
