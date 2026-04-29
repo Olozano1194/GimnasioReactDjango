@@ -23,40 +23,18 @@ from django.conf import settings
 
 # Importar permisos personalizados
 from .permissions import IsAdminUser, IsRecepcionUser
-
-
-# ============================================================
-# HELPERS
-# ============================================================
-
-def get_user_gimnasio(request):
-    """Obtiene el gimnasio del usuario autenticado."""
-    if hasattr(request.user, 'gimnasio') and request.user.gimnasio:
-        return request.user.gimnasio
-    return None
+from .mixins import MultiTenantViewSetMixin
 
 
 # ============================================================
 # VIEWSETS
 # ============================================================
 
-class UserViewSet(viewsets.ModelViewSet): 
+class UserViewSet(MultiTenantViewSetMixin, viewsets.ModelViewSet):
+    queryset = Usuario.objects.all()
     serializer_class = UsuarioSerializer
     permission_classes = [IsAuthenticated, IsAdminUser]  # Solo admins pueden gestionar usuarios
     parser_classes = (MultiPartParser, FormParser)
-    
-    def get_queryset(self):
-        """Filtrar usuarios por gimnasio del usuario actual."""
-        queryset = get_user_model().objects.all()
-        gimnasio = get_user_gimnasio(self.request)
-        if gimnasio:
-            queryset = queryset.filter(gimnasio=gimnasio)
-        return queryset.order_by('-id')
-    
-    def perform_create(self, serializer):
-        """Asignar automáticamente el gimnasio del usuario actual al crear."""
-        gimnasio = get_user_gimnasio(self.request)
-        serializer.save(gimnasio=gimnasio)
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -65,7 +43,8 @@ class UserViewSet(viewsets.ModelViewSet):
                 "error": "Datos inválidos",
                 "details": serializer.errors
             }, status=status.HTTP_400_BAD_REQUEST)
-        user_data = serializer.save()
+        self.perform_create(serializer)
+        user_data = serializer.instance
 
         return Response({
             "user": UsuarioSerializer(user_data, context={'request': request}).data,
@@ -91,7 +70,7 @@ class UserViewSet(viewsets.ModelViewSet):
                         old_avatar.delete(save=False)
                     instance.avatar = request.FILES['avatar']
 
-                updated_instance = serializer.save()
+                self.perform_update(serializer)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             
             else:
@@ -175,7 +154,7 @@ class userProfileView(APIView):
           
     def list(self, request):
         try:
-            gimnasio = get_user_gimnasio(request)
+            gimnasio = request.gimnasio
             if gimnasio:
                 users = Usuario.objects.filter(gimnasio=gimnasio).order_by('-id')
             else:
@@ -190,42 +169,30 @@ class userProfileView(APIView):
 # MIEMBROS DEL GIMNASIO
 # ============================================================
 
-class UsuarioGymViewSet(viewsets.ModelViewSet):
+class UsuarioGymViewSet(MultiTenantViewSetMixin, viewsets.ModelViewSet):
+    queryset = UsuarioGym.objects.all()
     serializer_class = UsuarioGymSerializer
     permission_classes = [IsAuthenticated, IsRecepcionUser]  # Admin y recepcion pueden acceder
     filter_backends = [DjangoFilterBackend, SearchFilter]
     search_fields = ['name', 'lastname']
-    
-    def get_queryset(self):
-        """Filtrar miembros por gimnasio del usuario actual."""
-        gimnasio = get_user_gimnasio(self.request)
-        if gimnasio:
-            return UsuarioGym.objects.filter(gimnasio=gimnasio)
-        return UsuarioGym.objects.none()
-    
-    def perform_create(self, serializer):
-        """Asignar automáticamente el gimnasio del usuario actual."""
-        gimnasio = get_user_gimnasio(self.request)
-        serializer.save(gimnasio=gimnasio)
 
 
-class UsuarioGymDayViewSet(viewsets.ModelViewSet):
+class UsuarioGymDayViewSet(MultiTenantViewSetMixin, viewsets.ModelViewSet):
+    queryset = UsuarioGymDay.objects.all()
     serializer_class = UsuarioGymDaySerializer
-    permission_classes = [IsAuthenticated, IsRecepcionUser]
+    permission_classes = [IsAuthenticated, IsRecepcionUser]  # Admin y recepcion pueden acceder
     filter_backends = [DjangoFilterBackend, SearchFilter]
     search_fields = ['name', 'lastname']
-    
-    def get_queryset(self):
-        """Filtrar miembros diarios por gimnasio del usuario actual."""
-        gimnasio = get_user_gimnasio(self.request)
-        if gimnasio:
-            return UsuarioGymDay.objects.filter(gimnasio=gimnasio)
-        return UsuarioGymDay.objects.none()
-    
-    def perform_create(self, serializer):
-        """Asignar automáticamente el gimnasio del usuario actual."""
-        gimnasio = get_user_gimnasio(self.request)
-        serializer.save(gimnasio=gimnasio)
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            return Response({
+                "error": "Datos inválidos para ingreso diario",
+                "details": serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+        self.perform_create(serializer)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 # ============================================================
@@ -239,7 +206,7 @@ class DashboardStatsView(APIView):
         from django.db.models import Count, Q
         from datetime import date, timedelta
         
-        gimnasio = get_user_gimnasio(request)
+        gimnasio = request.gimnasio
         
         if not gimnasio:
             return Response({
@@ -319,7 +286,7 @@ class Home(APIView):
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
-        gimnasio = get_user_gimnasio(request)
+        gimnasio = request.gimnasio
         
         if gimnasio:
             UserGymList = MembresiaAsignada.objects.filter(miembro__gimnasio=gimnasio).order_by('-id')
@@ -376,43 +343,30 @@ class Home(APIView):
 # MEMBRESIAS
 # ============================================================
 
-class MembresiaViewSet(viewsets.ModelViewSet):
+class MembresiaViewSet(MultiTenantViewSetMixin, viewsets.ModelViewSet):
+    queryset = Membresia.objects.all()
     serializer_class = MembresiasSerializer
     permission_classes = [IsAuthenticated, IsRecepcionUser]
-    
-    def get_queryset(self):
-        """Filtrar membresías por gimnasio del usuario actual."""
-        gimnasio = get_user_gimnasio(self.request)
-        if gimnasio:
-            return Membresia.objects.filter(gimnasio=gimnasio)
-        return Membresia.objects.none()
-    
-    def perform_create(self, serializer):
-        """Asignar automáticamente el gimnasio del usuario actual."""
-        gimnasio = get_user_gimnasio(self.request)
-        serializer.save(gimnasio=gimnasio)
 
 
-class MembresiaAsignadaViewSet(viewsets.ModelViewSet):
+class MembresiaAsignadaViewSet(MultiTenantViewSetMixin, viewsets.ModelViewSet):
+    queryset = MembresiaAsignada.objects.all()
     serializer_class = MembresiaAsignadaSerializer
     permission_classes = [IsAuthenticated, IsRecepcionUser]
     filter_backends = [DjangoFilterBackend, SearchFilter]
     search_fields = ['miembro__name', 'miembro__lastname']
+    gimnasio_field = 'miembro__gimnasio'
 
     def get_queryset(self):
         """Filtrar membresías asignadas por gimnasio del usuario actual."""
-        gimnasio = get_user_gimnasio(self.request)
-        qs = MembresiaAsignada.objects.select_related('miembro', 'membresia', 'miembro__gimnasio')
-        
-        if gimnasio:
-            qs = qs.filter(miembro__gimnasio=gimnasio)
+        queryset = super().get_queryset()
         
         # Filtro adicional por miembro si se pasa
         miembro_id = self.request.query_params.get('miembro')
         if miembro_id:
-            qs = qs.filter(miembro_id=miembro_id)
+            queryset = queryset.filter(miembro_id=miembro_id)
         
-        return qs.order_by('-id')
+        return queryset.order_by('-id')
 
 
 # ============================================================
@@ -427,7 +381,7 @@ class ActivitiesView(APIView):
     permission_classes = [IsAuthenticated]
     
     def get(self, request):
-        gimnasio = get_user_gimnasio(request)
+        gimnasio = request.gimnasio
         
         activities = []
         
@@ -516,7 +470,7 @@ class ExportReportView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        gimnasio = get_user_gimnasio(request)
+        gimnasio = request.gimnasio
 
         wb = Workbook()
         ws = wb.active
@@ -672,7 +626,7 @@ class ExportReportView(APIView):
 def membership_notifications(request):
     from django.conf import settings
     
-    gimnasio = get_user_gimnasio(request)
+    gimnasio = request.gimnasio
     numero_gimnasio = getattr(settings, 'WHATSAPP_NUMBER', '573001234567')  # Default si no está configurado
     
     today = datetime.now().date()
@@ -764,7 +718,7 @@ def membership_notifications(request):
 @permission_classes([IsAuthenticated])
 def mark_notifications_read(request):
     """Marca todas las notificaciones como leídas para el gimnasio del usuario."""
-    gimnasio = get_user_gimnasio(request)
+    gimnasio = request.gimnasio
     
     if not gimnasio:
         return Response({'status': 'no gimnasio'}, status=status.HTTP_400_BAD_REQUEST)
