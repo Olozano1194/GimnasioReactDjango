@@ -395,8 +395,7 @@ class ActivitiesView(APIView):
             ).order_by('-created_at')[:5]
             
             for membresia in membresias_recientes:
-                # dt = self.ensure_datetime(membresia.dateInitial)
-
+                
                 activities.append({
                     'id': f'm-{membresia.id}',
                     'type': 'new_member',
@@ -405,17 +404,12 @@ class ActivitiesView(APIView):
                     'title': 'Nuevo miembro registrado',
                     'description': f'{membresia.miembro.name} {membresia.miembro.lastname} - {membresia.membresia.name}',                    
                     'created_at': membresia.created_at.isoformat(),
-                    # 'date': membresia.dateInitial.strftime('%d/%m/%Y'),
                     'time_ago': self.get_time_ago(membresia.created_at),
-                })
+                })            
             
-            # ingresos_recientes = UsuarioGymDay.objects.filter(
-            #     gimnasio=gimnasio
-            # ).order_by('-id')[:5]
             
             for ingreso in ingresos:
-                dt = self.ensure_datetime(ingreso.dateInitial)
-
+                
                 activities.append({
                     'id': f'i-{ingreso.id}',
                     'type': 'entry',
@@ -423,10 +417,9 @@ class ActivitiesView(APIView):
                     'color': 'info',
                     'title': 'Ingreso registrado',
                     'description': f'{ingreso.name} {ingreso.lastname}',
-                    'created_at': dt.isoformat(),
+                    'created_at': ingreso.created_at.isoformat(),
                     'amount': float(ingreso.price),
-                    # 'date': ingreso.dateInitial.strftime('%d/%m/%Y'),
-                    'time_ago': self.get_time_ago(dt)
+                    'time_ago': self.get_time_ago(ingreso.created_at)
                 })
         
         activities.sort(key=lambda x: x['created_at'], reverse=True)
@@ -476,7 +469,7 @@ class ExportReportView(APIView):
         ws = wb.active
         ws.title = "Reporte"
 
-        # 🎨 ESTILOS
+        # ESTILOS
         header_fill = PatternFill(start_color="4F46E5", end_color="4F46E5", fill_type="solid")
         header_font = Font(color="FFFFFF", bold=True)
         bold_font = Font(bold=True)
@@ -489,7 +482,7 @@ class ExportReportView(APIView):
             bottom=Side(style='thin')
         )
 
-        # 🔥 TÍTULO
+        # TÍTULO
         ws.merge_cells('A1:F1')
         ws['A1'] = 'REPORTE DEL GIMNASIO'
         ws['A1'].font = Font(size=18, bold=True)
@@ -499,7 +492,7 @@ class ExportReportView(APIView):
         ws.append([f'Generado: {timezone.now().strftime("%d/%m/%Y %H:%M")}'])
         ws.append([])
 
-        # 🔥 DATOS
+        # DATOS
         if gimnasio:
             miembros = MembresiaAsignada.objects.filter(miembro__gimnasio=gimnasio)
             diarios = UsuarioGymDay.objects.filter(gimnasio=gimnasio)
@@ -512,7 +505,7 @@ class ExportReportView(APIView):
         total = total_membresias + total_diarios
 
         # ==========================================================
-        # 📊 ESTADÍSTICAS
+        # ESTADÍSTICAS
         # ==========================================================
         ws.append(['ESTADÍSTICAS DEL MES'])
 
@@ -533,7 +526,7 @@ class ExportReportView(APIView):
             total
         ])
 
-        # 💰 formato dinero
+        # formato dinero
         for col in range(2, 5):
             ws.cell(row=ws.max_row, column=col).number_format = '$#,##0'
 
@@ -567,7 +560,7 @@ class ExportReportView(APIView):
         ws.append([])
 
         # ==========================================================
-        # 💰 INGRESOS DIARIOS
+        # INGRESOS DIARIOS
         # ==========================================================
         ws.append(['INGRESOS DIARIOS'])
         headers = ['Nombre', 'Apellido', 'Fecha', 'Monto']
@@ -591,7 +584,7 @@ class ExportReportView(APIView):
             ws.cell(row=row, column=4).number_format = '$#,##0'
 
         # ==========================================================
-        # 📐 AUTO AJUSTE COLUMNAS
+        # AUTO AJUSTE COLUMNAS
         # ==========================================================
         from openpyxl.utils import get_column_letter
         
@@ -610,7 +603,7 @@ class ExportReportView(APIView):
             ws.column_dimensions[col_letter].width = max_length + 3 if max_length > 0 else 15
 
         # ==========================================================
-        # 📥 DESCARGA
+        # DESCARGA
         # ==========================================================
         response = HttpResponse(
             content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
