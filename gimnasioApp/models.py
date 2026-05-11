@@ -205,4 +205,4 @@ class MembresiaAsignada(models.Model):
         return self.dateInitial <= hoy <= self.dateFinal
 
     def __str__(self):
-        return f"{self.miembro.name} - {self.miembro.lastname} - {self.membresia.name}"   
+        return f"{self.miembro.name} - {self.miembro.lastname} - {self.membresia.name}"    
