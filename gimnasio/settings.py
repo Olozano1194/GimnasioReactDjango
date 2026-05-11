@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 import dj_database_url
 from dotenv import load_dotenv
+load_dotenv()  # cargamos las variables de entorno desde .env
 
 from pathlib import Path
 
@@ -94,7 +95,6 @@ WSGI_APPLICATION = 'gimnasio.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-load_dotenv() # cargamos las variables de entorno desde .env
 
 DATABASES = {
     # 'default': {
@@ -155,6 +155,19 @@ STATIC_URL = 'static/'
 # carga de las imagenes
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# ============================================================
+# SUPABASE STORAGE CONFIGURATION (S3-compatible)
+# ============================================================
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME', 'avatars')
+AWS_S3_ENDPOINT_URL = os.getenv('AWS_S3_ENDPOINT_URL')
+AWS_S3_REGION_NAME = 'us-east-1'
+AWS_DEFAULT_ACL = 'public-read'
+AWS_S3_SIGNATURE_VERSION = 's3v4'
+AWS_S3_FILE_OVERWRITE = False
+DEFAULT_FILE_STORAGE = 'gimnasioApp.storage.SupabaseMediaStorage'
 
 # This production code might break development mode, so we check whether we're in DEBUG mode
 if not DEBUG:   

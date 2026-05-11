@@ -68,29 +68,20 @@ class UsuarioSerializer(serializers.ModelSerializer):
         user.save()
         return user
     
-    def get_avatar(self, obj):
-        request = self.context.get('request')
-        if obj.avatar:
-            return request.build_absolute_uri(obj.avatar.url)
-        return None
-
     def update(self, instance, validated_data):
-        try:
-            if 'password' in validated_data:
-                password = validated_data.pop('password')
-                instance.set_password(password)
-            
-            if 'avatar' in validated_data:
-                instance.avatar = validated_data['avatar']
-
-            for attr, value in validated_data.items():
-                setattr(instance, attr, value)
-
-            instance.save()
-            return instance
-            
-        except Exception as e:
-            raise
+        # Handle password separately
+        if 'password' in validated_data:
+            password = validated_data.pop('password')
+            instance.set_password(password)
+        
+        # Delete old avatar if new one is provided
+        avatar = validated_data.get('avatar', None)
+        if avatar and instance.avatar and instance.avatar.name:
+            instance.avatar.delete(save=False)
+        
+        # Continue with normal update using super()
+        instance = super().update(instance, validated_data)
+        return instance
 
 
 # ============================================================
