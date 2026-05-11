@@ -1,14 +1,19 @@
+import io
+import base64
 from django.test import TestCase
 from django.test import RequestFactory
 from django.contrib.auth.models import AnonymousUser
 from rest_framework.test import APIRequestFactory, force_authenticate
 from rest_framework import status
+from unittest.mock import patch, MagicMock, call
 
 from .models import Gimnasio, Usuario, UsuarioGym, Membresia
 from .middleware import GimnasioMiddleware
 from .mixins import MultiTenantViewSetMixin
 from .serializers import UsuarioSerializer, UsuarioGymSerializer, MembresiasSerializer
 from .views import UserViewSet, UsuarioGymViewSet, MembresiaViewSet
+from .storage import SupabaseMediaStorage
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 
 class GimnasioMiddlewareTest(TestCase):
@@ -185,3 +190,218 @@ class UserViewSetCreateTest(TestCase):
 
         new_user = Usuario.objects.get(email="another@example.com")
         self.assertEqual(new_user.gimnasio, self.gimnasio)
+
+
+# ============================================================
+# SUPABASE STORAGE TESTS (Phase 4)
+# ============================================================
+
+class SupabaseMediaStorageTest(TestCase):
+    """Unit tests for SupabaseMediaStorage configuration."""
+
+    def test_storage_uses_correct_location(self):
+        """Storage should use 'fotos' as location (bucket subpath)."""
+        storage = SupabaseMediaStorage()
+        self.assertEqual(storage.location, 'fotos')
+
+    def test_storage_does_not_overwrite_files(self):
+        """Storage should NOT overwrite existing files (file_overwrite=False)."""
+        storage = SupabaseMediaStorage()
+        self.assertFalse(storage.file_overwrite)
+
+    def test_storage_uses_public_read_acl(self):
+        """Storage should use 'public-read' ACL for public URLs."""
+        storage = SupabaseMediaStorage()
+        self.assertEqual(storage.default_acl, 'public-read')
+
+    @patch.dict('os.environ', {
+        'AWS_S3_ENDPOINT_URL': 'https://test-project.supabase.co/storage/v1',
+        'AWS_ACCESS_KEY_ID': 'test-key',
+        'AWS_SECRET_ACCESS_KEY': 'test-secret',
+        'AWS_STORAGE_BUCKET_NAME': 'test-bucket'
+    })
+    def test_storage_reads_endpoint_from_env(self):
+        """Storage should read S3 endpoint from AWS_S3_ENDPOINT_URL env var."""
+        from django.test.utils import override_settings
+        with override_settings(
+            AWS_S3_ENDPOINT_URL='https://test-project.supabase.co/storage/v1',
+            AWS_ACCESS_KEY_ID='test-key',
+            AWS_SECRET_ACCESS_KEY='test-secret',
+            AWS_STORAGE_BUCKET_NAME='test-bucket'
+        ):
+            storage = SupabaseMediaStorage()
+            self.assertEqual(storage.endpoint_url, 'https://test-project.supabase.co/storage/v1')
+
+    @patch.dict('os.environ', {'AWS_STORAGE_BUCKET_NAME': 'custom-bucket'})
+    def test_storage_uses_configured_bucket_name(self):
+        """Storage should use bucket name from AWS_STORAGE_BUCKET_NAME env var."""
+        from django.test.utils import override_settings
+        with override_settings(AWS_STORAGE_BUCKET_NAME='custom-bucket'):
+            storage = SupabaseMediaStorage()
+            self.assertEqual(storage.bucket_name, 'custom-bucket')
+
+
+class UsuarioSerializerAvatarTest(TestCase):
+    """Unit tests for avatar update behavior in UsuarioSerializer."""
+
+    def setUp(self):
+        self.gimnasio = Gimnasio.objects.create(name="Test Gym")
+        self.user = Usuario.objects.create_user(
+            email="test@example.com",
+            name="Test",
+            lastname="User",
+            password="password123",
+            gimnasio=self.gimnasio
+        )
+        self.factory = APIRequestFactory()
+
+    def _make_uploaded_image(self, filename='test.jpg', fmt='JPEG'):
+        """Generate a valid image file using Pillow."""
+        from PIL import Image
+        import io
+        img = Image.new('RGB', (10, 10), color='red')
+        buffer = io.BytesIO()
+        img.save(buffer, format=fmt)
+        return SimpleUploadedFile(
+            filename,
+            buffer.getvalue(),
+            content_type='image/jpeg' if fmt == 'JPEG' else 'image/png'
+        )
+
+    def test_serializer_deletes_old_avatar_when_new_provided(self):
+        """Scenario 4.2: When new avatar is provided, old avatar should be deleted from storage."""
+        # Setup: user has existing avatar
+        self.user.avatar = 'avatars/old_avatar.jpg'
+        self.user.save()
+
+        # Patch FieldFile.delete to intercept the storage deletion call
+        with patch('django.db.models.fields.files.FieldFile.delete') as mock_delete:
+            new_avatar = self._make_uploaded_image('new_avatar.jpg')
+            serializer = UsuarioSerializer(
+                instance=self.user,
+                data={'avatar': new_avatar},
+                partial=True
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.update(self.user, {'avatar': new_avatar})
+
+            # Verify old avatar was deleted from storage
+            mock_delete.assert_called_once()
+
+    def test_serializer_skips_deletion_on_first_time_upload(self):
+        """Scenario 4.3: First-time upload (no existing avatar) should skip deletion gracefully."""
+        # User has no avatar
+        self.user.avatar = None
+        self.user.save()
+
+        with patch('django.db.models.fields.files.FieldFile.delete') as mock_delete:
+            new_avatar = self._make_uploaded_image('test.jpg')
+            serializer = UsuarioSerializer(
+                instance=self.user,
+                data={'avatar': new_avatar},
+                partial=True
+            )
+            serializer.is_valid(raise_exception=True)
+            result = serializer.update(self.user, {'avatar': new_avatar})
+
+            # delete should NOT have been called since there was no old avatar
+            mock_delete.assert_not_called()
+            # The avatar should now be set (not None)
+            self.assertIsNotNone(result.avatar)
+
+    def test_serializer_skips_deletion_when_avatar_not_in_update(self):
+        """Scenario 4.4: When avatar is NOT in the update data, existing avatar should NOT be deleted."""
+        # Setup: user has existing avatar
+        self.user.avatar = 'avatars/old_avatar.jpg'
+        self.user.save()
+
+        serializer = UsuarioSerializer(
+            instance=self.user,
+            data={'name': 'Updated Name'},
+            partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+
+        # Verify 'avatar' is not in validated_data
+        self.assertNotIn('avatar', serializer.validated_data)
+
+        # Mock storage delete to ensure it's not called
+        with patch('django.db.models.fields.files.FieldFile.delete') as mock_delete:
+            result = serializer.update(self.user, serializer.validated_data)
+            mock_delete.assert_not_called()
+            self.assertEqual(result.name, 'Updated Name')
+
+    def test_serializer_deletes_old_avatar_using_storage(self):
+        """Verify that storage.delete() is called on the old avatar name."""
+        self.user.avatar = 'avatars/old_avatar.jpg'
+        self.user.save()
+
+        with patch('django.db.models.fields.files.FieldFile.delete') as mock_delete:
+            new_avatar = self._make_uploaded_image('new_avatar.jpg')
+            serializer = UsuarioSerializer(
+                instance=self.user,
+                data={'avatar': new_avatar},
+                partial=True
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.update(self.user, {'avatar': new_avatar})
+
+            # Verify old avatar was deleted from storage
+            mock_delete.assert_called_once()
+
+
+# ============================================================
+# INTEGRATION TESTS (Phase 4.5)
+# ============================================================
+
+class AvatarUploadIntegrationTest(TestCase):
+    """Integration test for end-to-end avatar upload."""
+
+    def setUp(self):
+        self.gimnasio = Gimnasio.objects.create(name="Test Gym")
+        self.user = Usuario.objects.create_user(
+            email="test@example.com",
+            name="Test",
+            lastname="User",
+            password="password123",
+            roles="admin",
+            gimnasio=self.gimnasio
+        )
+        self.factory = APIRequestFactory()
+
+    def _make_uploaded_image(self, filename='test.jpg', fmt='JPEG'):
+        """Generate a valid image file using Pillow."""
+        from PIL import Image
+        import io
+        img = Image.new('RGB', (10, 10), color='red')
+        buffer = io.BytesIO()
+        img.save(buffer, format=fmt)
+        return SimpleUploadedFile(
+            filename,
+            buffer.getvalue(),
+            content_type='image/jpeg' if fmt == 'JPEG' else 'image/png'
+        )
+
+    def test_avatar_upload_returns_url(self):
+        """PATCH /api/user/ with avatar should return the avatar URL."""
+        mock_storage = MagicMock()
+        mock_storage.url.return_value = 'https://test-project.supabase.co/storage/v1/object/public/fotos/test.jpg'
+        mock_storage.save.return_value = 'fotos/test.jpg'
+        mock_storage.exists.return_value = False
+
+        # Patch the storage used by the avatar field
+        with patch.object(Usuario.avatar.field, 'storage', mock_storage):
+            new_avatar = self._make_uploaded_image('test.jpg')
+            view = UserViewSet.as_view({'patch': 'partial_update'})
+            request = self.factory.patch('/api/user/', {'avatar': new_avatar}, format='multipart')
+            request.user = self.user
+            request.gimnasio = self.gimnasio
+            force_authenticate(request, user=self.user)
+
+            with patch.object(UserViewSet, 'get_object', return_value=self.user):
+                response = view(request, pk=self.user.id)
+                self.assertEqual(response.status_code, status.HTTP_200_OK)
+                # Assert response contains Supabase URL (starts with 'http')
+                self.assertIn('avatar', response.data)
+                avatar_url = response.data['avatar']
+                self.assertTrue(avatar_url.startswith('http'), f"Avatar URL should start with 'http', got: {avatar_url}")

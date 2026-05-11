@@ -19,8 +19,6 @@ from rest_framework.decorators import api_view, permission_classes
 from openpyxl import Workbook
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 from django.conf import settings
-
-
 # Importar permisos personalizados
 from .permissions import IsAdminUser, IsRecepcionUser
 from .mixins import MultiTenantViewSetMixin
@@ -55,7 +53,7 @@ class UserViewSet(MultiTenantViewSetMixin, viewsets.ModelViewSet):
             partial = kwargs.pop('partial', False)
             instance = self.get_object()
 
-            old_avatar = instance.avatar if instance.avatar else None
+
 
             serializer = self.get_serializer(
                 instance, 
@@ -65,11 +63,6 @@ class UserViewSet(MultiTenantViewSetMixin, viewsets.ModelViewSet):
             )
 
             if serializer.is_valid():
-                if 'avatar' in request.FILES:
-                    if old_avatar:
-                        old_avatar.delete(save=False)
-                    instance.avatar = request.FILES['avatar']
-
                 self.perform_update(serializer)
                 return Response(serializer.data, status=status.HTTP_200_OK)
             
