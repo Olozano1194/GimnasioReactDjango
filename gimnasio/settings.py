@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
+    'storages',
     'gimnasioApp',
 ]
 
@@ -167,12 +168,19 @@ AWS_S3_REGION_NAME = 'us-east-1'
 AWS_DEFAULT_ACL = 'public-read'
 AWS_S3_SIGNATURE_VERSION = 's3v4'
 AWS_S3_FILE_OVERWRITE = False
-DEFAULT_FILE_STORAGE = 'gimnasioApp.storage.SupabaseMediaStorage'
+# Django 5.1 unified STORAGES setting (replaces DEFAULT_FILE_STORAGE y STATICFILES_STORAGE)
+STORAGES = {
+    'default': {
+        'BACKEND': 'gimnasioApp.storage.SupabaseMediaStorage',
+    },
+}
 
 # This production code might break development mode, so we check whether we're in DEBUG mode
 if not DEBUG:   
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    STORAGES['staticfiles'] = {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    }
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

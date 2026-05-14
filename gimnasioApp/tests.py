@@ -199,10 +199,10 @@ class UserViewSetCreateTest(TestCase):
 class SupabaseMediaStorageTest(TestCase):
     """Unit tests for SupabaseMediaStorage configuration."""
 
-    def test_storage_uses_correct_location(self):
-        """Storage should use 'fotos' as location (bucket subpath)."""
+    def test_storage_uses_empty_location(self):
+        """Storage should use '' as location (upload_to='fotos/' en el modelo maneja el path)."""
         storage = SupabaseMediaStorage()
-        self.assertEqual(storage.location, 'fotos')
+        self.assertEqual(storage.location, '')
 
     def test_storage_does_not_overwrite_files(self):
         """Storage should NOT overwrite existing files (file_overwrite=False)."""
@@ -215,7 +215,7 @@ class SupabaseMediaStorageTest(TestCase):
         self.assertEqual(storage.default_acl, 'public-read')
 
     @patch.dict('os.environ', {
-        'AWS_S3_ENDPOINT_URL': 'https://test-project.supabase.co/storage/v1',
+        'AWS_S3_ENDPOINT_URL': 'https://test-project.supabase.co/storage/v1/s3',
         'AWS_ACCESS_KEY_ID': 'test-key',
         'AWS_SECRET_ACCESS_KEY': 'test-secret',
         'AWS_STORAGE_BUCKET_NAME': 'test-bucket'
@@ -224,13 +224,13 @@ class SupabaseMediaStorageTest(TestCase):
         """Storage should read S3 endpoint from AWS_S3_ENDPOINT_URL env var."""
         from django.test.utils import override_settings
         with override_settings(
-            AWS_S3_ENDPOINT_URL='https://test-project.supabase.co/storage/v1',
+            AWS_S3_ENDPOINT_URL='https://test-project.supabase.co/storage/v1/s3',
             AWS_ACCESS_KEY_ID='test-key',
             AWS_SECRET_ACCESS_KEY='test-secret',
             AWS_STORAGE_BUCKET_NAME='test-bucket'
         ):
             storage = SupabaseMediaStorage()
-            self.assertEqual(storage.endpoint_url, 'https://test-project.supabase.co/storage/v1')
+            self.assertEqual(storage.endpoint_url, 'https://test-project.supabase.co/storage/v1/s3')
 
     @patch.dict('os.environ', {'AWS_STORAGE_BUCKET_NAME': 'custom-bucket'})
     def test_storage_uses_configured_bucket_name(self):
