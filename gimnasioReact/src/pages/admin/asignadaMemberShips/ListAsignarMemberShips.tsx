@@ -38,6 +38,7 @@ interface AsignacionTotal {
     dateFinal?:   string;
     price: number | string;
     estado_pago?: string;
+    multiplier?: never;
 }
 
 type Asignacion = AsignacionTotal | AsignarMemberShips;
