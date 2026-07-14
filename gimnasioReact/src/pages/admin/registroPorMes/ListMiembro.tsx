@@ -1,7 +1,8 @@
 //Estados
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 //API
 import { getMembers, deleteMember } from '../../../api/action/userGym.api';
+import { getAsignarMemberList } from '../../../api/action/asignarMemberShips.api';
 //Table
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 //Componente principal para la listas
@@ -14,10 +15,18 @@ import StatsOverviewSection from "../../../components/table/section/StatsOvervie
 import { toast } from 'react-hot-toast';
 //Models
 import { Miembro } from "../../../model/member.model";
+import { AsignarMemberShips } from "../../../model/asignarMemberShips.model";
 // icons
 import { IoSearch } from "react-icons/io5";
 
-
+interface MiembroConEstado extends Miembro {
+    membresia?: string;
+    totalMembresia?: number | string;
+    totalPagado?: number | string;
+    saldoPendiente?: number | string;
+    estadoPago?: string;
+    multiplier?: number | string;
+}
 
 interface MiembroTotal {
     id: 'total';
@@ -25,28 +34,89 @@ interface MiembroTotal {
     lastname?: string;
     phone?: string;
     address?: string;
-    dateInitial?: string;
-    dateFinal?: string;
-    price: number | string;
+    membresia?: string;
+    totalMembresia?: number | string;
+    totalPagado?: number | string;
+    saldoPendiente?: number | string;
+    estadoPago?: string;
 }
 
-type Member = MiembroTotal | Miembro;
+type Member = MiembroTotal | MiembroConEstado;
+
+const formatCurrency = (amount: number): string => {
+    return new Intl.NumberFormat("es-CO", {
+        style: "currency",
+        currency: "COP",
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+    }).format(amount);
+};
+
+const EstadoBadge = ({ estado }: { estado?: string }) => {
+    if (!estado) return null;
+    const config: Record<string, { label: string; class: string }> = {
+        paid: { label: 'Al día', class: 'bg-green-100 text-green-700' },
+        partial: { label: 'Parcial', class: 'bg-yellow-100 text-yellow-700' },
+        pending: { label: 'Pendiente', class: 'bg-red-100 text-red-700' },
+    };
+    const c = config[estado] || { label: estado, class: 'bg-gray-100 text-gray-700' };
+    return (
+        <span className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${c.class}`}>
+            {c.label}
+        </span>
+    );
+};
 
 const ListMiembro = () => {
-    const [users, setUser] = useState<Member[]>([]);
+    const [users, setUser] = useState<Miembro[]>([]);
+    const [asignaciones, setAsignaciones] = useState<AsignarMemberShips[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [filteredData, setFilteredData] = useState<number | null>(null);
     const [search, setSearch] = useState('');
+
+    // Mapa de miembro_id -> última membresía asignada
+    const miembrosConEstado = useMemo(() => {
+        const map = new Map<number, AsignarMemberShips>();
+        for (const a of asignaciones) {
+            const mid = typeof a.miembro === 'number' ? a.miembro : a.miembro?.id;
+            if (mid != null && !map.has(mid)) {
+                map.set(mid, a);
+            }
+        }
+        return map;
+    }, [asignaciones]);
+
+    const enrichedUsers = useMemo((): Member[] => {
+        return users.map((u) => {
+            const asignacion = miembrosConEstado.get(u.id);
+            if (!asignacion) return u;
+            const mult = Number(asignacion.multiplier || 1);
+            return {
+                ...u,
+                membresia: mult > 1
+                    ? (asignacion.membresia_details?.name || '-') + ' x' + mult
+                    : (asignacion.membresia_details?.name || '-'),
+                totalMembresia: asignacion.price,
+                totalPagado: asignacion.total_pagado,
+                saldoPendiente: asignacion.saldo_pendiente,
+                estadoPago: asignacion.estado_pago,
+                multiplier: mult,
+            } as MiembroConEstado;
+        });
+    }, [users, miembrosConEstado]);
 
     // Función en donde se buscan los datos
     const handleSearch = useCallback(async(user: string) => {
         setIsLoading(true);
         try {
-            const response = await getMembers(user);
-            setUser(response);
+            const [membersRes, asignacionesRes] = await Promise.all([
+                getMembers(user),
+                getAsignarMemberList()
+            ]);
+            setUser(membersRes);
+            setAsignaciones(asignacionesRes);
         } catch (error) {
             console.error('Error al buscar el miembro:', error);
-            
         }finally {
             setIsLoading(false);
         }       
@@ -56,8 +126,12 @@ const ListMiembro = () => {
         const fetchUserData = async () => {
             setIsLoading(true);
             try {
-                const response = await getMembers();
-                setUser(response);
+                const [membersRes, asignacionesRes] = await Promise.all([
+                    getMembers(),
+                    getAsignarMemberList()
+                ]);
+                setUser(membersRes);
+                setAsignaciones(asignacionesRes);
             }catch (error) {
                 const errorMessage = error instanceof Error ? error.message : 'Error al cargar los datos';
                 toast.error(errorMessage);
@@ -67,13 +141,11 @@ const ListMiembro = () => {
         };
         fetchUserData();
 
-        //Limpiamos el timeout cada vez que se renderiza la página
         return () => {
             if (filteredData) clearTimeout(filteredData);
         };
     }, [filteredData]);
 
-    //Manejamos el evento de búsqueda
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const searchValue = e.target.value.toLowerCase();
         setSearch(searchValue);
@@ -87,28 +159,11 @@ const ListMiembro = () => {
 
     const columnHelper = createColumnHelper<Member>();
 
-    //Calculamos el total de los precios
-    //const total = users.reduce((acc, user) => acc + Number((user.price)), 0);
-    // const total = users.reduce((acc, user) => {
-    //     const price = typeof user.price === 'string' ? parseFloat(user.price) : user.price;
-    //     return acc + price;
-    // }, 0);
-        
-
-    // const totalRow: MiembroTotal = {
-    //     id: 'total',
-    //     name: 'Total',
-    //     price: `$ ${total}`, 
-    // };
-    
     const columns = [
         columnHelper.accessor((_, index) => index + 1, {
             id: 'index',
             header: 'N°',
-            cell: (info) => {
-                // Solo mostrar el número si no es la fila de total
-                return info.row.index + 1;
-            },
+            cell: (info) => info.row.index + 1,
         }),
         columnHelper.accessor(row => `${row.name}`, {
             id: 'name',
@@ -130,71 +185,52 @@ const ListMiembro = () => {
             header: 'Dirección',
             cell: (info) => info.getValue()
         }),
-        // columnHelper.accessor(row => row.dateInitial, {
-        //     id: 'dateInitial',
-        //     header: 'Fecha Inicial',
-        //     cell: (info) => info.getValue()
-        // }),
-        // columnHelper.accessor(row => row.dateFinal, {
-        //     id: 'dateFinal',
-        //     header: 'Fecha Final',
-        //     cell: (info) => info.getValue()
-        // }),
-        // columnHelper.accessor('price', {
-        //     id: 'price',
-        //     header: 'Precio',
-        //     cell: info => {
-        //         const isTotalRow = info.row.original.id === 'total';
-        //         const raw = info.getValue<Member['price']>();
-        //         const priceNum  = typeof raw === 'string' ? parseFloat(raw) : raw;              
-        //         // Si es la fila de total, mostrar en negrita
-        //         return (
-        //             <div className={isTotalRow ? 'font-bold' : ''}>
-        //                 ${priceNum.toFixed(2)}
-        //             </div>
-        //         )              
-        //     },
-        // }),
+        columnHelper.accessor(row => {
+            return (row as MiembroConEstado).membresia || '-';
+        }, {
+            id: 'membresia',
+            header: 'Membresía',
+            cell: (info) => {
+                const val = info.getValue();
+                return <span className="text-sm">{val}</span>;
+            },
+        }),
+        columnHelper.accessor(row => {
+            const val = (row as MiembroConEstado).totalMembresia;
+            return val ? formatCurrency(Number(val)) : '-';
+        }, {
+            id: 'totalMembresia',
+            header: 'Total',
+            cell: (info) => <span className="font-medium">{info.getValue()}</span>,
+        }),
+        columnHelper.accessor(row => {
+            const val = (row as MiembroConEstado).totalPagado;
+            return val ? formatCurrency(Number(val)) : '-';
+        }, {
+            id: 'totalPagado',
+            header: 'Pagado',
+            cell: (info) => <span className="font-medium">{info.getValue()}</span>,
+        }),
+        columnHelper.accessor(row => {
+            const val = (row as MiembroConEstado).saldoPendiente;
+            return val ? formatCurrency(Number(val)) : '-';
+        }, {
+            id: 'saldoPendiente',
+            header: 'Saldo Pend.',
+            cell: (info) => <span className="font-medium">{info.getValue()}</span>,
+        }),
+        columnHelper.accessor(row => (row as MiembroConEstado).estadoPago, {
+            id: 'estadoPago',
+            header: 'Estado',
+            cell: (info) => <EstadoBadge estado={info.getValue()} />,
+        }),
         columnHelper.display({
             id: 'actions',
             header: 'Acciones',
             cell: props => {
                 const id = props.row.original.id;
-                //si es la fila total, no mostrar botones
                 if(typeof id !== 'number') return null;
                 return(
-                    // <div className="flex justify-center items-center gap-x-4">
-                    //     <Link to={`/dashboard/miembro/${id}`} className="bg-green-500 text-white p-2 rounded-md hover:scale-110">
-                    //         <RiPencilLine />
-                    //     </Link>
-                    //     <button 
-                    //         onClick={ async () => {
-                    //             if (window.confirm('¿Estás seguro de eliminar este miembro?')){
-                    //                 try {
-                    //                     await deleteMember(id);
-                    //                     setUser(users.filter(user => user.id !== id));
-                    //                     toast.success('Miembro Eliminado', {
-                    //                         duration: 3000,
-                    //                         position: 'bottom-right',
-                    //                         style: {
-                    //                             background: '#4b5563',   // Fondo negro
-                    //                             color: '#fff',           // Texto blanco
-                    //                             padding: '16px',
-                    //                             borderRadius: '8px',
-                    //                         },
-                        
-                    //                     });   
-                                        
-                    //                 } catch (error) {
-                    //                     const errorMessage = error instanceof Error ? error.message : 'Error al eliminar la membresía';
-                    //                     toast.error(errorMessage);                                    
-                    //                 }
-                    //             }                                                          
-                    //         }}
-                    //         className="bg-red-500 text-white p-2 rounded-md hover:scale-110">
-                    //         <RiDeleteBinLine />
-                    //     </button>
-                    // </div>
                     <ActionButtons
                         id={id}
                         editPath={`/dashboard/miembro/${id}`}
@@ -215,7 +251,6 @@ const ListMiembro = () => {
                 highlight="Miembros" 
             />
             <StatsOverviewSection />            
-            {/* Busqueda */}
             <section className="relative w-full">
                 <span className="absolute left-3 text-lg text-nav top-1/2 -translate-y-1/2"><IoSearch /></span>
                 <input 
@@ -231,9 +266,8 @@ const ListMiembro = () => {
                     <div className="text-center py-4">Buscando...</div>
                 ) : (
                         <Table 
-                            data={users} 
+                            data={enrichedUsers} 
                             columns={columns} 
-                            // totalRow={totalRow} 
                         />
                     )
             }                         

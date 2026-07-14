@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { useParams, useNavigate } from "react-router-dom";
 //Estados
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 //Icons
 import { RiLoginBoxLine } from "react-icons/ri";
 // sections
@@ -22,6 +22,9 @@ import { Membresia } from '../../../model/memberShips.model';
 import { Miembro } from '../../../model/member.model';
 import { CreateAsignarMemberShipsDto } from '../../../model/dto/asignarMemberShips.dto';
 
+const DISCOUNT_TIERS: Record<number, number> = {
+    1: 0, 2: 0, 3: 5, 6: 10, 12: 20
+};
 
 interface FormData {
     miembro: string;
@@ -32,14 +35,50 @@ interface FormData {
 const MemberShipsForm = () => {
     const [miembros, setMiembros] = useState<Miembro[]>([]);
     const [membresias, setMembresias] = useState<Membresia[]>([]);
-    const [, setSelectedPrice] = useState<number | null>(null);
+    const [selectedMembresia, setSelectedMembresia] = useState<Membresia | null>(null);
+    const [multiplier, setMultiplier] = useState<number>(1);
+    const [discountPercent, setDiscountPercent] = useState<number>(0);
     const params = useParams<{ id?: string }>();
     const isEditing = !!params.id;
     const navigate = useNavigate();
-    const { register, handleSubmit, formState: { errors }, reset } = useForm<FormData>();
+    const { register, handleSubmit, formState: { errors }, reset, watch } = useForm<FormData>();
+    const dateInitial = watch('dateInitial');
+
+    const formatCurrency = (amount: number): string => {
+        return new Intl.NumberFormat("es-CO", {
+            style: "currency",
+            currency: "COP",
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+        }).format(amount);
+    };
+
+    // Precio estimado: base * multiplier * (1 - discount/100)
+    const estimatedPrice = useMemo(() => {
+        if (!selectedMembresia) return 0;
+        const base = Number(selectedMembresia.price);
+        return base * multiplier * (1 - discountPercent / 100);
+    }, [selectedMembresia, multiplier, discountPercent]);
+
+    // Fecha final estimada
+    const estimatedDateFinal = useMemo(() => {
+        if (!dateInitial || !selectedMembresia) return '';
+        const initial = new Date(dateInitial);
+        const final = new Date(initial);
+        final.setDate(final.getDate() + selectedMembresia.duration * multiplier);
+        return final.toLocaleDateString('es-CO', {
+            year: 'numeric', month: '2-digit', day: '2-digit'
+        });
+    }, [dateInitial, selectedMembresia, multiplier]);
+
+    // Auto-sugerir descuento cuando cambia multiplier
+    const handleMultiplierChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const val = parseInt(e.target.value);
+        setMultiplier(val);
+        setDiscountPercent(DISCOUNT_TIERS[val] ?? 0);
+    };
 
     const onSubmit = handleSubmit(async (data: FormData) => {
-        //console.log('Form data:', data);        
         try {
             const miembroId = parseInt(data.miembro);
             const membresiaId = parseInt(data.membresia);
@@ -49,58 +88,55 @@ const MemberShipsForm = () => {
                 return;
             }
 
-            //Encontrar la membresía para seleccionar la duración
             const selectMembresia = membresias.find((m) => m.id === membresiaId);
             if (!selectMembresia) {
                 toast.error('Membresía no encontrada');
                 return;
             }
 
-            //Calculamos la fecha final
             const initialDate = new Date(data.dateInitial);
             const finalDate = new Date(initialDate);
-            finalDate.setDate(finalDate.getDate() + selectMembresia.duration);
+            finalDate.setDate(finalDate.getDate() + selectMembresia.duration * multiplier);
 
-            //Formateamos la fecha en el formato correcto
             const dateInitial = initialDate.toISOString().split('T')[0];
             const dateFinal = finalDate.toISOString().split('T')[0];
 
-            //Para la creación/actualización solo enviamos los Ids y las fechas
             const requestData: CreateAsignarMemberShipsDto = {
                 miembro: miembroId,
                 membresia: membresiaId,
                 dateInitial: dateInitial,
-                dateFinal: dateFinal
+                dateFinal: dateFinal,
+                multiplier: multiplier,
+                discount_percent: discountPercent,
             };
-            //console.log('Datos que serán enviados:', requestData);
 
             if (params.id) {
                 await updateAsignarMemberShips(parseInt(params.id), requestData);
-                //console.log('Actualizando miembro:', params.id);
                 toast.success('Asignación de Membresía Actualizada', {
                     duration: 3000,
                     position: 'bottom-right',
                     style: {
-                        background: '#4b5563',   // Fondo negro
-                        color: '#fff',           // Texto blanco
+                        background: '#4b5563',
+                        color: '#fff',
                         padding: '16px',
                         borderRadius: '8px',
                     },
                 });
             } else {
                 await createAsignarMemberShips(requestData);
-                //console.log('Respuesta del servidor:',rest.data);            
                 toast.success('Asignación de Membresía Creada', {
                     duration: 3000,
                     position: 'bottom-right',
                     style: {
-                        background: '#4b5563',   // Fondo negro
-                        color: '#fff',           // Texto blanco
+                        background: '#4b5563',
+                        color: '#fff',
                         padding: '16px',
                         borderRadius: '8px',
                     },
                 });
                 reset();
+                setMultiplier(1);
+                setDiscountPercent(0);
             }
             navigate('/dashboard/asignar-membresia-list');
 
@@ -108,47 +144,38 @@ const MemberShipsForm = () => {
             if (error instanceof Error) {
                 console.error('Error detallado:', error);
                 toast.error(`Error: ${error.message}`);
-
             } else {
                 console.error('Error desconocido:', error);
                 toast.error('Error desconocido al procesar la solicitud');
             }
-            // const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-            //     toast.error(errorMessage, {
-            //         duration: 3000,
-            //         position: 'bottom-right',
-            //     });                    
         }
     });
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                // Cargar listas de miembros y membresías
-                const responseMemberShips: Membresia[] = await getMemberList(); // Función para obtener la lista de membresías
-                const responseMembers: Miembro[] = await getMembers(); // Función para obtener la lista de miembros
+                const responseMemberShips: Membresia[] = await getMemberList();
+                const responseMembers: Miembro[] = await getMembers();
 
                 setMembresias(responseMemberShips);
                 setMiembros(responseMembers);
 
-
-                // Si params.id está presente, cargar los datos específicos para actualizar
                 if (params.id) {
-                    const responseAsignacion = await getAsignarMemberShips(parseInt(params.id)); // Función para obtener una asignación específica
-                    //console.log("Datos de la asignación para editar:", responseAsignacion);
-
-                    //formateamos la fecha antes de pasarla al formulario
+                    const responseAsignacion = await getAsignarMemberShips(parseInt(params.id));
                     if (responseAsignacion.dateInitial && responseAsignacion.dateFinal) {
                         responseAsignacion.dateInitial = formatDate(responseAsignacion.dateInitial);
                         responseAsignacion.dateFinal = formatDate(responseAsignacion.dateFinal);
                     }
+                    // Cargar multiplier y discount si la asignación los tiene
+                    const mult = Number(responseAsignacion.multiplier) || 1;
+                    const disc = Number(responseAsignacion.discount_percent) || 0;
+                    setMultiplier(mult);
+                    setDiscountPercent(disc);
 
-                    // Prellenar los campos del formulario con los datos existentes
                     reset({
                         miembro: responseAsignacion.miembro.toString(),
                         membresia: responseAsignacion.membresia.toString(),
                         dateInitial: responseAsignacion.dateInitial,
-                        //dateFinal: responseAsignacion.dateFinal,
                     });
                 }
             } catch (error) {
@@ -161,7 +188,7 @@ const MemberShipsForm = () => {
     }, [params.id, reset]);
 
     const formatDate = (date: string): string => {
-        if (!date) return ''; // Retorna un valor vacío si la fecha es undefined o null
+        if (!date) return '';
         try {
             const [day, month, year] = date.split('-');
             return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
@@ -173,15 +200,9 @@ const MemberShipsForm = () => {
 
     const handleMemberShipsChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const membresiaId = parseInt(event.target.value);
-        const selectedMembresia = membresias.find((membresia) => membresia.id === membresiaId);
-
-        if (selectedMembresia) {
-            setSelectedPrice(selectedMembresia.price);
-        } else {
-            setSelectedPrice(null);
-        }
+        const found = membresias.find((m) => m.id === membresiaId);
+        setSelectedMembresia(found ?? null);
     };
-
 
     return (
         <main className="max-w-7xl mx-auto p-6 lg:p-10">
@@ -268,14 +289,65 @@ const MemberShipsForm = () => {
                                     {
                                         errors.dateInitial && <span className='text-red-500 text-sm'>{errors.dateInitial.message}</span>
                                     }
-                                </div>                                
+                                </div>
+                                {/* Multiplier / Periodos */}
+                                <div className="relative pt-5">
+                                    <Select
+                                        value={multiplier}
+                                        onChange={handleMultiplierChange}
+                                    >
+                                        <option value={1}>1 mes</option>
+                                        <option value={2}>2 meses</option>
+                                        <option value={3}>3 meses</option>
+                                        <option value={6}>6 meses</option>
+                                        <option value={12}>12 meses</option>
+                                    </Select>
+                                    <Label>
+                                        Periodos
+                                    </Label>
+                                </div>
+                                {/* Descuento */}
+                                <div className="relative pt-5">
+                                    <Input
+                                        type="number"
+                                        min={0}
+                                        max={100}
+                                        step={0.1}
+                                        value={discountPercent}
+                                        onChange={(e) => setDiscountPercent(parseFloat(e.target.value) || 0)}
+                                    />
+                                    <Label>
+                                        Descuento %
+                                    </Label>
+                                </div>
                             </section>
+                            {/* Preview de precio y fecha final */}
+                            {selectedMembresia && (
+                                <div className="bg-sky-50 border border-sky-200 p-4 rounded-lg space-y-2">
+                                    <p className="text-sm text-sky-800 font-semibold">Vista previa</p>
+                                    <div className="grid grid-cols-2 gap-2 text-sm text-sky-700">
+                                        <span>Precio base:</span>
+                                        <span className="font-semibold text-right">{formatCurrency(Number(selectedMembresia.price))}</span>
+                                        <span>Periodos:</span>
+                                        <span className="font-semibold text-right">{multiplier}x</span>
+                                        <span>Descuento:</span>
+                                        <span className="font-semibold text-right">{discountPercent}%</span>
+                                        <span className="text-base font-bold">Total estimado:</span>
+                                        <span className="text-base font-bold text-right">{formatCurrency(estimatedPrice)}</span>
+                                        {estimatedDateFinal && (
+                                            <>
+                                                <span>Fecha final aprox.:</span>
+                                                <span className="font-semibold text-right">{estimatedDateFinal}</span>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
                             {/* btn Register */}
                             <div className="w-full flex items-center justify-center">
                                 <Button type="submit">
                                     {params.id ? 'Actualizar' : 'Registrar'} <RiLoginBoxLine className='text-surface-container-lowest' />
                                 </Button>
-
                             </div>
                         </form>
                     </section>
