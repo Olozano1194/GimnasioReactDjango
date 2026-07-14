@@ -10,7 +10,8 @@ export interface AsignarMemberShips {
     dateInitial: string;
     dateFinal:   string;
     name?: string;
-    price: number | string;    
+    price: number | string;
+    multiplier: number | string;    
     miembro_details: {
         id: number;
         name: string;
