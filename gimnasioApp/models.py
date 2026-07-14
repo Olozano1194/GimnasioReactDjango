@@ -2,6 +2,8 @@ from django.db import models
 from datetime import timedelta, date
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.core.exceptions import ValidationError
+from decimal import Decimal
+from django.db.models import Sum
 
 
 # ============================================================
@@ -176,6 +178,8 @@ class MembresiaAsignada(models.Model):
     dateInitial = models.DateField()
     dateFinal = models.DateField(editable=False, null=True, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, editable=False)
+    multiplier = models.DecimalField(default=1, max_digits=4, decimal_places=1)
+    discount_percent = models.DecimalField(default=0, max_digits=5, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
     notified_at = models.DateTimeField(null=True, blank=True, help_text="Fecha en que se marcó como notificada/leída")
 
@@ -188,10 +192,13 @@ class MembresiaAsignada(models.Model):
     def save(self, *args, **kwargs):
         if not self.gimnasio_id and self.miembro_id:
             self.gimnasio = self.miembro.gimnasio
-        # Se calcula la fecha final de la membresia + precio al guardarlo
-        self.dateFinal = self.dateInitial + timedelta(days=self.membresia.duration)
-        self.price = self.membresia.price
-        super().save(*args, **kwargs)  # Llamar al método save de la clase padre
+        if not self.pk:  # Only on creation
+            mult = Decimal(str(self.multiplier))
+            disc = Decimal(str(self.discount_percent or 0))
+            dias_totales = int(self.membresia.duration * mult)
+            self.dateFinal = self.dateInitial + timedelta(days=dias_totales)
+            self.price = self.membresia.price * mult * (Decimal('1') - disc / Decimal('100'))
+        super().save(*args, **kwargs)
 
     def clean(self):
         if MembresiaAsignada.objects.filter(miembro=self.miembro,
@@ -204,5 +211,48 @@ class MembresiaAsignada(models.Model):
         hoy = date.today()
         return self.dateInitial <= hoy <= self.dateFinal
 
+    @property
+    def total_pagado(self):
+        return self.pagos.aggregate(total=Sum('monto'))['total'] or Decimal('0')
+
+    @property
+    def saldo_pendiente(self):
+        return self.price - self.total_pagado
+
+    @property
+    def estado_pago(self):
+        if self.total_pagado >= self.price:
+            return 'paid'
+        elif self.total_pagado > 0:
+            return 'partial'
+        return 'pending'
+
     def __str__(self):
-        return f"{self.miembro.name} - {self.miembro.lastname} - {self.membresia.name}"    
+        return f"{self.miembro.name} - {self.miembro.lastname} - {self.membresia.name}"
+
+
+class PagoMembresia(models.Model):
+    METODO_PAGO_CHOICES = [
+        ('efectivo', 'Efectivo'),
+        ('transferencia', 'Transferencia'),
+        ('nequi', 'Nequi'),
+    ]
+
+    membresia_asignada = models.ForeignKey(
+        MembresiaAsignada,
+        on_delete=models.CASCADE,
+        related_name='pagos'
+    )
+    monto = models.DecimalField(max_digits=10, decimal_places=2)
+    fecha_pago = models.DateTimeField(auto_now_add=True)
+    metodo_pago = models.CharField(max_length=20, choices=METODO_PAGO_CHOICES)
+    nota = models.TextField(blank=True, default='')
+
+    class Meta:
+        verbose_name = 'Pago Membresia'
+        verbose_name_plural = 'Pagos Membresia'
+        db_table = 'pago_membresia'
+        ordering = ['-fecha_pago']
+
+    def __str__(self):
+        return f"Pago {self.monto} - {self.metodo_pago} ({self.fecha_pago.strftime('%d/%m/%Y') if self.fecha_pago else '--'})"    

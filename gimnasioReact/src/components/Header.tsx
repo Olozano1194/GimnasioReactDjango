@@ -9,6 +9,3 @@ const Header = () => {
     );
 };
 export default Header;
-/**
- * h-[7vh] md:h-[10vh] border-b border-gray-600 p-8 flex items-center justify-end
- */

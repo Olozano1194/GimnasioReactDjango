@@ -6,4 +6,6 @@ export interface CreateMemberDto{
     address:     string;
     initial_membership_id?: number;
     dateInitial?: string;
+    multiplier?: number;
+    discount_percent?: number;
 };

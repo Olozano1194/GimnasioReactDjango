@@ -170,18 +170,21 @@ AWS_S3_SIGNATURE_VERSION = 's3v4'
 AWS_S3_FILE_OVERWRITE = False
 AWS_S3_USE_PATH_STYLE_ENDPOINT = True  # Requerido para Supabase S3 (path-style)
 # Django 5.1 unified STORAGES setting (replaces DEFAULT_FILE_STORAGE y STATICFILES_STORAGE)
+# 'staticfiles' DEBE estar siempre definido (requerido por Django 5.1+)
+# En desarrollo usamos el backend por defecto de Django.
+# En producción usamos WhiteNoise con compresión y cacheo de manifests.
 STORAGES = {
     'default': {
         'BACKEND': 'gimnasioApp.storage.SupabaseMediaStorage',
     },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage' if not DEBUG else 'django.contrib.staticfiles.storage.StaticFilesStorage',
+    },
 }
 
-# This production code might break development mode, so we check whether we're in DEBUG mode
+# STATIC_ROOT solo se necesita para producción (collectstatic)
 if not DEBUG:   
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-    STORAGES['staticfiles'] = {
-        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
-    }
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
