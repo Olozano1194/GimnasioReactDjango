@@ -11,7 +11,6 @@ import Table from '../../../components/Table';
 import ActionButtons from "../../../components/table/ActionButton";
 // components Sections
 import HeaderSection from "../../../components/table/section/HeaderSection";
-import StatsOverviewSection from "../../../components/table/section/StatsOverviewSection";
 //Mensajes
 import { toast } from 'react-hot-toast';
 // icons
@@ -249,7 +248,7 @@ const ListAsignarMemberShips = () => {
                 title="Listado de Asignación"
                 highlight="Membresías" 
             />
-            <StatsOverviewSection />            
+            
             {/* Busqueda */}
             <section className="relative w-full">
                 <span className="absolute left-3 text-lg text-nav top-1/2 -translate-y-1/2"><IoSearch /></span>

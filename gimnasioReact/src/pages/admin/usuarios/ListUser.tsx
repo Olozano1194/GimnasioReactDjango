@@ -7,7 +7,6 @@ import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import Table from '../../../components/Table';
 // components Sections
 import HeaderSection from "../../../components/table/section/HeaderSection";
-import StatsOverviewSection from "../../../components/table/section/StatsOverviewSection";
 //Mensajes
 import { toast } from 'react-hot-toast';
 //Models
@@ -81,7 +80,6 @@ const ListUser = () => {
                 title="Listado de"
                 highlight="Usuarios" 
             />
-            <StatsOverviewSection />
             {
                 isLoading ? (
                     <div className="text-center py-4">Cargando...</div>

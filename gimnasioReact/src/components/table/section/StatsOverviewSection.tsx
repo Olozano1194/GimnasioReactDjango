@@ -41,11 +41,11 @@ const StatsOverviewSection = () => {
                     </div>
                 </article>
                 <article className="bg-surface-container-lowest border-b-2 border-primary/10 flex flex-col justify-between p-6 rounded-xl shadow-sm">
-                    <p className="font-bold text-on-surface text-xs tracking-widest uppercase">Retention Rate</p>
+                    <p className="font-bold text-on-surface text-xs tracking-widest uppercase">Tasa de Retención</p>
                     <h3 className="font-black text-3xl text-on-surface tracking-tighter">...</h3>
                 </article>
                 <article className="bg-surface-container-lowest border-b-2 border-primary/10 flex flex-col justify-between p-6 rounded-xl shadow-sm">
-                    <p className="font-bold text-on-surface text-xs tracking-widest uppercase">New Today</p>
+                    <p className="font-bold text-on-surface text-xs tracking-widest uppercase">Nuevos Hoy</p>
                     <h3 className="font-black text-3xl text-on-surface tracking-tighter">...</h3>
                 </article>
             </section>
@@ -71,7 +71,7 @@ const StatsOverviewSection = () => {
                 </div>
             </article>
             <article className="bg-surface-container-lowest border-b-2 border-primary/10 flex flex-col justify-between p-6 rounded-xl shadow-sm">
-                <p className="font-bold text-on-surface text-xs tracking-widest uppercase">Retention Rate</p>
+                <p className="font-bold text-on-surface text-xs tracking-widest uppercase">Tasa de Retención</p>
                 <h3 className="font-black text-3xl text-on-surface tracking-tighter">
                     {stats.retention_rate}%
                 </h3>
@@ -83,7 +83,7 @@ const StatsOverviewSection = () => {
                 </div>
             </article>
             <article className="bg-surface-container-lowest border-b-2 border-primary/10 flex flex-col justify-between p-6 rounded-xl shadow-sm">
-                <p className="font-bold text-on-surface text-xs tracking-widest uppercase">New Today</p>
+                <p className="font-bold text-on-surface text-xs tracking-widest uppercase">Nuevos Hoy</p>
                 <h3 className="font-black text-3xl text-on-surface tracking-tighter">
                     {stats.new_today}
                 </h3>
