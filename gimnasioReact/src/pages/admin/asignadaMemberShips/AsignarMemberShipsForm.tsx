@@ -37,6 +37,8 @@ const MemberShipsForm = () => {
     const [selectedMembresia, setSelectedMembresia] = useState<Membresia | null>(null);
     const [multiplier, setMultiplier] = useState<number>(1);
     const [discountPercent, setDiscountPercent] = useState<number>(0);
+    const [membresias, setMembresias] = useState<Membresia[]>([]);
+    const [miembros, setMiembros] = useState<Miembro[]>([]);
     const params = useParams<{ id?: string }>();
     const isEditing = !!params.id;
     const navigate = useNavigate();
