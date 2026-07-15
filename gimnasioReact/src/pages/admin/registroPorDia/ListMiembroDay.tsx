@@ -177,7 +177,7 @@ const ListMiembroDay = () => {
                 title="Listado de Miembros por"
                 highlight="Día" 
             />
-            <StatsOverviewSection />            
+            <StatsOverviewSection />
             {/* Busqueda */}
             <section className="relative w-full">
                 <span className="absolute left-3 text-lg text-nav top-1/2 -translate-y-1/2"><IoSearch /></span>

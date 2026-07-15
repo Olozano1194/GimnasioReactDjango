@@ -244,26 +244,27 @@ class DashboardStatsView(APIView):
         else:
             prev_month_end = date(prev_year, prev_month + 1, 1) - timedelta(days=1)
         
-        # Miembros que tenían membresía activa el mes anterior
-        prev_active = MembresiaAsignada.objects.filter(
+        # Miembros únicos activos el mes anterior (distinct por miembro)
+        prev_active_ids = MembresiaAsignada.objects.filter(
             miembro__gimnasio=gimnasio,
             dateInitial__lte=prev_month_end,
             dateFinal__gte=prev_month_start
-        ).count()
+        ).values_list('miembro', flat=True).distinct()
+        prev_active_count = len(prev_active_ids)
         
-        # Miembros que estavam activos el mes anterior Y aún siguen activos
-        from django.db.models import Q
-        still_active = MembresiaAsignada.objects.filter(
-            miembro__gimnasio=gimnasio,
-            dateInitial__lte=prev_month_end,
-            dateFinal__gte=prev_month_start
-        ).filter(
-            dateFinal__gte=today
-        ).count()
+        # De esos miembros, cuántos siguen activos hoy (con cualquier membresía)
+        still_active_count = 0
+        if prev_active_count > 0:
+            still_active_count = MembresiaAsignada.objects.filter(
+                miembro__in=list(prev_active_ids),
+                miembro__gimnasio=gimnasio,
+                dateFinal__gte=today,
+                dateInitial__lte=today
+            ).values('miembro').distinct().count()
         
         # Calcular retention
-        if prev_active > 0:
-            retention = round((still_active / prev_active) * 100, 1)
+        if prev_active_count > 0:
+            retention = round((still_active_count / prev_active_count) * 100, 1)
         else:
             retention = 100.0  # Si no hay miembros anteriores, 100%
         

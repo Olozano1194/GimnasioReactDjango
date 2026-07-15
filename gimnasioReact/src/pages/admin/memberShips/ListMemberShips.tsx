@@ -9,7 +9,6 @@ import Table from '../../../components/Table';
 import ActionButtons from "../../../components/table/ActionButton";
 // components Sections
 import HeaderSection from "../../../components/table/section/HeaderSection";
-import StatsOverviewSection from "../../../components/table/section/StatsOverviewSection";
 //Mensajes
 import { toast } from 'react-hot-toast';
 //Models
@@ -156,7 +155,7 @@ const ListMemberShips = () => {
                 title="Listado de"
                 highlight="Membresías" 
             />
-            <StatsOverviewSection />           
+
             {
                 isLoading ? (
                     <div className="text-center py-4">Buscando...</div>
