@@ -201,8 +201,13 @@ class MembresiasSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Membresia
-        fields = ['id', 'name', 'price', 'duration', 'gimnasio', 'gimnasio_name', 'is_active']
+        fields = ['id', 'name', 'price', 'duration', 'max_multiplier', 'is_active', 'gimnasio', 'gimnasio_name']
         read_only_fields = ('id', 'gimnasio',)
+
+    def validate_duration(self, value):
+        if value < 1 or value > 365:
+            raise serializers.ValidationError("La duración debe estar entre 1 y 365 días")
+        return value
 
     def create(self, validated_data):
         # Remover cualquier gimnasio de los datos validados
@@ -224,9 +229,7 @@ class MembresiaAsignadaSerializer(serializers.ModelSerializer):
     membresia_details = MembresiasSerializer(source='membresia', read_only=True)
 
     dateInitial = serializers.DateField(format="%d-%m-%Y", input_formats=['%Y-%m-%d', '%d-%m-%Y'])
-    dateFinal = serializers.DateField(format="%d-%m-%Y", input_formats=['%Y-%m-%d', '%d-%m-%Y'])
-
-    price = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+    dateFinal = serializers.DateField(format="%d-%m-%Y", input_formats=['%Y-%m-%d', '%d-%m-%Y'], read_only=True)
 
     multiplier = serializers.DecimalField(max_digits=4, decimal_places=1, default=Decimal('1'))
     discount_percent = serializers.DecimalField(max_digits=5, decimal_places=2, default=Decimal('0'))
@@ -239,7 +242,7 @@ class MembresiaAsignadaSerializer(serializers.ModelSerializer):
         fields = ['id', 'miembro', 'membresia', 'miembro_details', 'membresia_details',
                   'dateInitial', 'dateFinal', 'price', 'multiplier', 'discount_percent',
                   'total_pagado', 'saldo_pendiente', 'estado_pago']
-        read_only_fields = ('id', 'price')
+        read_only_fields = ('id', 'price', 'dateFinal')
 
     def validate_multiplier(self, value):
         if value < 1:
@@ -268,9 +271,15 @@ class MembresiaAsignadaSerializer(serializers.ModelSerializer):
                 "El miembro no pertenece a tu gimnasio"
             )
         
-        # Verificar fechas considerando el multiplier
+        # Validar multiplier contra max_multiplier de la membresía
         multiplier = data.get('multiplier', getattr(self.instance, 'multiplier', 1)) or 1
-        dias_totales = int(membresia.duration * multiplier)
+        if int(multiplier) > membresia.max_multiplier:
+            raise serializers.ValidationError(
+                f"El multiplicador {multiplier} excede el máximo permitido ({membresia.max_multiplier})"
+            )
+        
+        # Verificar fechas considerando el multiplier
+        dias_totales = int(membresia.duration * Decimal(str(multiplier)))
         expected_final = inicio + timedelta(days=dias_totales)
         
         suscripcion = MembresiaAsignada.objects.filter(

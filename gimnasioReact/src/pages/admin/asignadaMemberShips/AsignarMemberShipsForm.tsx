@@ -29,15 +29,16 @@ const DISCOUNT_TIERS: Record<number, number> = {
 interface FormData {
     miembro: string;
     membresia: string;
+    multiplier: string;
     dateInitial: string;
 }
 
 const MemberShipsForm = () => {
-    const [miembros, setMiembros] = useState<Miembro[]>([]);
-    const [membresias, setMembresias] = useState<Membresia[]>([]);
     const [selectedMembresia, setSelectedMembresia] = useState<Membresia | null>(null);
     const [multiplier, setMultiplier] = useState<number>(1);
     const [discountPercent, setDiscountPercent] = useState<number>(0);
+    const [membresias, setMembresias] = useState<Membresia[]>([]);
+    const [miembros, setMiembros] = useState<Miembro[]>([]);
     const params = useParams<{ id?: string }>();
     const isEditing = !!params.id;
     const navigate = useNavigate();
@@ -104,10 +105,10 @@ const MemberShipsForm = () => {
             const requestData: CreateAsignarMemberShipsDto = {
                 miembro: miembroId,
                 membresia: membresiaId,
-                dateInitial: dateInitial,
-                dateFinal: dateFinal,
                 multiplier: multiplier,
                 discount_percent: discountPercent,
+                dateInitial: dateInitial,
+                dateFinal: dateFinal,
             };
 
             if (params.id) {
@@ -175,6 +176,7 @@ const MemberShipsForm = () => {
                     reset({
                         miembro: responseAsignacion.miembro.toString(),
                         membresia: responseAsignacion.membresia.toString(),
+                        multiplier: responseAsignacion.multiplier?.toString() ?? '1',
                         dateInitial: responseAsignacion.dateInitial,
                     });
                 }
@@ -200,10 +202,18 @@ const MemberShipsForm = () => {
 
     const handleMemberShipsChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const membresiaId = parseInt(event.target.value);
-        const found = membresias.find((m) => m.id === membresiaId);
-        setSelectedMembresia(found ?? null);
+        const found = membresias.find((m) => m.id === membresiaId) || null;
+        setSelectedMembresia(found);
+        // Reset multiplier to 1 when membership changes
+        setMultiplier(1);
+        setDiscountPercent(0);
     };
 
+    // Generate multiplier options from 1..max_multiplier (dynamic per membership)
+    const multiplierOptions = selectedMembresia
+        ? Array.from({ length: selectedMembresia.max_multiplier }, (_, i) => i + 1)
+        : [];
+    const showMultiplier = selectedMembresia && selectedMembresia.max_multiplier > 1;
     return (
         <main className="max-w-7xl mx-auto p-6 lg:p-10">
             <BreadCrumbsSection
@@ -260,7 +270,7 @@ const MemberShipsForm = () => {
                                         }}
                                     >
                                         <option value="">Seleccione una Membresía</option>
-                                        {membresias.map((membresia) => (
+                                        {membresias.filter(m => m.is_active !== false).map((membresia) => (
                                             <option key={membresia.id} value={membresia.id?.toString()}>{membresia.name} - ${membresia.price}</option>
                                         ))}
                                     </Select>
@@ -271,6 +281,24 @@ const MemberShipsForm = () => {
                                         errors.membresia && <span className='text-red-500 text-sm'>{errors.membresia.message}</span>
                                     }
                                 </div>
+                                {/* Multiplier — hidden when max_multiplier === 1 */}
+                                {showMultiplier && (
+                                    <div className="relative pt-5">
+                                        <Select
+                                            value={multiplier}
+                                            onChange={(e) => {
+                                                handleMultiplierChange(e);
+                                            }}
+                                        >
+                                            {multiplierOptions.map((val) => (
+                                                <option key={val} value={val}>{val}x</option>
+                                            ))}
+                                        </Select>
+                                        <Label>
+                                            Periodos
+                                        </Label>
+                                    </div>
+                                )}
                                 {/* Date Initial */}
                                 <div className="relative pt-5">
                                     <Input
@@ -289,22 +317,6 @@ const MemberShipsForm = () => {
                                     {
                                         errors.dateInitial && <span className='text-red-500 text-sm'>{errors.dateInitial.message}</span>
                                     }
-                                </div>
-                                {/* Multiplier / Periodos */}
-                                <div className="relative pt-5">
-                                    <Select
-                                        value={multiplier}
-                                        onChange={handleMultiplierChange}
-                                    >
-                                        <option value={1}>1 mes</option>
-                                        <option value={2}>2 meses</option>
-                                        <option value={3}>3 meses</option>
-                                        <option value={6}>6 meses</option>
-                                        <option value={12}>12 meses</option>
-                                    </Select>
-                                    <Label>
-                                        Periodos
-                                    </Label>
                                 </div>
                                 {/* Descuento */}
                                 <div className="relative pt-5">

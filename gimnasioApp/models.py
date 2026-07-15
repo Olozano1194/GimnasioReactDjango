@@ -1,8 +1,8 @@
 from django.db import models
 from datetime import timedelta, date
+from decimal import Decimal
 from django.contrib.auth.models import BaseUserManager, AbstractBaseUser
 from django.core.exceptions import ValidationError
-from decimal import Decimal
 from django.db.models import Sum
 
 
@@ -141,16 +141,11 @@ class UsuarioGymDay(models.Model):
         ordering = ['-created_at']
 
 class Membresia(models.Model):
-    OPCIONES_NAME = [
-        ('básico', 'Básico'),
-        ('premium', 'Premium'),
-        ('VIP', 'VIP'),
-    ]    
-    name = models.CharField(max_length=10, choices=OPCIONES_NAME, default='básico')
+    name = models.CharField(max_length=100)
     price = models.DecimalField(max_digits=10, decimal_places=2)
-    duration = models.PositiveIntegerField(help_text="Duración en días (ej: 15, 30, 45)")
+    duration = models.PositiveIntegerField(help_text="Duración en días (1-365)")
+    max_multiplier = models.PositiveIntegerField(default=1, help_text="Máximo multiplicador permitido (1 = no multiplicable)")
     is_active = models.BooleanField(default=True)
-    # created_at = models.DateTimeField(auto_now_add=True)
     
     # FK a Gimnasio para multi-tenant
     gimnasio = models.ForeignKey(
@@ -161,7 +156,6 @@ class Membresia(models.Model):
         blank=False
     )
 
-
     def __str__(self):
         return self.name
     
@@ -169,17 +163,17 @@ class Membresia(models.Model):
         verbose_name = 'Membresia'
         verbose_name_plural = 'Membresias'
         db_table = 'membresia'
-        # ordering = ['-created_at']
+        unique_together = ('gimnasio', 'name')
 
 class MembresiaAsignada(models.Model):
     gimnasio = models.ForeignKey(Gimnasio, on_delete=models.CASCADE, related_name='membresias_asignadas', null=False, blank=False)
     miembro = models.ForeignKey(UsuarioGym, on_delete=models.CASCADE, related_name='miembro')
     membresia = models.ForeignKey(Membresia, on_delete=models.CASCADE)
+    multiplier = models.DecimalField(default=1, max_digits=4, decimal_places=1, help_text="Multiplicador de duración/precio (1 = sin multiplicar)")
+    discount_percent = models.DecimalField(default=0, max_digits=5, decimal_places=2, help_text="Descuento porcentual (0-100)")
     dateInitial = models.DateField()
     dateFinal = models.DateField(editable=False, null=True, blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, editable=False)
-    multiplier = models.DecimalField(default=1, max_digits=4, decimal_places=1)
-    discount_percent = models.DecimalField(default=0, max_digits=5, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
     notified_at = models.DateTimeField(null=True, blank=True, help_text="Fecha en que se marcó como notificada/leída")
 
@@ -192,12 +186,27 @@ class MembresiaAsignada(models.Model):
     def save(self, *args, **kwargs):
         if not self.gimnasio_id and self.miembro_id:
             self.gimnasio = self.miembro.gimnasio
+        # Ensure dateInitial is a date object, not a string
+        inicio = self.dateInitial
+        if isinstance(inicio, str):
+            try:
+                partes = inicio.split('-')
+                inicio = date(int(partes[0]), int(partes[1]), int(partes[2]))
+            except (IndexError, ValueError):
+                raise ValidationError("Formato de fecha inválido. Use YYYY-MM-DD.")
         if not self.pk:  # Only on creation
+            if int(self.multiplier) > self.membresia.max_multiplier:
+                raise ValidationError(
+                    f"El multiplicador {self.multiplier} excede el máximo permitido ({self.membresia.max_multiplier})"
+                )
             mult = Decimal(str(self.multiplier))
             disc = Decimal(str(self.discount_percent or 0))
             dias_totales = int(self.membresia.duration * mult)
-            self.dateFinal = self.dateInitial + timedelta(days=dias_totales)
+            self.dateFinal = inicio + timedelta(days=dias_totales)
             self.price = self.membresia.price * mult * (Decimal('1') - disc / Decimal('100'))
+        else:
+            self.dateFinal = inicio + timedelta(days=self.membresia.duration)
+            self.price = self.membresia.price
         super().save(*args, **kwargs)
 
     def clean(self):

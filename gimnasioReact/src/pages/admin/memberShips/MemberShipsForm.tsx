@@ -9,7 +9,7 @@ import BreadCrumbsSection from "../../../components/form/section/BreadCrumbsSect
 //Mensajes
 import { toast } from "react-hot-toast";
 //ui
-import { Input, Label, Button, Select } from '../../../components/ui/index';
+import { Input, Label, Button } from '../../../components/ui/index';
 //API
 import { createMemberShips, updateMemberShips, getMemberShips } from '../../../api/action/memberShips.api';
 
@@ -18,6 +18,8 @@ interface MembresiaForm {
     name: string;
     price: string;
     duration: string;
+    max_multiplier: string;
+    is_active: boolean;
 };
 
 
@@ -34,6 +36,8 @@ const MemberShipsForm = () => {
                 name: data.name,
                 price: Number(data.price),
                 duration: Number(data.duration),
+                max_multiplier: Number(data.max_multiplier),
+                is_active: data.is_active,
             };
 
             if (params.id) {
@@ -85,6 +89,8 @@ const MemberShipsForm = () => {
                         name: response.name,
                         price: String(response.price),
                         duration: String(response.duration),
+                        max_multiplier: String(response.max_multiplier ?? 1),
+                        is_active: response.is_active ?? true,
                     });
                 }
             } catch (error) {
@@ -115,19 +121,16 @@ const MemberShipsForm = () => {
                             <section className='gap-y-10 gap-x-8 grid grid-cols-1 md:grid-cols-2'>
                                 {/* Name */}
                                 <div className="relative pt-5">
-                                    <Select
+                                    <Input
+                                        type="text"
+                                        placeholder=""
                                         {...register('name', {
                                             required: {
                                                 value: true,
                                                 message: 'Nombre requerido'
                                             },
                                         })}
-                                    >
-                                        <option value="">Escoge El Plan</option>
-                                        <option value="básico">Básico</option>
-                                        <option value="premium">Premium</option>
-                                        <option value="VIP">VIP</option>
-                                    </Select>
+                                    />
                                     <Label>
                                         Nombre del Plan
                                     </Label>
@@ -170,7 +173,8 @@ const MemberShipsForm = () => {
                                             },
                                             validate: (value) => {
                                                 const num = Number(value);
-                                                return [15, 30, 45].includes(num) || 'Solo se permiten los valores 15, 30 o 45';
+                                                if (isNaN(num) || !Number.isInteger(num)) return 'Debe ser un número entero';
+                                                return (num >= 1 && num <= 365) || 'La duración debe estar entre 1 y 365 días';
                                             },
                                             pattern: {
                                                 value: /^[0-9]+$/,
@@ -179,12 +183,55 @@ const MemberShipsForm = () => {
                                         })}
                                     />
                                     <Label>
-                                        Duración
+                                        Duración (días)
                                     </Label>
                                     {
                                         errors.duration && <span className='text-red-500 text-sm'>{errors.duration.message}</span>
                                     }
-                                </div>                                
+                                </div>
+                                {/* Max Multiplier */}
+                                <div className="relative pt-5">
+                                    <Input
+                                        type="text"
+                                        placeholder=""
+                                        {...register('max_multiplier', {
+                                            required: {
+                                                value: true,
+                                                message: 'Multiplicador requerido'
+                                            },
+                                            validate: (value) => {
+                                                const num = Number(value);
+                                                if (isNaN(num) || !Number.isInteger(num)) return 'Debe ser un número entero';
+                                                return num >= 1 || 'El multiplicador debe ser al menos 1';
+                                            },
+                                            pattern: {
+                                                value: /^[0-9]+$/,
+                                                message: 'Multiplicador invalido'
+                                            },
+                                        })}
+                                    />
+                                    <Label>
+                                        Multiplicador Máx.
+                                    </Label>
+                                    {
+                                        errors.max_multiplier && <span className='text-red-500 text-sm'>{errors.max_multiplier.message}</span>
+                                    }
+                                </div>
+                                {/* is_active toggle */}
+                                <div className="relative pt-5 flex items-center gap-3">
+                                    <label className="relative inline-flex items-center cursor-pointer">
+                                        <input
+                                            type="checkbox"
+                                            className="sr-only peer"
+                                            defaultChecked={true}
+                                            {...register('is_active')}
+                                        />
+                                        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:inset-s-0 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                    </label>
+                                    <Label>
+                                        Membresía Activa
+                                    </Label>
+                                </div>
                             </section>
                             {/* btn Register */}
                             <div className="w-full flex items-center justify-center">

@@ -11,7 +11,11 @@ class GimnasioappConfig(AppConfig):
 
     def ready(self):
         import sys
-        # Avoid running during management commands
+
+        # Importar señales para seed de membresías por defecto (siempre)
+        import gimnasioApp.signals  # noqa: F401
+
+        # Avoid running demo admin creation during management commands
         if len(sys.argv) >= 2 and sys.argv[1] in ['migrate', 'makemigrations', 'collectstatic', 'test']:
             return
 

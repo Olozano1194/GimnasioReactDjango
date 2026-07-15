@@ -4,6 +4,8 @@ import json
 from django.test import TestCase
 from django.test import RequestFactory
 from django.contrib.auth.models import AnonymousUser
+from django.db import IntegrityError
+from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework.test import APIRequestFactory, force_authenticate
 from rest_framework import status
 from unittest.mock import patch, MagicMock, call
@@ -134,8 +136,11 @@ class MultiTenantViewSetMixinTest(TestCase):
         force_authenticate(request, user=self.user1)
         response = view(request)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]['gimnasio'], self.gimnasio1.id)
+        # gym1 has 3 defaults (Básico, Premium, VIP) + Plan 1 = 4, gym2 has Plan 2
+        gym1_count = len([m for m in response.data if m['gimnasio'] == self.gimnasio1.id])
+        gym2_count = len([m for m in response.data if m['gimnasio'] == self.gimnasio2.id])
+        self.assertEqual(gym1_count, 4)
+        self.assertEqual(gym2_count, 0)
 
 
 class UserViewSetCreateTest(TestCase):
@@ -423,7 +428,7 @@ class MembresiaAsignadaSaveTest(TestCase):
             name="Juan", lastname="Perez", gimnasio=self.gimnasio
         )
         self.membresia = Membresia.objects.create(
-            name="básico", price=Decimal('50000'), duration=30, gimnasio=self.gimnasio
+            name="Plan Test", price=Decimal('50000'), duration=30, max_multiplier=12, gimnasio=self.gimnasio
         )
 
     def test_save_con_multiplier_3_y_discount_5(self):
@@ -481,7 +486,7 @@ class PagoMembresiaValidacionTest(TestCase):
             name="Juan", lastname="Perez", gimnasio=self.gimnasio
         )
         self.membresia = Membresia.objects.create(
-            name="básico", price=Decimal('100000'), duration=30, gimnasio=self.gimnasio
+            name="Plan Test", price=Decimal('100000'), duration=30, gimnasio=self.gimnasio
         )
         self.asignada = MembresiaAsignada.objects.create(
             miembro=self.miembro,
@@ -587,7 +592,7 @@ class MembresiaAsignadaPropiedadesTest(TestCase):
             name="Maria", lastname="Lopez", gimnasio=self.gimnasio
         )
         self.membresia = Membresia.objects.create(
-            name="premium", price=Decimal('100000'), duration=30, gimnasio=self.gimnasio
+            name="Plan Premium", price=Decimal('100000'), duration=30, gimnasio=self.gimnasio
         )
         self.asignada = MembresiaAsignada.objects.create(
             miembro=self.miembro,
@@ -653,7 +658,7 @@ class PagoMembresiaIntegracionTest(TestCase):
             name="Carlos", lastname="Mendez", gimnasio=self.gimnasio
         )
         self.membresia = Membresia.objects.create(
-            name="básico", price=Decimal('50000'), duration=30, gimnasio=self.gimnasio
+            name="Plan Test", price=Decimal('50000'), duration=30, gimnasio=self.gimnasio
         )
         self.asignada = MembresiaAsignada.objects.create(
             miembro=self.miembro,
@@ -731,7 +736,7 @@ class HomeDashboardPagosTest(TestCase):
 
         # Membresia basica de 30 dias
         self.membresia = Membresia.objects.create(
-            name="básico", price=Decimal('50000'), duration=30, gimnasio=self.gimnasio
+            name="Plan Test", price=Decimal('50000'), duration=30, gimnasio=self.gimnasio
         )
 
         # Miembro 1: Al dia (paid)
@@ -807,3 +812,310 @@ class HomeDashboardPagosTest(TestCase):
         # Solo deberia contar los 3 miembros del gimnasio original
         self.assertEqual(data['num_miembros'], 3)
         self.assertEqual(data['por_cobrar'], 70000.0)
+
+
+# ============================================================
+# PHASE 6: CUSTOMIZABLE MEMBERSHIPS TESTS
+# ============================================================
+
+class MembresiaModelTest(TestCase):
+    """Tests for Membresia model changes."""
+
+    def setUp(self):
+        self.gimnasio = Gimnasio.objects.create(name="Test Gym")
+        # Note: seed signal creates Básico/Premium/VIP automatically
+        self.membresia = Membresia.objects.create(
+            name="Premium Pro",
+            price=50000,
+            duration=30,
+            max_multiplier=12,
+            gimnasio=self.gimnasio
+        )
+
+    # 6.1: Existing tests updated - Membresia objects now include max_multiplier
+    def test_membresia_has_max_multiplier_default(self):
+        """Membresia should default max_multiplier to 1."""
+        m = Membresia.objects.create(
+            name="Basico Plus", price=100, duration=15, gimnasio=self.gimnasio
+        )
+        self.assertEqual(m.max_multiplier, 1)
+
+    def test_membresia_accepts_free_text_name(self):
+        """Membresia.name should accept any string, not just choices."""
+        m = Membresia.objects.create(
+            name="Mensual $50k", price=50000, duration=30,
+            max_multiplier=6, gimnasio=self.gimnasio
+        )
+        self.assertEqual(m.name, "Mensual $50k")
+
+    # 6.3: unique_together per gym
+    def test_unique_together_per_gym(self):
+        """Two memberships with same name for same gym should raise IntegrityError."""
+        Membresia.objects.create(
+            name="UniquePlan", price=100, duration=15,
+            max_multiplier=1, gimnasio=self.gimnasio
+        )
+        with self.assertRaises(IntegrityError):
+            Membresia.objects.create(
+                name="UniquePlan", price=200, duration=30,
+                max_multiplier=1, gimnasio=self.gimnasio
+            )
+
+    def test_same_name_different_gyms_allowed(self):
+        """Different gyms can have memberships with the same name."""
+        gym2 = Gimnasio.objects.create(name="Gym 2")
+        Membresia.objects.create(
+            name="SameName", price=100, duration=15,
+            max_multiplier=1, gimnasio=self.gimnasio
+        )
+        # Should not raise
+        Membresia.objects.create(
+            name="SameName", price=200, duration=30,
+            max_multiplier=1, gimnasio=gym2
+        )
+
+
+class MembresiaAsignadaModelSaveTest(TestCase):
+    """Tests for MembresiaAsignada.save() multiplier validation."""
+
+    def setUp(self):
+        self.gimnasio = Gimnasio.objects.create(name="Test Gym")
+        self.membresia = Membresia.objects.create(
+            name="Limited", price=10000, duration=30,
+            max_multiplier=4, gimnasio=self.gimnasio
+        )
+        self.miembro = UsuarioGym.objects.create(
+            name="Test", lastname="Member", gimnasio=self.gimnasio
+        )
+
+    # 6.2: save() rejects multiplier > max_multiplier
+    def test_save_rejects_multiplier_exceeds_max(self):
+        """MembresiaAsignada.save() should raise ValidationError when multiplier > max_multiplier."""
+        asignacion = MembresiaAsignada(
+            miembro=self.miembro,
+            membresia=self.membresia,
+            multiplier=5,  # max_multiplier is 4
+            dateInitial="2026-01-01"
+        )
+        with self.assertRaises(DjangoValidationError):
+            asignacion.save()
+
+    def test_save_accepts_valid_multiplier(self):
+        """MembresiaAsignada.save() should accept multiplier <= max_multiplier."""
+        asignacion = MembresiaAsignada(
+            miembro=self.miembro,
+            membresia=self.membresia,
+            multiplier=3,  # max_multiplier is 4
+            dateInitial="2026-01-01"
+        )
+        # Should not raise
+        asignacion.save()
+        self.assertEqual(asignacion.multiplier, 3)
+
+    def test_save_calculates_price_with_multiplier(self):
+        """save() should multiply price by multiplier on creation."""
+        asignacion = MembresiaAsignada(
+            miembro=self.miembro,
+            membresia=self.membresia,
+            multiplier=3,
+            dateInitial="2026-01-01"
+        )
+        asignacion.save()
+        expected_price = self.membresia.price * 3  # 10000 * 3 = 30000
+        self.assertEqual(asignacion.price, expected_price)
+
+    def test_save_calculates_date_final_with_multiplier(self):
+        """save() should multiply duration by multiplier on creation."""
+        from datetime import date, timedelta
+        asignacion = MembresiaAsignada(
+            miembro=self.miembro,
+            membresia=self.membresia,
+            multiplier=3,
+            dateInitial="2026-01-01"
+        )
+        asignacion.save()
+        expected_days = self.membresia.duration * 3  # 30 * 3 = 90
+        expected_final = date(2026, 1, 1) + timedelta(days=expected_days)
+        self.assertEqual(asignacion.dateFinal, expected_final)
+
+
+class SeedDefaultMembershipsTest(TestCase):
+    """Tests for post_save signal seed."""
+
+    # 6.4: Seed creates 3 default memberships on Gimnasio creation
+    def test_new_gym_gets_default_memberships(self):
+        """Creating a new Gimnasio should seed 3 default memberships."""
+        gym = Gimnasio.objects.create(name="New Gym")
+        memberships = Membresia.objects.filter(gimnasio=gym)
+        self.assertEqual(memberships.count(), 3)
+
+        names = [m.name for m in memberships]
+        self.assertIn("Básico", names)
+        self.assertIn("Premium", names)
+        self.assertIn("VIP", names)
+
+    def test_default_memberships_have_correct_durations(self):
+        """Default memberships should have correct durations."""
+        gym = Gimnasio.objects.create(name="Gym Durations")
+        basico = Membresia.objects.get(gimnasio=gym, name="Básico")
+        premium = Membresia.objects.get(gimnasio=gym, name="Premium")
+        vip = Membresia.objects.get(gimnasio=gym, name="VIP")
+
+        self.assertEqual(basico.duration, 15)
+        self.assertEqual(basico.max_multiplier, 1)
+        self.assertEqual(premium.duration, 30)
+        self.assertEqual(premium.max_multiplier, 12)
+        self.assertEqual(vip.duration, 45)
+        self.assertEqual(vip.max_multiplier, 8)
+
+    def test_default_memberships_have_zero_price(self):
+        """Default memberships should have price=0."""
+        gym = Gimnasio.objects.create(name="Zero Price Gym")
+        for m in Membresia.objects.filter(gimnasio=gym):
+            self.assertEqual(m.price, 0)
+
+    # 6.5: Seed does NOT re-seed when memberships already exist
+    def test_seed_does_not_re_seed_existing_gym(self):
+        """Saving an existing gym with memberships should NOT create duplicates."""
+        gym = Gimnasio.objects.create(name="Gym With Memberships")
+
+        # Count should be 3 (from seed)
+        self.assertEqual(Membresia.objects.filter(gimnasio=gym).count(), 3)
+
+        # Add a custom membership
+        Membresia.objects.create(
+            name="Custom Plan", price=500, duration=10,
+            max_multiplier=1, gimnasio=gym
+        )
+
+        # Save gym again
+        gym.save()
+
+        # Count should still be 4 (3 original + 1 custom, no duplicates)
+        self.assertEqual(Membresia.objects.filter(gimnasio=gym).count(), 4)
+
+    def test_seed_skips_if_memberships_exist(self):
+        """Signal should skip seed if gym already has memberships."""
+        gym = Gimnasio.objects.create(name="Pre-seeded Gym")
+
+        # Manually add a membership before the signal hypothetically fires
+        Membresia.objects.create(
+            name="Pre-existing", price=300, duration=20,
+            max_multiplier=1, gimnasio=gym
+        )
+
+        # Delete what the signal created and save again
+        Membresia.objects.filter(gimnasio=gym).exclude(name="Pre-existing").delete()
+        gym.save()
+
+        # Should still only have the pre-existing one
+        self.assertEqual(Membresia.objects.filter(gimnasio=gym).count(), 1)
+
+
+class MembresiasSerializerTest(TestCase):
+    """Tests for MembresiasSerializer."""
+
+    def setUp(self):
+        self.gimnasio = Gimnasio.objects.create(name="Test Gym")
+
+    # 6.6: MembresiasSerializer rejects duration=0 or duration=400
+    def test_rejects_duration_zero(self):
+        """Serializer should reject duration=0."""
+        data = {
+            "name": "Test Plan",
+            "price": 100,
+            "duration": 0,
+            "max_multiplier": 1
+        }
+        serializer = MembresiasSerializer(data=data)
+        self.assertFalse(serializer.is_valid())
+        self.assertIn("duration", serializer.errors)
+
+    def test_rejects_duration_above_365(self):
+        """Serializer should reject duration=400."""
+        data = {
+            "name": "Test Plan",
+            "price": 100,
+            "duration": 400,
+            "max_multiplier": 1
+        }
+        serializer = MembresiasSerializer(data=data)
+        self.assertFalse(serializer.is_valid())
+        self.assertIn("duration", serializer.errors)
+
+    def test_accepts_valid_duration(self):
+        """Serializer should accept duration=30."""
+        data = {
+            "name": "Test Plan",
+            "price": 100,
+            "duration": 30,
+            "max_multiplier": 1
+        }
+        serializer = MembresiasSerializer(data=data, context={'request': self._make_request()})
+        # Without gimnasio in context, create will fail, but validation should pass
+        self.assertTrue(serializer.is_valid())
+
+    def test_accepts_valid_duration_edge(self):
+        """Serializer should accept duration=1 and duration=365."""
+        for dur in [1, 365]:
+            data = {
+                "name": f"Plan {dur}",
+                "price": 100,
+                "duration": dur,
+                "max_multiplier": 1
+            }
+            serializer = MembresiasSerializer(data=data, context={'request': self._make_request()})
+            self.assertTrue(serializer.is_valid(), f"Duration {dur} should be valid")
+
+    def _make_request(self):
+        """Create a mock request with gimnasio."""
+        factory = APIRequestFactory()
+        request = factory.get('/')
+        request.gimnasio = self.gimnasio
+        return request
+
+
+class MembresiaAsignadaSerializerValidationTest(TestCase):
+    """Tests for MembresiaAsignadaSerializer multiplier validation."""
+
+    def setUp(self):
+        self.gimnasio = Gimnasio.objects.create(name="Test Gym")
+        self.membresia = Membresia.objects.create(
+            name="Limited", price=10000, duration=30,
+            max_multiplier=4, gimnasio=self.gimnasio
+        )
+        self.miembro = UsuarioGym.objects.create(
+            name="Test", lastname="Member", gimnasio=self.gimnasio
+        )
+
+    # 6.7: MembresiaAsignadaSerializer rejects multiplier > max_multiplier
+    def test_serializer_rejects_multiplier_exceeds_max(self):
+        """Serializer should reject multiplier > max_multiplier."""
+        data = {
+            "miembro": self.miembro.id,
+            "membresia": self.membresia.id,
+            "multiplier": 5,  # max is 4
+            "dateInitial": "2026-01-01"
+        }
+        serializer = MembresiaAsignadaSerializer(data=data)
+        self.assertFalse(serializer.is_valid())
+        self.assertIn("non_field_errors", serializer.errors)
+
+    def test_serializer_accepts_valid_multiplier(self):
+        """Serializer should accept multiplier <= max_multiplier."""
+        from datetime import date, timedelta
+        data = {
+            "miembro": self.miembro.id,
+            "membresia": self.membresia.id,
+            "multiplier": 3,  # max is 4
+            "dateInitial": (date.today() + timedelta(days=365)).isoformat()
+        }
+        serializer = MembresiaAsignadaSerializer(data=data, context={'request': self._make_request()})
+        self.assertTrue(serializer.is_valid(), f"Errors: {serializer.errors}")
+
+    def _make_request(self):
+        """Create a mock request with gimnasio."""
+        factory = APIRequestFactory()
+        request = factory.get('/')
+        request.gimnasio = self.gimnasio
+        return request

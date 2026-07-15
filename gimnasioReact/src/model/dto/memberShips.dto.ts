@@ -1,5 +1,6 @@
 export interface CreateMemberShipsDTO {
-    name:      string;
-    price:     number;
-    duration:  number;
+    name:           string;
+    price:          number;
+    duration:       number;
+    max_multiplier: number;
 };
