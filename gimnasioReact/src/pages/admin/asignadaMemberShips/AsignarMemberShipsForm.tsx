@@ -26,12 +26,14 @@ import { CreateAsignarMemberShipsDto } from '../../../model/dto/asignarMemberShi
 interface FormData {
     miembro: string;
     membresia: string;
+    multiplier: string;
     dateInitial: string;
 }
 
 const MemberShipsForm = () => {
     const [miembros, setMiembros] = useState<Miembro[]>([]);
     const [membresias, setMembresias] = useState<Membresia[]>([]);
+    const [selectedMembresia, setSelectedMembresia] = useState<Membresia | null>(null);
     const [, setSelectedPrice] = useState<number | null>(null);
     const params = useParams<{ id?: string }>();
     const isEditing = !!params.id;
@@ -56,10 +58,12 @@ const MemberShipsForm = () => {
                 return;
             }
 
+            const multiplierValue = data.multiplier ? parseInt(data.multiplier) : 1;
+
             //Calculamos la fecha final
             const initialDate = new Date(data.dateInitial);
             const finalDate = new Date(initialDate);
-            finalDate.setDate(finalDate.getDate() + selectMembresia.duration);
+            finalDate.setDate(finalDate.getDate() + (selectMembresia.duration * multiplierValue));
 
             //Formateamos la fecha en el formato correcto
             const dateInitial = initialDate.toISOString().split('T')[0];
@@ -69,6 +73,7 @@ const MemberShipsForm = () => {
             const requestData: CreateAsignarMemberShipsDto = {
                 miembro: miembroId,
                 membresia: membresiaId,
+                multiplier: multiplierValue,
                 dateInitial: dateInitial,
                 dateFinal: dateFinal
             };
@@ -113,11 +118,6 @@ const MemberShipsForm = () => {
                 console.error('Error desconocido:', error);
                 toast.error('Error desconocido al procesar la solicitud');
             }
-            // const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-            //     toast.error(errorMessage, {
-            //         duration: 3000,
-            //         position: 'bottom-right',
-            //     });                    
         }
     });
 
@@ -125,16 +125,15 @@ const MemberShipsForm = () => {
         const fetchData = async () => {
             try {
                 // Cargar listas de miembros y membresías
-                const responseMemberShips: Membresia[] = await getMemberList(); // Función para obtener la lista de membresías
-                const responseMembers: Miembro[] = await getMembers(); // Función para obtener la lista de miembros
+                const responseMemberShips: Membresia[] = await getMemberList();
+                const responseMembers: Miembro[] = await getMembers();
 
                 setMembresias(responseMemberShips);
                 setMiembros(responseMembers);
 
-
                 // Si params.id está presente, cargar los datos específicos para actualizar
                 if (params.id) {
-                    const responseAsignacion = await getAsignarMemberShips(parseInt(params.id)); // Función para obtener una asignación específica
+                    const responseAsignacion = await getAsignarMemberShips(parseInt(params.id));
                     //console.log("Datos de la asignación para editar:", responseAsignacion);
 
                     //formateamos la fecha antes de pasarla al formulario
@@ -147,8 +146,8 @@ const MemberShipsForm = () => {
                     reset({
                         miembro: responseAsignacion.miembro.toString(),
                         membresia: responseAsignacion.membresia.toString(),
+                        multiplier: responseAsignacion.multiplier?.toString() ?? '1',
                         dateInitial: responseAsignacion.dateInitial,
-                        //dateFinal: responseAsignacion.dateFinal,
                     });
                 }
             } catch (error) {
@@ -161,7 +160,7 @@ const MemberShipsForm = () => {
     }, [params.id, reset]);
 
     const formatDate = (date: string): string => {
-        if (!date) return ''; // Retorna un valor vacío si la fecha es undefined o null
+        if (!date) return '';
         try {
             const [day, month, year] = date.split('-');
             return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
@@ -173,15 +172,22 @@ const MemberShipsForm = () => {
 
     const handleMemberShipsChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
         const membresiaId = parseInt(event.target.value);
-        const selectedMembresia = membresias.find((membresia) => membresia.id === membresiaId);
+        const selected = membresias.find((membresia) => membresia.id === membresiaId) || null;
 
-        if (selectedMembresia) {
-            setSelectedPrice(selectedMembresia.price);
+        setSelectedMembresia(selected);
+
+        if (selected) {
+            setSelectedPrice(selected.price);
         } else {
             setSelectedPrice(null);
         }
     };
 
+    // Generate multiplier options from 1..max_multiplier
+    const multiplierOptions = selectedMembresia
+        ? Array.from({ length: selectedMembresia.max_multiplier }, (_, i) => i + 1)
+        : [];
+    const showMultiplier = selectedMembresia && selectedMembresia.max_multiplier > 1;
 
     return (
         <main className="max-w-7xl mx-auto p-6 lg:p-10">
@@ -239,7 +245,7 @@ const MemberShipsForm = () => {
                                         }}
                                     >
                                         <option value="">Seleccione una Membresía</option>
-                                        {membresias.map((membresia) => (
+                                        {membresias.filter(m => m.is_active !== false).map((membresia) => (
                                             <option key={membresia.id} value={membresia.id?.toString()}>{membresia.name} - ${membresia.price}</option>
                                         ))}
                                     </Select>
@@ -250,6 +256,29 @@ const MemberShipsForm = () => {
                                         errors.membresia && <span className='text-red-500 text-sm'>{errors.membresia.message}</span>
                                     }
                                 </div>
+                                {/* Multiplier — hidden when max_multiplier === 1 */}
+                                {showMultiplier && (
+                                    <div className="relative pt-5">
+                                        <Select
+                                            {...register('multiplier', {
+                                                required: {
+                                                    value: true,
+                                                    message: 'Multiplicador requerido'
+                                                },
+                                            })}
+                                        >
+                                            {multiplierOptions.map((val) => (
+                                                <option key={val} value={val.toString()}>{val}x</option>
+                                            ))}
+                                        </Select>
+                                        <Label>
+                                            Multiplicador
+                                        </Label>
+                                        {
+                                            errors.multiplier && <span className='text-red-500 text-sm'>{errors.multiplier.message}</span>
+                                        }
+                                    </div>
+                                )}
                                 {/* Date Initial */}
                                 <div className="relative pt-5">
                                     <Input

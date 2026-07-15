@@ -2,6 +2,7 @@
 export interface CreateAsignarMemberShipsDto{
     membresia: number;
     miembro: number;
+    multiplier?: number;
     dateInitial: string;
-    dateFinal: string;          
+    dateFinal: string;
 };
