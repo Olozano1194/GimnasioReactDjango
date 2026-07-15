@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.db import transaction
+from decimal import Decimal
 from .models import Gimnasio, Usuario, UsuarioGym, UsuarioGymDay, Membresia, MembresiaAsignada
 from datetime import timedelta, date
 
@@ -175,8 +176,13 @@ class MembresiasSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Membresia
-        fields = ['id', 'name', 'price', 'duration', 'gimnasio', 'gimnasio_name', 'is_active']
+        fields = ['id', 'name', 'price', 'duration', 'max_multiplier', 'is_active', 'gimnasio', 'gimnasio_name']
         read_only_fields = ('id', 'gimnasio',)
+
+    def validate_duration(self, value):
+        if value < 1 or value > 365:
+            raise serializers.ValidationError("La duración debe estar entre 1 y 365 días")
+        return value
 
     def create(self, validated_data):
         # Remover cualquier gimnasio de los datos validados
@@ -198,15 +204,16 @@ class MembresiaAsignadaSerializer(serializers.ModelSerializer):
     membresia_details = MembresiasSerializer(source='membresia', read_only=True)
 
     dateInitial = serializers.DateField(format="%d-%m-%Y", input_formats=['%Y-%m-%d', '%d-%m-%Y'])
-    dateFinal = serializers.DateField(format="%d-%m-%Y", input_formats=['%Y-%m-%d', '%d-%m-%Y'])
+    dateFinal = serializers.DateField(format="%d-%m-%Y", input_formats=['%Y-%m-%d', '%d-%m-%Y'], read_only=True)
 
+    multiplier = serializers.IntegerField(default=1, required=False)
     price = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
 
     class Meta:
         model = MembresiaAsignada
         fields = ['id', 'miembro', 'membresia', 'miembro_details', 'membresia_details',
-                  'dateInitial', 'dateFinal', 'price']
-        read_only_fields = ('id', 'price')
+                  'multiplier', 'dateInitial', 'dateFinal', 'price']
+        read_only_fields = ('id', 'price', 'dateFinal')
 
     def validate(self, data):           
         miembro = data.get('miembro') or (self.instance.miembro if self.instance else None)
@@ -230,8 +237,16 @@ class MembresiaAsignadaSerializer(serializers.ModelSerializer):
                 "El miembro no pertenece a tu gimnasio"
             )
         
+        # Validar multiplier contra max_multiplier de la membresía
+        multiplier = data.get('multiplier', 1)
+        if multiplier > membresia.max_multiplier:
+            raise serializers.ValidationError(
+                f"El multiplicador {multiplier} excede el máximo permitido ({membresia.max_multiplier})"
+            )
+        
         # Verificar fechas
-        expected_final = inicio + timedelta(membresia.duration)
+        dias_totales = int(membresia.duration * multiplier)
+        expected_final = inicio + timedelta(dias_totales)
         
         suscripcion = MembresiaAsignada.objects.filter(
             miembro=miembro, 
@@ -246,7 +261,8 @@ class MembresiaAsignadaSerializer(serializers.ModelSerializer):
         return data        
 
     def create(self, validated_data):
-        validated_data['price'] = validated_data['membresia'].price
+        multiplier = validated_data.get('multiplier', 1)
+        validated_data['price'] = validated_data['membresia'].price * Decimal(str(multiplier))
         return super().create(validated_data)
     
     def to_representation(self, instance):
