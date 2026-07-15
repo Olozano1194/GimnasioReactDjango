@@ -15,11 +15,6 @@ class Migration(migrations.Migration):
             name='max_multiplier',
             field=models.PositiveIntegerField(default=1, help_text='Máximo multiplicador permitido (1 = no multiplicable)'),
         ),
-        migrations.AddField(
-            model_name='membresiaasignada',
-            name='multiplier',
-            field=models.PositiveIntegerField(default=1, help_text='Multiplicador de duración/precio (1 = sin multiplicar)'),
-        ),
         migrations.AlterField(
             model_name='membresia',
             name='duration',

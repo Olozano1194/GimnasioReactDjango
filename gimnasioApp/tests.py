@@ -428,7 +428,7 @@ class MembresiaAsignadaSaveTest(TestCase):
             name="Juan", lastname="Perez", gimnasio=self.gimnasio
         )
         self.membresia = Membresia.objects.create(
-            name="básico", price=Decimal('50000'), duration=30, gimnasio=self.gimnasio
+            name="Plan Test", price=Decimal('50000'), duration=30, max_multiplier=12, gimnasio=self.gimnasio
         )
 
     def test_save_con_multiplier_3_y_discount_5(self):
@@ -486,7 +486,7 @@ class PagoMembresiaValidacionTest(TestCase):
             name="Juan", lastname="Perez", gimnasio=self.gimnasio
         )
         self.membresia = Membresia.objects.create(
-            name="básico", price=Decimal('100000'), duration=30, gimnasio=self.gimnasio
+            name="Plan Test", price=Decimal('100000'), duration=30, gimnasio=self.gimnasio
         )
         self.asignada = MembresiaAsignada.objects.create(
             miembro=self.miembro,
@@ -592,7 +592,7 @@ class MembresiaAsignadaPropiedadesTest(TestCase):
             name="Maria", lastname="Lopez", gimnasio=self.gimnasio
         )
         self.membresia = Membresia.objects.create(
-            name="premium", price=Decimal('100000'), duration=30, gimnasio=self.gimnasio
+            name="Plan Premium", price=Decimal('100000'), duration=30, gimnasio=self.gimnasio
         )
         self.asignada = MembresiaAsignada.objects.create(
             miembro=self.miembro,
@@ -658,7 +658,7 @@ class PagoMembresiaIntegracionTest(TestCase):
             name="Carlos", lastname="Mendez", gimnasio=self.gimnasio
         )
         self.membresia = Membresia.objects.create(
-            name="básico", price=Decimal('50000'), duration=30, gimnasio=self.gimnasio
+            name="Plan Test", price=Decimal('50000'), duration=30, gimnasio=self.gimnasio
         )
         self.asignada = MembresiaAsignada.objects.create(
             miembro=self.miembro,
@@ -736,7 +736,7 @@ class HomeDashboardPagosTest(TestCase):
 
         # Membresia basica de 30 dias
         self.membresia = Membresia.objects.create(
-            name="básico", price=Decimal('50000'), duration=30, gimnasio=self.gimnasio
+            name="Plan Test", price=Decimal('50000'), duration=30, gimnasio=self.gimnasio
         )
 
         # Miembro 1: Al dia (paid)

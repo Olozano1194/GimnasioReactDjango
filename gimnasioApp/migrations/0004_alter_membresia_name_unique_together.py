@@ -15,12 +15,6 @@ class Migration(migrations.Migration):
             name='name',
             field=models.CharField(max_length=100),
         ),
-        # Alter multiplier field type to match PositiveIntegerField
-        migrations.AlterField(
-            model_name='membresiaasignada',
-            name='multiplier',
-            field=models.PositiveIntegerField(default=1, help_text='Multiplicador de duración/precio (1 = sin multiplicar)'),
-        ),
         # Add unique_together constraint
         migrations.AlterUniqueTogether(
             name='membresia',
