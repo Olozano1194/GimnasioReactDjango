@@ -11,7 +11,11 @@ export interface AsignarMemberShips {
     dateFinal:   string;
     name?: string;
     price: number | string;
-    multiplier: number | string;    
+    multiplier: number | string;
+    discount_percent: number | string;
+    total_pagado: number | string;
+    saldo_pendiente: number | string;
+    estado_pago: 'paid' | 'partial' | 'pending';
     miembro_details: {
         id: number;
         name: string;

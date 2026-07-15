@@ -3,6 +3,7 @@ export interface CreateAsignarMemberShipsDto{
     membresia: number;
     miembro: number;
     multiplier?: number;
+    discount_percent?: number;
     dateInitial: string;
     dateFinal: string;
 };

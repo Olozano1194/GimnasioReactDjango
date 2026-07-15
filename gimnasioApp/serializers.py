@@ -1,8 +1,8 @@
 from rest_framework import serializers
 from django.db import transaction
-from decimal import Decimal
-from .models import Gimnasio, Usuario, UsuarioGym, UsuarioGymDay, Membresia, MembresiaAsignada
+from .models import Gimnasio, Usuario, UsuarioGym, UsuarioGymDay, Membresia, MembresiaAsignada, PagoMembresia
 from datetime import timedelta, date
+from decimal import Decimal
 
 #token
 from rest_framework.authtoken.models import Token
@@ -93,16 +93,21 @@ class UsuarioGymSerializer(serializers.ModelSerializer):
     gimnasio_name = serializers.CharField(source='gimnasio.name', read_only=True, allow_null=True)
     initial_membership_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
     dateInitial = serializers.DateField(write_only=True, required=False, allow_null=True)
+    multiplier = serializers.DecimalField(max_digits=4, decimal_places=1, default=Decimal('1'), write_only=True, required=False)
+    discount_percent = serializers.DecimalField(max_digits=5, decimal_places=2, default=Decimal('0'), write_only=True, required=False)
 
     class Meta:
         model = UsuarioGym
         fields = ['id', 'name', 'lastname', 'phone', 'address', 'gimnasio',
-                  'gimnasio_name', 'created_at', 'initial_membership_id', 'dateInitial']
+                  'gimnasio_name', 'created_at', 'initial_membership_id', 'dateInitial',
+                  'multiplier', 'discount_percent']
         read_only_fields = ('id', 'created_at', 'gimnasio')
 
     def create(self, validated_data):
         initial_membership_id = validated_data.pop('initial_membership_id', None)
         date_initial = validated_data.pop('dateInitial', None)
+        multiplier = validated_data.pop('multiplier', Decimal('1'))
+        discount_percent = validated_data.pop('discount_percent', Decimal('0'))
 
         # Remover cualquier gimnasio de los datos validados (usar el del middleware)
         validated_data.pop('gimnasio', None)
@@ -128,12 +133,32 @@ class UsuarioGymSerializer(serializers.ModelSerializer):
                     MembresiaAsignada.objects.create(
                         miembro=miembro,
                         membresia=membresia,
-                        dateInitial=date_initial or date.today()
+                        dateInitial=date_initial or date.today(),
+                        multiplier=multiplier,
+                        discount_percent=discount_percent
                     )
                 except Membresia.DoesNotExist:
                     raise serializers.ValidationError({"initial_membership_id": "Membresía no encontrada en tu gimnasio"})
 
             return miembro
+
+    def update(self, instance, validated_data):
+        initial_membership_id = validated_data.pop('initial_membership_id', None)
+        date_initial = validated_data.pop('dateInitial', None)
+        multiplier = validated_data.pop('multiplier', Decimal('1'))
+        discount_percent = validated_data.pop('discount_percent', Decimal('0'))
+        instance = super().update(instance, validated_data)
+        if initial_membership_id:
+            try:
+                membresia = Membresia.objects.get(id=initial_membership_id, gimnasio=instance.gimnasio)
+                MembresiaAsignada.objects.create(
+                    miembro=instance, membresia=membresia,
+                    dateInitial=date_initial or date.today(),
+                    multiplier=multiplier, discount_percent=discount_percent
+                )
+            except Membresia.DoesNotExist:
+                raise serializers.ValidationError({'initial_membership_id': 'Membresia no encontrada en tu gimnasio'})
+        return instance
 
 
 class UsuarioGymDaySerializer(serializers.ModelSerializer):
@@ -206,14 +231,23 @@ class MembresiaAsignadaSerializer(serializers.ModelSerializer):
     dateInitial = serializers.DateField(format="%d-%m-%Y", input_formats=['%Y-%m-%d', '%d-%m-%Y'])
     dateFinal = serializers.DateField(format="%d-%m-%Y", input_formats=['%Y-%m-%d', '%d-%m-%Y'], read_only=True)
 
-    multiplier = serializers.IntegerField(default=1, required=False)
-    price = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+    multiplier = serializers.DecimalField(max_digits=4, decimal_places=1, default=Decimal('1'))
+    discount_percent = serializers.DecimalField(max_digits=5, decimal_places=2, default=Decimal('0'))
+    total_pagado = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+    saldo_pendiente = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
+    estado_pago = serializers.CharField(read_only=True)
 
     class Meta:
         model = MembresiaAsignada
         fields = ['id', 'miembro', 'membresia', 'miembro_details', 'membresia_details',
-                  'multiplier', 'dateInitial', 'dateFinal', 'price']
+                  'dateInitial', 'dateFinal', 'price', 'multiplier', 'discount_percent',
+                  'total_pagado', 'saldo_pendiente', 'estado_pago']
         read_only_fields = ('id', 'price', 'dateFinal')
+
+    def validate_multiplier(self, value):
+        if value < 1:
+            raise serializers.ValidationError("El multiplicador debe ser al menos 1")
+        return value
 
     def validate(self, data):           
         miembro = data.get('miembro') or (self.instance.miembro if self.instance else None)
@@ -238,15 +272,15 @@ class MembresiaAsignadaSerializer(serializers.ModelSerializer):
             )
         
         # Validar multiplier contra max_multiplier de la membresía
-        multiplier = data.get('multiplier', 1)
-        if multiplier > membresia.max_multiplier:
+        multiplier = data.get('multiplier', getattr(self.instance, 'multiplier', 1)) or 1
+        if int(multiplier) > membresia.max_multiplier:
             raise serializers.ValidationError(
                 f"El multiplicador {multiplier} excede el máximo permitido ({membresia.max_multiplier})"
             )
         
-        # Verificar fechas
-        dias_totales = int(membresia.duration * multiplier)
-        expected_final = inicio + timedelta(dias_totales)
+        # Verificar fechas considerando el multiplier
+        dias_totales = int(membresia.duration * Decimal(str(multiplier)))
+        expected_final = inicio + timedelta(days=dias_totales)
         
         suscripcion = MembresiaAsignada.objects.filter(
             miembro=miembro, 
@@ -261,8 +295,7 @@ class MembresiaAsignadaSerializer(serializers.ModelSerializer):
         return data        
 
     def create(self, validated_data):
-        multiplier = validated_data.get('multiplier', 1)
-        validated_data['price'] = validated_data['membresia'].price * Decimal(str(multiplier))
+        # Price calculation is handled by model.save()
         return super().create(validated_data)
     
     def to_representation(self, instance):
@@ -272,3 +305,31 @@ class MembresiaAsignadaSerializer(serializers.ModelSerializer):
         if instance.dateFinal:
             representation['dateFinal'] = instance.dateFinal.strftime("%d-%m-%Y")
         return representation
+
+
+# ============================================================
+# PAGO MEMBRESIA SERIALIZER
+# ============================================================
+
+class PagoMembresiaSerializer(serializers.ModelSerializer):
+    fecha_pago = serializers.DateTimeField(read_only=True, format="%Y-%m-%dT%H:%M:%S%z")
+
+    class Meta:
+        model = PagoMembresia
+        fields = ['id', 'membresia_asignada', 'monto', 'fecha_pago', 'metodo_pago', 'nota']
+        read_only_fields = ['id', 'fecha_pago', 'membresia_asignada']
+
+    def validate_monto(self, value):
+        if value <= 0:
+            raise serializers.ValidationError("El monto debe ser mayor a cero")
+        return value
+
+    def validate(self, data):
+        membresia = self.context.get('membresia_asignada') or data.get('membresia_asignada')
+        if membresia:
+            monto = data.get('monto')
+            if monto and monto > membresia.saldo_pendiente:
+                raise serializers.ValidationError({
+                    'monto': f'El monto excede el saldo pendiente ({membresia.saldo_pendiente})'
+                })
+        return data

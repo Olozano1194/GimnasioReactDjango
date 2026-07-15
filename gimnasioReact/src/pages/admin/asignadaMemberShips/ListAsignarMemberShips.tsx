@@ -16,6 +16,9 @@ import StatsOverviewSection from "../../../components/table/section/StatsOvervie
 import { toast } from 'react-hot-toast';
 // icons
 import { IoSearch } from "react-icons/io5";
+import { FaMoneyBillWave } from "react-icons/fa";
+// Modal de pago
+import PagoMembresiaModal from "./PagoMembresiaModal";
 
 
 interface AsignacionTotal {
@@ -34,6 +37,8 @@ interface AsignacionTotal {
     dateInitial?: string;
     dateFinal?:   string;
     price: number | string;
+    estado_pago?: string;
+    multiplier?: never;
 }
 
 type Asignacion = AsignacionTotal | AsignarMemberShips;
@@ -43,6 +48,13 @@ const ListAsignarMemberShips = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [filteredData, setFilteredData] = useState<number | null>(null);
     const [search, setSearch] = useState('');
+    const [pagoModal, setPagoModal] = useState<{
+        open: boolean;
+        id: number;
+        price: number | string;
+        totalPagado: number | string;
+        saldoPendiente: number | string;
+    }>({ open: false, id: 0, price: 0, totalPagado: 0, saldoPendiente: 0 });
 
     // Función en donde se buscan los datos
     const handleSearch = useCallback(async(user: string) => {
@@ -57,27 +69,26 @@ const ListAsignarMemberShips = () => {
         }       
     }, []);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            setIsLoading(true);
-            try {                
-                const response = await getAsignarMemberList();
-                //console.log('Datos recibidos:', response);                
-                setAsignarMemberShips(response);
+    const refreshList = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const response = await getAsignarMemberList();
+            setAsignarMemberShips(response);
+        } catch (error) {
+            const errorMessage = error instanceof Error ? error.message : 'Error al cargar los datos';
+            toast.error(errorMessage);
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
 
-            }catch (error) {
-                const errorMessage = error instanceof Error ? error.message : 'Error al cargar los datos';
-                toast.error(errorMessage);
-            }finally {
-                setIsLoading(false);
-            }
-        };
-        fetchData();
+    useEffect(() => {
+        refreshList();
         //Limpiamos el timeout cada vez que se renderiza la página
         return () => {
             if (filteredData) clearTimeout(filteredData);
         };
-    }, [filteredData]);
+    }, [filteredData, refreshList]);
 
     //Manejamos el evento de búsqueda
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -104,7 +115,6 @@ const ListAsignarMemberShips = () => {
     };
 
     //Calculamos el total de los precios
-    //const total = users.reduce((acc, user) => acc + Number((user.price)), 0);
     const total = asignarMemberShips.reduce((acc, item) => {
         const price = typeof item.price === 'string' ? parseFloat(item.price) : item.price;
         return acc + price;
@@ -115,10 +125,23 @@ const ListAsignarMemberShips = () => {
         name: 'Total',
         nombreCompleto: 'Total',
         price: formatCurrency(total),
-        //price: total       
+        estado_pago: '',
     };
 
-    //const rowsConTotal: Asignacion[] = [...asignarMemberShips, totalRow];    
+    // Badge de estado de pago
+    const EstadoBadge = ({ estado }: { estado: string }) => {
+        const config: Record<string, { label: string; class: string }> = {
+            paid: { label: 'Al día', class: 'bg-green-100 text-green-700' },
+            partial: { label: 'Parcial', class: 'bg-yellow-100 text-yellow-700' },
+            pending: { label: 'Pendiente', class: 'bg-red-100 text-red-700' },
+        };
+        const c = config[estado] || { label: estado, class: 'bg-gray-100 text-gray-700' };
+        return (
+            <span className={`inline-block px-2 py-1 rounded-full text-xs font-semibold ${c.class}`}>
+                {c.label}
+            </span>
+        );
+    };
 
     const columns = [
         columnHelper.display({
@@ -134,7 +157,11 @@ const ListAsignarMemberShips = () => {
             header: 'Nombre',
             cell: (info) => info.getValue(),            
         }),
-        columnHelper.accessor(row => row.membresia_details?.name, {
+        columnHelper.accessor(row => {
+            const name = row.membresia_details?.name || '-';
+            const mult = row.multiplier ? Number(row.multiplier) : 1;
+            return mult > 1 ? name + ' x' + mult : name;
+        }, {
             id: 'membresia',
             header: 'Membresía',
             cell: info => info.getValue(),
@@ -156,7 +183,6 @@ const ListAsignarMemberShips = () => {
                 const isTotalRow = info.row.original.id === 'total';
                 const raw = info.getValue<Asignacion['price']>();
                 const priceNum  = typeof raw === 'string' ? parseFloat(raw) : raw;                              
-                // Si es la fila de total, mostrar en negrita
                 return (
                     <div className={isTotalRow ? 'font-bold text-gray-50' : ''}>
                         {formatCurrency(priceNum)}
@@ -164,24 +190,55 @@ const ListAsignarMemberShips = () => {
                 )          
             },
         }),
+        columnHelper.accessor(row => {
+            if (row.id === 'total') return '';
+            return (row as AsignarMemberShips).estado_pago || 'pending';
+        }, {
+            id: 'estado_pago',
+            header: 'Estado',
+            cell: info => {
+                const val = info.getValue();
+                if (!val) return null;
+                return <EstadoBadge estado={val} />;
+            },
+        }),
         columnHelper.display({
             id: 'actions',
             header: 'Acciones',
             cell: props => {
-                const id = props.row.original.id;
-                // No mostrar botones si es la fila de total
+                const row = props.row.original;
+                const id = row.id;
                 if(typeof id !== 'number') return null;
-                return (                    
-                    <ActionButtons
-                        id={id}
-                        editPath={`/dashboard/asignar-membresia/${id}`}
-                        onDelete={async (id) => { await deleteAsignarMemberShips(id);
-                        setAsignarMemberShips(asignarMemberShips.filter(asignarmemberShips => asignarmemberShips.id !== id)); 
-                        }}
-                        confirmMessage="¿Estas seguro de eliminar esta asignación?"
-                    />
-                    );
-                },
+                const asignacion = row as AsignarMemberShips;
+                const puedePagar = asignacion.estado_pago && asignacion.estado_pago !== 'paid';
+                return (
+                    <div className="flex items-center gap-2">
+                        {puedePagar && (
+                            <button
+                                onClick={() => setPagoModal({
+                                    open: true,
+                                    id: id,
+                                    price: asignacion.price,
+                                    totalPagado: asignacion.total_pagado,
+                                    saldoPendiente: asignacion.saldo_pendiente,
+                                })}
+                                className="flex items-center gap-1 text-sm bg-sky-600 text-white px-2 py-1 rounded-md hover:bg-sky-500 transition"
+                                title="Registrar pago"
+                            >
+                                <FaMoneyBillWave /> Pagar
+                            </button>
+                        )}
+                        <ActionButtons
+                            id={id}
+                            editPath={`/dashboard/asignar-membresia/${id}`}
+                            onDelete={async (id) => { await deleteAsignarMemberShips(id);
+                            setAsignarMemberShips(asignarMemberShips.filter(asignarmemberShips => asignarmemberShips.id !== id)); 
+                            }}
+                            confirmMessage="¿Estas seguro de eliminar esta asignación?"
+                        />
+                    </div>
+                );
+            },
         }),               
                 
         ] as ColumnDef<Asignacion>[];
@@ -214,7 +271,18 @@ const ListAsignarMemberShips = () => {
                             totalRow={totalRow} 
                         />
                     )
-            }                         
+            }
+
+            {/* Modal de pago */}
+            <PagoMembresiaModal
+                isOpen={pagoModal.open}
+                onClose={() => setPagoModal(prev => ({ ...prev, open: false }))}
+                onSuccess={refreshList}
+                membresiaAsignadaId={pagoModal.id}
+                totalPrice={pagoModal.price}
+                totalPagado={pagoModal.totalPagado}
+                saldoPendiente={pagoModal.saldoPendiente}
+            />
         </main>
         );
 };

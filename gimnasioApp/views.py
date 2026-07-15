@@ -4,10 +4,11 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import authenticate
 from django.contrib.auth import get_user_model
-from .serializers import UsuarioSerializer, UsuarioGymSerializer, UsuarioGymDaySerializer, MembresiasSerializer, MembresiaAsignadaSerializer
-from .models import Usuario, UsuarioGym, UsuarioGymDay, Membresia, MembresiaAsignada, Gimnasio
+from .serializers import UsuarioSerializer, UsuarioGymSerializer, UsuarioGymDaySerializer, MembresiasSerializer, MembresiaAsignadaSerializer, PagoMembresiaSerializer
+from .models import Usuario, UsuarioGym, UsuarioGymDay, Membresia, MembresiaAsignada, PagoMembresia, Gimnasio
 from django.utils import timezone
 from django.http import JsonResponse, HttpResponse
+from django.shortcuts import get_object_or_404
 #para la imagen
 from rest_framework.parsers import MultiPartParser, FormParser
 #Para las filtraciones en la base de datos
@@ -22,6 +23,8 @@ from django.conf import settings
 # Importar permisos personalizados
 from .permissions import IsAdminUser, IsRecepcionUser
 from .mixins import MultiTenantViewSetMixin
+from decimal import Decimal
+from django.db.models import Sum
 
 
 # ============================================================
@@ -300,14 +303,16 @@ class Home(APIView):
 
         num_miembros = UserGymList.count()
 
-        miembros_mes = UserGymList.filter(dateInitial__month=month, dateInitial__year=year)
-        total_gym_mes = sum(user.price for user in miembros_mes)
-
         miembrosDay_mes = UserDayList.filter(dateInitial__month=month, dateInitial__year=year)
         total_day_mes = sum(user.price for user in miembrosDay_mes)
-
-        total_month = total_gym_mes + total_day_mes
-        miembros_mes_count = miembros_mes.count()
+        # Pagos recibidos este mes (dinero real, no esperado)
+        pagos_mes = PagoMembresia.objects.filter(
+            membresia_asignada__miembro__gimnasio=gimnasio,
+            fecha_pago__month=month,
+            fecha_pago__year=year
+        ).aggregate(total=Sum('monto'))['total'] or Decimal('0')
+        total_month = pagos_mes + total_day_mes
+        miembros_mes_count = UserGymList.filter(dateInitial__month=month, dateInitial__year=year).count()
 
         # Miembros del mes anterior
         miembros_mes_anterior = UserGymList.filter(
@@ -318,9 +323,40 @@ class Home(APIView):
         # Diferencia vs mes anterior
         diff_miembros = miembros_mes_count - miembros_mes_anterior
 
-        total_gym = sum(user.price for user in UserGymList)
         total_day = sum(user.price for user in UserDayList)
-        total = total_gym + total_day
+        # Dinero real recibido: suma de todos los pagos de membresias + ingresos diarios
+        pagos_totales = PagoMembresia.objects.filter(
+            membresia_asignada__miembro__gimnasio=gimnasio
+        ).aggregate(total=Sum('monto'))['total'] or Decimal('0')
+        total = pagos_totales + total_day
+
+        # ---- Dashboard de cobranza ----
+        today = date.today()
+        active_memberships = UserGymList.filter(
+            dateInitial__lte=today,
+            dateFinal__gte=today
+        )
+
+        # Obtener total de pagos por membresia activa en una sola consulta
+        pago_totals = PagoMembresia.objects.filter(
+            membresia_asignada__in=active_memberships
+        ).values('membresia_asignada').annotate(
+            total_monto=Sum('monto')
+        )
+        pago_dict = {item['membresia_asignada']: item['total_monto'] for item in pago_totals}
+
+        por_cobrar = Decimal('0')
+        al_dia = 0
+        con_deuda = 0
+
+        for m in active_memberships:
+            total_pagado = pago_dict.get(m.id, Decimal('0'))
+            saldo = m.price - total_pagado
+            if saldo > 0:
+                por_cobrar += saldo
+                con_deuda += 1
+            else:
+                al_dia += 1
 
         return JsonResponse({ 
             'num_miembros': num_miembros, 
@@ -328,7 +364,10 @@ class Home(APIView):
             'miembros_mes': miembros_mes_count,
             'total': float(total),
             'miembros_mes_anterior': miembros_mes_anterior,   
-            'diff_miembros': diff_miembros,                   
+            'diff_miembros': diff_miembros,
+            'por_cobrar': float(por_cobrar),
+            'al_dia': al_dia,
+            'con_deuda': con_deuda,
         })
     
 
@@ -360,6 +399,41 @@ class MembresiaAsignadaViewSet(MultiTenantViewSetMixin, viewsets.ModelViewSet):
             queryset = queryset.filter(miembro_id=miembro_id)
         
         return queryset.order_by('-id')
+
+
+# ============================================================
+# PAGO MEMBRESIA (Nested under MemberShipsAsignada/{pk}/pagos/)
+# ============================================================
+
+class PagoMembresiaViewSet(viewsets.ModelViewSet):
+    serializer_class = PagoMembresiaSerializer
+    permission_classes = [IsAuthenticated, IsRecepcionUser]
+
+    def get_membresia_asignada(self):
+        pk = self.kwargs.get('pk')
+        return get_object_or_404(
+            MembresiaAsignada.objects.filter(miembro__gimnasio=self.request.gimnasio),
+            pk=pk
+        )
+
+    def get_queryset(self):
+        membresia = self.get_membresia_asignada()
+        return PagoMembresia.objects.filter(
+            membresia_asignada=membresia
+        ).order_by('-fecha_pago')
+
+    def perform_create(self, serializer):
+        membresia = self.get_membresia_asignada()
+        serializer.save(membresia_asignada=membresia)
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        try:
+            membresia = self.get_membresia_asignada()
+            context['membresia_asignada'] = membresia
+        except Exception:
+            pass
+        return context
 
 
 # ============================================================
@@ -413,6 +487,34 @@ class ActivitiesView(APIView):
                     'created_at': ingreso.created_at.isoformat(),
                     'amount': float(ingreso.price),
                     'time_ago': self.get_time_ago(ingreso.created_at)
+                })
+
+            # Pagos recientes (abonos o pagos completos)
+            pagos_recientes = PagoMembresia.objects.filter(
+                membresia_asignada__miembro__gimnasio=gimnasio
+            ).select_related(
+                'membresia_asignada__miembro',
+                'membresia_asignada__membresia'
+            ).order_by('-fecha_pago')[:5]
+
+            for pago in pagos_recientes:
+                asignacion = pago.membresia_asignada
+                miembro = asignacion.miembro
+                # Determinar si es pago completo o parcial
+                if pago.monto >= asignacion.price:
+                    tipo_pago = 'Pago completo'
+                else:
+                    tipo_pago = 'Abono'
+                activities.append({
+                    'id': f'p-{pago.id}',
+                    'type': 'payment',
+                    'icon': 'payments',
+                    'color': 'success',
+                    'title': f'{tipo_pago} - {pago.metodo_pago}',
+                    'description': f'{miembro.name} {miembro.lastname} - {asignacion.membresia.name}',
+                    'amount': float(pago.monto),
+                    'created_at': pago.fecha_pago.isoformat(),
+                    'time_ago': self.get_time_ago(pago.fecha_pago),
                 })
         
         activities.sort(key=lambda x: x['created_at'], reverse=True)

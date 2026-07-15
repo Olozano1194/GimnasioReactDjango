@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { getHome } from "../../api/action/userGymDay.api";
 import { BsPeople } from "react-icons/bs";
 import { FaMoneyBillWave } from "react-icons/fa";
+import { HiOutlineExclamationCircle } from "react-icons/hi";
 
 
 const MetricsSection = () => {
@@ -10,13 +11,15 @@ const MetricsSection = () => {
         total_month: 0,
         miembros_mes: 0,
         total: 0,
+        por_cobrar: 0,
+        al_dia: 0,
+        con_deuda: 0,
     });
 
     useEffect(() => {
         const loadStats = async () => {
             try {
                 const data = await getHome();
-                //console.log("Datos recibidos:", data);
                 setStats(data);
             } catch (error) {
                 console.error("Error al cargar estadísticas:", error);
@@ -75,46 +78,87 @@ const MetricsSection = () => {
 
 
     return (
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {cards.map((card, index) => (
-                <div
-                    key={index}
-                    className="bg-white border border-gray-200 p-5 rounded-xl shadow-sm hover:shadow-md transition"
-                >
-                    {/* Header */}
-                    <div className="flex justify-between items-start mb-4">
-                        <div className={`p-3 rounded-lg ${card.bgIcon}`}>
-                            {card.icon}
-                        </div>
+        <>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+                {cards.map((card, index) => (
+                    <div
+                        key={index}
+                        className="bg-white border border-gray-200 p-5 rounded-xl shadow-sm hover:shadow-md transition"
+                    >
+                        {/* Header */}
+                        <div className="flex justify-between items-start mb-4">
+                            <div className={`p-3 rounded-lg ${card.bgIcon}`}>
+                                {card.icon}
+                            </div>
 
-                        {card.change && (
-                            <span className="text-xs font-semibold text-green-600 bg-green-100 px-2 py-1 rounded-full">
-                                {card.change}
-                            </span>
+                            {card.change && (
+                                <span className="text-xs font-semibold text-green-600 bg-green-100 px-2 py-1 rounded-full">
+                                    {card.change}
+                                </span>
+                            )}
+                        </div>
+                        {/* Subtitle */}
+                        <p className="font-bold mb-1 text-sm tracking-widest text-on-surface uppercase">
+                            {card.subtitle}
+                        </p>
+                        {/* Value */}
+                        <h2 className="text-3xl font-black text-on-surface tracking-tighter">
+                            {card.value}
+                        </h2>
+                        {/* Progress bar */}
+                        {card.progress != null && card.progress > 0 && (
+                            <div className="mt-4">
+                                <div className="w-full h-1 bg-slate-100 mt-4 overflow-hidden rounded-full">
+                                    <div
+                                        className={`h-full rounded-full ${card.color} transition-all w-[85%]`}
+                                        style={{ width: `${card.progress}%` }}
+                                    />
+                                </div>
+                            </div>
                         )}
                     </div>
-                    {/* Subtitle */}
-                    <p className="font-bold mb-1 text-sm tracking-widest text-on-surface uppercase">
-                        {card.subtitle}
-                    </p>
-                    {/* Value */}
-                    <h2 className="text-3xl font-black text-on-surface tracking-tighter">
-                        {card.value}
-                    </h2>
-                    {/* Progress bar */}
-                    {card.progress && (
-                        <div className="mt-4">
-                            <div className="w-full h-1 bg-slate-100 mt-4 overflow-hidden rounded-full">
-                                <div
-                                    className={`h-full rounded-full ${card.color} transition-all w-[85%]`}
-                                    style={{ width: `${card.progress}%` }}
-                                />
-                            </div>
-                        </div>
-                    )}
+                ))}
+            </div>
+
+            {/* Resumen de Cobranza - formato compacto tipo tabla */}
+            <div className="bg-white border border-gray-200 mt-4 p-5 rounded-xl shadow-sm">
+                <div className="flex items-center gap-2 mb-4">
+                    <HiOutlineExclamationCircle size={20} className="text-orange-500" />
+                    <h3 className="font-bold text-sm tracking-widest text-on-surface uppercase">
+                        Resumen de Cobranza
+                    </h3>
                 </div>
-            ))}
-        </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg">
+                        <div className="p-2 bg-orange-100 rounded-lg">
+                            <FaMoneyBillWave size={18} className="text-orange-600" />
+                        </div>
+                        <div>
+                            <p className="text-xs text-gray-500 uppercase tracking-wider">Por Cobrar</p>
+                            <p className="text-lg font-bold text-gray-900">{formatCurrency(stats.por_cobrar)}</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
+                        <div className="p-2 bg-green-100 rounded-lg">
+                            <BsPeople size={18} className="text-green-600" />
+                        </div>
+                        <div>
+                            <p className="text-xs text-gray-500 uppercase tracking-wider">Al Día</p>
+                            <p className="text-lg font-bold text-gray-900">{stats.al_dia} miembros</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-3 p-3 bg-red-50 rounded-lg">
+                        <div className="p-2 bg-red-100 rounded-lg">
+                            <HiOutlineExclamationCircle size={18} className="text-red-600" />
+                        </div>
+                        <div>
+                            <p className="text-xs text-gray-500 uppercase tracking-wider">Con Deuda</p>
+                            <p className="text-lg font-bold text-gray-900">{stats.con_deuda} miembros</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </>
     );
 };
 export default MetricsSection;
