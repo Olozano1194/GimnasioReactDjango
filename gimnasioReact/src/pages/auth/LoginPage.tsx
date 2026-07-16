@@ -26,22 +26,24 @@ const Login = () => {
     formState: { errors },
   } = useForm<LoginUserDto>();
   const [showkPass, setShowPass] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
 
   const onSubmit = handleSubmit(async (data: LoginUserDto) => {
+    if (isSubmitting) return; // Evitar doble envío
+    setIsSubmitting(true);
     try {
       await login({
         email: data.email,
         password: data.password,
       });
-      //console.log('Login successful, result:', response);
 
       toast.success('Login exitoso');
-      // Redirect to the dashboard
       navigate("/dashboard");
     } catch {
-      // console.error("Error logging in:", error);
       toast.error("Error al iniciar sesión");
+    } finally {
+      setIsSubmitting(false);
     }
   });
 
@@ -119,11 +121,12 @@ const Login = () => {
         </section>
         {/* btn login */}
         <button
-          className="w-full bg-primary bg-pulse-gradient cursor-pointer flex font-bold gap-2 items-center justify-center py-4 rounded-lg shadow-lg text-white tramsition-all hover:shadow-primary/20 hover:scale-[1.01] active:scale[0.98]"
+          disabled={isSubmitting || loading}
+          className="w-full bg-primary bg-pulse-gradient cursor-pointer flex font-bold gap-2 items-center justify-center py-4 rounded-lg shadow-lg text-white transition-all hover:shadow-primary/20 hover:scale-[1.01] active:scale-[0.98] disabled:opacity-60 disabled:scale-100 disabled:cursor-not-allowed"
           type="submit"
         >
-          {loading ? 'Ingresando...' : 'Ingresar al Panel'}
-          <MdArrowForward className="text-2xl" />
+          {isSubmitting || loading ? 'Ingresando...' : 'Ingresar al Panel'}
+          <MdArrowForward className={`text-2xl ${isSubmitting || loading ? 'animate-pulse' : ''}`} />
         </button>
         {/* footer */}
         <section className="border-t border-outline-variant mt-12 pt-8">

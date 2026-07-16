@@ -6,7 +6,8 @@ const baseURL = import.meta.env.MODE === 'development'
 
 export const axiosPublic = axios.create({   
     baseURL, 
+    withCredentials: true,  // Necesario para enviar la cookie HTTP-only del refresh token
     headers: {
         'Content-Type': 'application/json',
-      },
+    },
 });  

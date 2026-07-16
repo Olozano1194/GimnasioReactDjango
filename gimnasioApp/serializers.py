@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.db import transaction
+from django.core.exceptions import ValidationError as DjangoValidationError
 from .models import Gimnasio, Usuario, UsuarioGym, UsuarioGymDay, Membresia, MembresiaAsignada, PagoMembresia
 from datetime import timedelta, date
 from decimal import Decimal
@@ -130,6 +131,9 @@ class UsuarioGymSerializer(serializers.ModelSerializer):
                         id=initial_membership_id,
                         gimnasio=gimnasio
                     )
+                except Membresia.DoesNotExist:
+                    raise serializers.ValidationError({"initial_membership_id": "Membresía no encontrada en tu gimnasio"})
+                try:
                     MembresiaAsignada.objects.create(
                         miembro=miembro,
                         membresia=membresia,
@@ -137,8 +141,8 @@ class UsuarioGymSerializer(serializers.ModelSerializer):
                         multiplier=multiplier,
                         discount_percent=discount_percent
                     )
-                except Membresia.DoesNotExist:
-                    raise serializers.ValidationError({"initial_membership_id": "Membresía no encontrada en tu gimnasio"})
+                except DjangoValidationError as e:
+                    _catch_model_error(e)
 
             return miembro
 
@@ -151,13 +155,16 @@ class UsuarioGymSerializer(serializers.ModelSerializer):
         if initial_membership_id:
             try:
                 membresia = Membresia.objects.get(id=initial_membership_id, gimnasio=instance.gimnasio)
+            except Membresia.DoesNotExist:
+                raise serializers.ValidationError({'initial_membership_id': 'Membresia no encontrada en tu gimnasio'})
+            try:
                 MembresiaAsignada.objects.create(
                     miembro=instance, membresia=membresia,
                     dateInitial=date_initial or date.today(),
                     multiplier=multiplier, discount_percent=discount_percent
                 )
-            except Membresia.DoesNotExist:
-                raise serializers.ValidationError({'initial_membership_id': 'Membresia no encontrada en tu gimnasio'})
+            except DjangoValidationError as e:
+                _catch_model_error(e)
         return instance
 
 
@@ -274,8 +281,10 @@ class MembresiaAsignadaSerializer(serializers.ModelSerializer):
         # Validar multiplier contra max_multiplier de la membresía
         multiplier = data.get('multiplier', getattr(self.instance, 'multiplier', 1)) or 1
         if int(multiplier) > membresia.max_multiplier:
+            if membresia.max_multiplier <= 1:
+                raise serializers.ValidationError("Esa membresía no se puede multiplicar")
             raise serializers.ValidationError(
-                f"El multiplicador {multiplier} excede el máximo permitido ({membresia.max_multiplier})"
+                f"Esa membresía solo permite hasta {membresia.max_multiplier} periodos"
             )
         
         # Verificar fechas considerando el multiplier
@@ -296,7 +305,10 @@ class MembresiaAsignadaSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         # Price calculation is handled by model.save()
-        return super().create(validated_data)
+        try:
+            return super().create(validated_data)
+        except DjangoValidationError as e:
+            _catch_model_error(e)
     
     def to_representation(self, instance):
         representation = super().to_representation(instance)
@@ -305,6 +317,17 @@ class MembresiaAsignadaSerializer(serializers.ModelSerializer):
         if instance.dateFinal:
             representation['dateFinal'] = instance.dateFinal.strftime("%d-%m-%Y")
         return representation
+
+
+# Helper: convierte ValidationError de Django a DRF
+def _catch_model_error(e: DjangoValidationError):
+    from django.core.exceptions import ValidationError as DJE
+    if isinstance(e, DJE):
+        if hasattr(e, 'error_dict'):
+            raise serializers.ValidationError(e.message_dict)
+        msg = e.messages[0] if e.messages else str(e)
+        raise serializers.ValidationError(msg)
+    raise e
 
 
 # ============================================================
