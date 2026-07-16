@@ -141,14 +141,20 @@ const MemberShipsForm = () => {
             }
             navigate('/dashboard/asignar-membresia-list');
 
-        } catch (error) {
-            if (error instanceof Error) {
-                console.error('Error detallado:', error);
-                toast.error(`Error: ${error.message}`);
-            } else {
-                console.error('Error desconocido:', error);
-                toast.error('Error desconocido al procesar la solicitud');
+        } catch (error: unknown) {
+            let errorMessage = 'Error desconocido al procesar la solicitud';
+            if (error && typeof error === 'object' && 'response' in error) {
+                const axiosErr = error as { response: { data: Record<string, unknown> } };
+                const data = axiosErr.response?.data;
+                if (data) {
+                    const msgs = Object.values(data).flat().filter(Boolean);
+                    if (msgs.length > 0) errorMessage = msgs.join('. ');
+                }
+            } else if (error instanceof Error) {
+                errorMessage = error.message;
             }
+            console.error('Error:', error);
+            toast.error(errorMessage);
         }
     });
 

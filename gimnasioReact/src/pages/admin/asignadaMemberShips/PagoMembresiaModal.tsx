@@ -82,8 +82,18 @@ const PagoMembresiaModal: React.FC<PagoMembresiaModalProps> = ({
             setMetodoPago("efectivo");
             onSuccess();
             onClose();
-        } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : "Error al registrar el pago";
+        } catch (error: unknown) {
+            let errorMessage = "Error al registrar el pago";
+            if (error && typeof error === 'object' && 'response' in error) {
+                const axiosErr = error as { response: { data: Record<string, unknown> } };
+                const data = axiosErr.response?.data;
+                if (data) {
+                    const msgs = Object.values(data).flat().filter(Boolean);
+                    if (msgs.length > 0) errorMessage = msgs.join('. ');
+                }
+            } else if (error instanceof Error) {
+                errorMessage = error.message;
+            }
             toast.error(errorMessage);
         } finally {
             setIsSubmitting(false);
@@ -173,5 +183,4 @@ const PagoMembresiaModal: React.FC<PagoMembresiaModalProps> = ({
         </div>
     );
 };
-
 export default PagoMembresiaModal;

@@ -77,13 +77,19 @@ const WelcomeSection = () => {
                 </h2>
                 <p className="font-medium text-on-surface/70">
                     Tu ecosistema fitness está rindiendo{" "}
-                    <span className={`font-bold ${diffColor(stats?.diff_miembros ?? 0)}`}>
-                        {formatDiff(stats?.diff_miembros ?? 0)} miembros
-                    </span>{" "}
-                    {(stats?.diff_miembros ?? 0) >= 0
-                        ? "por encima"
-                        : "por debajo"}{" "}
-                    del mes anterior.
+                    {stats?.diff_miembros === 0 ? (
+                        <span className="font-bold text-on-surface/50">igual que el mes anterior.</span>
+                    ) : (
+                        <>
+                            <span className={`font-bold ${diffColor(stats?.diff_miembros ?? 0)}`}>
+                                {formatDiff(stats?.diff_miembros ?? 0)} miembros
+                            </span>{" "}
+                            {(stats?.diff_miembros ?? 0) > 0
+                                ? "por encima"
+                                : "por debajo"}{" "}
+                            del mes anterior.
+                        </>
+                    )}
                 </p>
             </div>
             <div className="flex gap-3">

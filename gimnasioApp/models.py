@@ -196,8 +196,10 @@ class MembresiaAsignada(models.Model):
                 raise ValidationError("Formato de fecha inválido. Use YYYY-MM-DD.")
         if not self.pk:  # Only on creation
             if int(self.multiplier) > self.membresia.max_multiplier:
+                if self.membresia.max_multiplier <= 1:
+                    raise ValidationError("Esa membresía no se puede multiplicar")
                 raise ValidationError(
-                    f"El multiplicador {self.multiplier} excede el máximo permitido ({self.membresia.max_multiplier})"
+                    f"Esa membresía solo permite hasta {self.membresia.max_multiplier} periodos"
                 )
             mult = Decimal(str(self.multiplier))
             disc = Decimal(str(self.discount_percent or 0))
@@ -205,8 +207,11 @@ class MembresiaAsignada(models.Model):
             self.dateFinal = inicio + timedelta(days=dias_totales)
             self.price = self.membresia.price * mult * (Decimal('1') - disc / Decimal('100'))
         else:
-            self.dateFinal = inicio + timedelta(days=self.membresia.duration)
-            self.price = self.membresia.price
+            mult = Decimal(str(self.multiplier or 1))
+            disc = Decimal(str(self.discount_percent or 0))
+            dias_totales = int(self.membresia.duration * mult)
+            self.dateFinal = inicio + timedelta(days=dias_totales)
+            self.price = self.membresia.price * mult * (Decimal('1') - disc / Decimal('100'))
         super().save(*args, **kwargs)
 
     def clean(self):
