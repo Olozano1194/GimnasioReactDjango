@@ -67,6 +67,16 @@ export const sidebarMenus: SidebarMenu[] = [
   },
 ];
 
+/**
+ * Verifica si una ruta actual coincide con un item del sidebar.
+ * Compara por segmentos de path para evitar falsos positivos
+ * (ej: "miembros" no debe coincidir con "miembros-day").
+ */
+export const pathMatches = (currentPath: string, itemTo: string): boolean => {
+    const path = currentPath.endsWith('/') ? currentPath.slice(0, -1) : currentPath;
+    return path === `/dashboard/${itemTo}` || path.startsWith(`/dashboard/${itemTo}/`);
+};
+
 // Función para obtener menús filtrados por rol
 export const getSidebarMenusByRole = (userRoles: UserRole[] | undefined): SidebarMenu[] => {
     if (!userRoles || userRoles.length === 0) return [];

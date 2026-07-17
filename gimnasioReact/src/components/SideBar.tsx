@@ -1,5 +1,6 @@
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { sidebarMenus, pathMatches } from "./sideBar/components/SideBarMenus";
 import { useAuth } from "../context/useAuth";
 // icons
 import { RiMenu3Line, RiCloseLine, RiLogoutCircleLine } from "react-icons/ri";
@@ -21,6 +22,7 @@ export interface SubMenuState {
 
 const SideBar = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const [toggleMenu, setToggleMenu] = useState(false);
     const [showSubMenu, setShowSubMenu] = useState<SubMenuState>({
         menu1: false,
@@ -42,6 +44,18 @@ const SideBar = () => {
             [submenu]: !prev[submenu],
         }));
     };
+
+    // Auto-abrir submenú si la ruta actual coincide con algún item
+    useEffect(() => {
+        for (const menu of sidebarMenus) {
+            const hasActiveItem = menu.items.some(item =>
+                pathMatches(location.pathname, item.to)
+            );
+            if (hasActiveItem && !showSubMenu[menu.key as keyof SubMenuState]) {
+                setShowSubMenu((prev) => ({ ...prev, [menu.key]: true }));
+            }
+        }
+    }, [location.pathname]);
 
     // Esta función nos sirve para cerrar la sesión
     const handleLogOut = () => {
@@ -73,11 +87,13 @@ const SideBar = () => {
                             <SideBarAdmin
                                 handleToggleSubMenu={handleToggleSubMenu}
                                 showSubmenu={showSubMenu}
+                                currentPath={location.pathname}
                             />
                         ) : (
                             <SideBarUser
                                 handleToggleSubMenu={handleToggleSubMenu}
                                 showSubmenu={showSubMenu}
+                                currentPath={location.pathname}
                             />
                         )}
                     </nav>
