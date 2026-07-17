@@ -57,8 +57,6 @@ const PagoMembresiaModal: React.FC<PagoMembresiaModalProps> = ({
         };
     }, [isOpen]);
 
-    if (!isOpen) return null;
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -112,6 +110,8 @@ const PagoMembresiaModal: React.FC<PagoMembresiaModalProps> = ({
             setIsSubmitting(false);
         }
     };
+
+    if (!isOpen) return null;
 
     return createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
