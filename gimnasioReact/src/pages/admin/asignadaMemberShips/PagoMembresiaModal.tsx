@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { toast } from "react-hot-toast";
 import { createPago } from "../../../api/action/pagoMembresia.api";
 import { Input, Label, Button, Select } from "../../../components/ui/index";
@@ -43,6 +44,18 @@ const PagoMembresiaModal: React.FC<PagoMembresiaModalProps> = ({
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const saldoNum = Number(saldoPendiente);
+
+    // Bloquear scroll del body cuando el modal está abierto (crítico en mobile)
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [isOpen]);
 
     if (!isOpen) return null;
 
@@ -100,7 +113,7 @@ const PagoMembresiaModal: React.FC<PagoMembresiaModalProps> = ({
         }
     };
 
-    return (
+    return createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
             <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-md mx-4">
                 <h3 className="font-bold text-xl mb-6">Registrar Pago</h3>
@@ -180,7 +193,8 @@ const PagoMembresiaModal: React.FC<PagoMembresiaModalProps> = ({
                     </div>
                 </form>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
 export default PagoMembresiaModal;
