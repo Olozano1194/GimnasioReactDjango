@@ -1,7 +1,7 @@
 // Menu
 import { SidebarItem } from "./components/SideBarItem";
 import { SidebarSubMenu } from "./components/SideBarSubMenu";
-import { getSidebarMenusByRole } from "./components/SideBarMenus";
+import { getSidebarMenusByRole, sidebarMenus, pathMatches } from "./components/SideBarMenus";
 import { useAuth } from "../../context/useAuth";
 // Icon
 import { MdOutlineSupportAgent } from "react-icons/md";
@@ -21,12 +21,25 @@ export interface SubMenuState {
 interface SidebarAdminProps {
   showSubmenu: SubMenuState;
   handleToggleSubMenu: (submenu: SubMenuKey) => void;
+  currentPath: string;
 }
 
-const SideBarAdmin = ({ showSubmenu, handleToggleSubMenu }: SidebarAdminProps ) => {
+const SideBarAdmin = ({ showSubmenu, handleToggleSubMenu, currentPath }: SidebarAdminProps ) => {
     const { user } = useAuth();
     const filteredMenus = getSidebarMenusByRole(user?.roles);
 
+    // Determinar qué rutas están activas
+    const isHomeActive = currentPath === '/dashboard' || currentPath === '/dashboard/';
+
+    const getActiveItem = (items: { label: string; to: string }[]) => {
+      return items.find(item => pathMatches(currentPath, item.to))?.to;
+    };
+
+    const isParentActive = (menuKey: string) => {
+      const menu = sidebarMenus.find(m => m.key === menuKey);
+      if (!menu) return false;
+      return menu.items.some(item => pathMatches(currentPath, item.to));
+    };
 
     return (
         <ul className="flex flex-col gap-2">
@@ -34,7 +47,8 @@ const SideBarAdmin = ({ showSubmenu, handleToggleSubMenu }: SidebarAdminProps ) 
             <SidebarItem 
                 to='/dashboard' 
                 icon={<RiHome8Line />} 
-                label='Inicio' 
+                label='Inicio'
+                isActive={isHomeActive}
             />
             {/* Menus desplegables */}
             {filteredMenus.map(menu => (
@@ -45,6 +59,8 @@ const SideBarAdmin = ({ showSubmenu, handleToggleSubMenu }: SidebarAdminProps ) 
                     isOpen={showSubmenu[menu.key as SubMenuKey ]}
                     onToggle={() => handleToggleSubMenu(menu.key as SubMenuKey)}
                     items={menu.items}
+                    activeItem={getActiveItem(menu.items)}
+                    isParentActive={isParentActive(menu.key)}
             />
             ))}
 
