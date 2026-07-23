@@ -191,7 +191,7 @@ if not DEBUG:
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-CORS_ALLOWED_ORIGINS = ["http://localhost:5173", "https://controlfit.vercel.app"]
+CORS_ALLOWED_ORIGINS = ["http://localhost:5173", "https://gimnasio-react-django.vercel.app"]
 
 AUTH_USER_MODEL = 'gimnasioApp.Usuario'
 
@@ -239,7 +239,7 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:3000",
-    "https://controlfit.vercel.app",
+    "https://gimnasio-react-django.vercel.app",
 ]
 CORS_EXPOSE_HEADERS = ['Content-Type', 'Authorization']
 
